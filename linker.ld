@@ -25,9 +25,9 @@ SECTIONS {
         ALIGN(4)
         *(.text)
     }
-    .sync_table:{
-        __sync_table_start__=.;
+    .sync_same_el_table:{
+        __sync_same_el_table_start__=.;
         ALIGN(4)
-        *(.sync_table)
+        *(.sync_same_el_table)
     }
 }
