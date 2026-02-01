@@ -1,9 +1,9 @@
-
 .section init
 .equiv EL1_STACK,
-reset_handler:
+init:
     ldr sp,=EL1_STACK
-    
+    mrs #__vector_table__,VBAR_EL1 @ set vector base address.
+    b kernel
 
 .ltorg
 
@@ -18,9 +18,9 @@ reset_handler:
 .equiv SYSTEM_TIMER_CHI,#0x08
 .equiv SYSTEM_TIMER_C0,#0x0C
 
-.equiv AUX_BASE,#0x7E215000
-.equiv AUX_IRQ,#0x00
-.equiv AUX_MU_IIR_REG,#0x48
+@ .equiv AUX_BASE,#0x7E215000 @ AUX Base address (for SPI1/SPI2/MINI-UART).
+@ .equiv AUX_IRQ,#0x00
+@ .equiv AUX_MU_IIR_REG,#0x48
 
 .macro _exception_entry
     stp x0,x1,[sp,#-16] 

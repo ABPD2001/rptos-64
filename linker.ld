@@ -1,21 +1,33 @@
-ENTRY(reset_handler)
+ENTRY(init)
 SECTIONS {
-    . = 0x00;
-    .reset:{
+    . = 0x8000;
+    .init:{
         ALIGN(4)
-        *(.reset_handler)
+        *(.init)
     }
     .vectors:{
+        ALIGN(32)
+        __vector_table__=.;
         *(.vectors)
     }
     .vector_table_handlers:{
-        *(.vector_table_handlers)
+        ALIGN(4)
+        *(vector_table_handlers)
     }
     .bss:{
         ALIGN(16)
-        __bss_start=.;
+        __bss_start__=.;
         *(.bss)
         *(COMMON)
-        __bss_end=.;
+        __bss_end__=.;
+    }
+    .text:{
+        ALIGN(4)
+        *(.text)
+    }
+    .sync_table:{
+        __sync_table_start__=.;
+        ALIGN(4)
+        *(.sync_table)
     }
 }
