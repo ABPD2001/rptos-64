@@ -1,10 +1,31 @@
 .section init
-.equiv EL1_STACK,
-init:
-    ldr sp,=EL1_STACK
-    mrs #__vector_table__,VBAR_EL1 @ set vector base address.
-    b kernel
+.equiv EL1_CORE_STACK_TABLE,
 
+init:
+    mrs #__vector_table__,VBAR_EL1 @ set vector base address.
+
+    msr x0,MPIDR_EL1 @ read core id.
+    and x0,x0,#0xFF @ get core 0 id (first 8-bits).
+    
+    ldr x1,__core_stack_table__ @ load core stack table base.
+    mul x2,x0,#8 @ calculate relative address of core stack table.
+    add x1,x1,x2
+    ldr sp,[x1] @ load core stack pointer.
+
+    cbnz x0,core_spinlock @ if core id wasnt zero, jump to (lock cores except core 0).
+    
+    b kernel @ load kernel (core 0).
+
+core_spinlock:
+    wfe
+    b core_spinlock
+.ltorg
+
+.section cores_info
+.org 0x00, .double  @ core 0 stack info
+.org 0x08, .double  @ core 1 stack info
+.org 0x10, .double  @ core 2 stack info
+.org 0x18, .double  @ core 3 stack info
 .ltorg
 
 .section vectors
@@ -42,8 +63,8 @@ init:
     msr x0,SPSR_EL1 @ read pstate fields
     msr x1,ELR_EL1 @ read exception link register
     
-    ldp x30,x0,[sp,#-16]
-    ldp x1,x1,[sp,#-16] @ save ELR with padding
+    stp x30,x0,[sp,#-16]
+    stp x1,x1,[sp,#-16] @ save ELR with padding
 .endm
 
 .macro _exception_irq_enable
@@ -90,8 +111,11 @@ vector_table:
 
     bl determine_id
 
-    ldr x19,=EL1_CUR_HANDLER_TABLE
-    mul x19,#4 @ calculate callback relative address of table.
+    ldr x19,=EL1_LOWER_HANDLER_TABLE
+    mul x20,x20,#4 @ calculate callback relative address of table.
+    add x19,x19,x20
+
+    mov x0,x1 @ pass ESR_EL1 to handler
 
     bl x19 # call the callback (c handler)
 
@@ -149,7 +173,10 @@ vector_table:
     bl determine_id
 
     ldr x19,=EL1_LOWER_HANDLER_TABLE
-    mul x19,#4 @ calculate callback relative address of table.
+    mul x20,x20,#4 @ calculate callback relative address of table.
+    add x19,x19,x20
+
+    mov x0,x1 @ pass ESR_EL1 to handler
 
     bl x19 # call the callback (c handler)
 
@@ -196,8 +223,6 @@ vector_table:
     eret
     .balign 128
     eret
-
-
 .ltorg
 
 .section vector_table_handlers
@@ -225,28 +250,44 @@ EL1_CUR_RETURN:
     eret @ return.
 
 EL1_LOWER_RETURN:
-    ldp x0,x0,[sp,#16] @ read ELR_EL1
-    mrs x0,ELR_EL1 @ apply ELR_EL1.
-    ldp x30,x0,[sp],#16 @ read x30 and SPSR_EL1    
-    mrs x0,SPSR_EL1 @ apply spsr.
+    @ x1 has current running pcb of core.
+    add sp,sp,#16 @ skip ELR_EL1, becuase there is no return to task.
+    ldp x30,x0,[sp],#16
+
+    stp x0,x30,[x1],#16 @ save SPSR_EL1 and x30 into pcb.
     ldp x28,x29,[sp],#16    
-    ldp x26,x27,[sp],#16    
-    ldp x24,x25,[sp],#16    
-    ldp x22,x23,[sp],#16    
-    ldp x20,x21,[sp],#16    
-    ldp x18,x19,[sp],#16    
-    ldp x16,x17,[sp],#16    
-    ldp x14,x15,[sp],#16    
-    ldp x12,x13,[sp],#16    
-    ldp x10,x11,[sp],#16    
-    ldp x8,x9,[sp],#16    
-    ldp x6,x7,[sp],#16    
-    ldp x4,x5,[sp],#16    
-    ldp x2,x3,[sp],#16        
-    ldp x0,x1,[sp],#16 @ restore context.
-
-    @ save current task context
-
+    ldp x26,x27,[sp],#16   
+    ldp x24,x25,[sp],#16
+    ldp x22,x23,[sp],#16
+    ldp x20,x21,[sp],#16
+    ldp x18,x19,[sp],#16
+    ldp x16,x17,[sp],#16
+    ldp x14,x15,[sp],#16
+    ldp x12,x13,[sp],#16
+    ldp x10,x11,[sp],#16
+    ldp x8,x9,[sp],#16
+    ldp x6,x7,[sp],#16
+    ldp x4,x5,[sp],#16
+    ldp x2,x3,[sp],#16
+    
+    stp x29,x28,[x1],#16
+    stp x27,x26,[x1],#16
+    stp x25,x24,[x1],#16
+    stp x23,x22,[x1],#16
+    stp x21,x20,[x1],#16
+    stp x19,x18,[x1],#16
+    stp x17,x16,[x1],#16
+    stp x15,x14,[x1],#16
+    stp x13,x12,[x1],#16
+    stp x11,x10,[x1],#16
+    stp x9,x8,[x1],#16
+    stp x7,x6,[x1],#16
+    stp x5,x4,[x1],#16
+    stp x3,x2,[x1],#16
+    
+    ldp x2,x3,[sp],#16 @ load x0 and x1 into temp registers.
+    stp x2,x3,[x1],#16 @ store it on pcb (this line completes the whole context save).
+    
     bl task_schaduler
     bl task_dispatcher
 

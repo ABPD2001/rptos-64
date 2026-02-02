@@ -1,0 +1,49 @@
+#ifndef TYPES_TASK_H
+#define TYPES_TASK_H
+#include "./base.h"
+
+typedef struct
+{
+    u64_t spsr;
+    u64_t x30;
+    u64_t x29;
+    u64_t x28;
+    u64_t x27;
+    u64_t x26;
+    u64_t x25;
+    u64_t x24;
+    u64_t x23;
+    u64_t x22;
+    u64_t x21;
+    u64_t x20;
+    u64_t x19;
+    u64_t x18;
+    u64_t x17;
+    u64_t x16;
+    u64_t x15;
+    u64_t x14;
+    u64_t x13;
+    u64_t x12;
+    u64_t x11;
+    u64_t x10;
+    u64_t x9;
+    u64_t x8;
+    u64_t x7;
+    u64_t x6;
+    u64_t x5;
+    u64_t x4;
+    u64_t x3;
+    u64_t x2;
+    u64_t x1;
+    u64_t x0;
+    u64_t id;
+    u64_t status;
+    u64_t priority;
+    u64_t stack_start;
+    u64_t stack_end;
+    u64_t fault_code;
+    u8_t *sensess;
+    u64_t padding;
+} pcb_t;
+
+#endif

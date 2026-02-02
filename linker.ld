@@ -5,6 +5,11 @@ SECTIONS {
         ALIGN(4)
         *(.init)
     }
+    .cores_info:{
+        ALIGN(8)
+        __core_stack_table__=.;
+        *(.cores_info)
+    }
     .vectors:{
         ALIGN(32)
         __vector_table__=.;
