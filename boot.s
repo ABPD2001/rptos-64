@@ -18,7 +18,8 @@ init:
 
 core_spinlock:
     wfe
-    b core_spinlock
+    ldr x0,[#__core_stack_table__,#0x1B] @ read if multi-core is enabled.
+    cbz x0,core_spinlock @ if not enabled, wait again.
 .ltorg
 
 .section cores_info
@@ -26,6 +27,7 @@ core_spinlock:
 .org 0x08, .double  @ core 1 stack info
 .org 0x10, .double  @ core 2 stack info
 .org 0x18, .double  @ core 3 stack info
+.org 0x1B, .word @ multi-core enable.
 .ltorg
 
 .section vectors
