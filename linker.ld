@@ -1,12 +1,13 @@
-ENTRY(init)
+ENTRY(cinit)
 SECTIONS {
     . = 0x8000;
     .init:{
+        __init_start__=.;
         ALIGN(4)
         *(.init)
     }
     .cores_info:{
-        ALIGN(8)
+        ALIGN(4)
         __core_stack_table__=.;
         *(.cores_info)
     }
@@ -19,6 +20,12 @@ SECTIONS {
         ALIGN(4)
         *(vector_table_handlers)
     }
+    .sync_same_el_table:{
+        __sync_same_el_table_start__=.;
+        ALIGN(4)
+        *(.sync_same_el_table)
+    }
+    
     .bss:{
         ALIGN(16)
         __bss_start__=.;
@@ -29,10 +36,5 @@ SECTIONS {
     .text:{
         ALIGN(4)
         *(.text)
-    }
-    .sync_same_el_table:{
-        __sync_same_el_table_start__=.;
-        ALIGN(4)
-        *(.sync_same_el_table)
     }
 }

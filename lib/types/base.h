@@ -1,5 +1,12 @@
 #ifndef TYPE_BASE_H
 #define TYPE_BASE_H
+#define NULL ((void *)0) // Define NULL if not already defined
+
+#define true ((void *)1)  // Define true if not already defined
+#define false ((void *)0) // Define false if not already defined
+
+extern unsigned long __core_stack_table__;
+
 typedef unsigned long u64_t;
 typedef signed long s64_t;
 

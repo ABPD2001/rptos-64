@@ -1,49 +1,67 @@
 .section init
 .equiv EL1_CORE_STACK_TABLE,
+.global core_spinlock,cinit
 
-init:
+cinit:
     mrs #__vector_table__,VBAR_EL1 @ set vector base address.
 
     msr x0,MPIDR_EL1 @ read core id.
     and x0,x0,#0xFF @ get core 0 id (first 8-bits).
     
-    ldr x1,__core_stack_table__ @ load core stack table base.
+    ldr x1,=__core_stack_table__ @ load core stack table base.
     mul x2,x0,#8 @ calculate relative address of core stack table.
     add x1,x1,x2
     ldr sp,[x1] @ load core stack pointer.
-
-    cbnz x0,core_spinlock @ if core id wasnt zero, jump to (lock cores except core 0).
     
-    b kernel @ load kernel (core 0).
+    dsb sy @ memory barrier.
+    isb @ flush pipeline.
+
+    bl retry_to_count @ increment core count. 
+    
+    ldr x0,=__bss_start__
+    ldr x1,=__bss_end__
+
+    cmp x0,#0 @ compare if core is zero.
+
+    b.eq clear_bss_loop @ clear bss section.
+    b.ne kernel @ load kernel (core n>0).
+
+retry_to_count:
+    ldr x2,=__core_stack_table__ @ load core stack table base.
+    ldxr w0,[x2,#0x1C]
+    add w0,w0,#1
+    stxr w0,w1,[x2,#0x1C]
+    cmp w1,#0
+    
+    b.ne retry_to_count
+    ret
+
+clear_bss_loop:
+    cmp x0,x1
+    str xzr,[x0],#8
+    
+    b.ne clear_bss_loop
+    b.eq kernel @ load kernel (core 0).
 
 core_spinlock:
     wfe
-    ldr x0,[#__core_stack_table__,#0x1B] @ read if multi-core is enabled.
+    ldr w0,[#__core_stack_table__,#0x1C] @ read if multi-core is enabled.
     cbz x0,core_spinlock @ if not enabled, wait again.
 .ltorg
 
 .section cores_info
+.balign 4
 .org 0x00, .double  @ core 0 stack info
 .org 0x08, .double  @ core 1 stack info
 .org 0x10, .double  @ core 2 stack info
 .org 0x18, .double  @ core 3 stack info
-.org 0x1B, .word @ multi-core enable.
+.org 0x1C, .word @ core counts.
 .ltorg
 
 .section vectors
 .equiv EL1_CUR_HANDLER_TABLE,
 .equiv EL1_CUR_IRQ_HANDLER_TABLE,
-.equiv EL1_CUR_FIQ_HANDLER_TABLE
-
-.equiv SYSTEM_TIMER_BASE,#0x7E003000 @ hardware timer (not ARM Timer).
-.equiv SYSTEM_TIMER_CS,#0x00
-.equiv SYSTEM_TIMER_CLO,#0x04
-.equiv SYSTEM_TIMER_CHI,#0x08
-.equiv SYSTEM_TIMER_C0,#0x0C
-
-@ .equiv AUX_BASE,#0x7E215000 @ AUX Base address (for SPI1/SPI2/MINI-UART).
-@ .equiv AUX_IRQ,#0x00
-@ .equiv AUX_MU_IIR_REG,#0x48
+.equiv EL1_CUR_FIQ_HANDLER_TABLE,
 
 .macro _exception_entry
     stp x0,x1,[sp,#-16] 
@@ -62,23 +80,24 @@ core_spinlock:
     stp x26,x27,[sp,#-16]    
     stp x28,x29,[sp,#-16]    
     
-    msr x0,SPSR_EL1 @ read pstate fields
-    msr x1,ELR_EL1 @ read exception link register
+    mrs x0,SPSR_EL1 @ read pstate fields
+    mrs x1,ELR_EL1 @ read exception link register
     
     stp x30,x0,[sp,#-16]
     stp x1,x1,[sp,#-16] @ save ELR with padding
+    dmb ish @ data memory barrier.
 .endm
 
 .macro _exception_irq_enable
-    msr x3,DAIF_EL1
+    mrs x3,DAIF_EL1
     and x3,0b1011 @ enable IRQs
-    mrs x3,DAIF_EL1 @ apply
+    msr DAIF_EL1,x3 @ apply
 .endm
 
 .macro _exception_fiq_enable
-    msr x3,DAIF_EL1
+    mrs x3,DAIF_EL1
     and x3,0b0111 @ enable FIQs
-    mrs x3,DAIF_EL1 @ apply
+    msr DAIF_EL1,x3 @ apply
 .endm
 
 .macro _serror_panic
@@ -102,7 +121,7 @@ vector_table:
     @ synchronous exception
     .balign 128
     _exception_entry
-    msr ESR_EL1,x0 @ read ESR_EL1
+    mrs x0,ESR_EL1 @ read ESR_EL1
 
     mov x1,x0
     mov x2,x0
@@ -163,7 +182,7 @@ vector_table:
     @ synchronous exception
     .balign 128
     _exception_entry
-    msr ESR_EL1,x0 @ read ESR_EL1
+    mrs x0,ESR_EL1 @ read ESR_EL1
 
     mov x1,x0
     mov x2,x0
@@ -232,7 +251,7 @@ EL1_CUR_RETURN:
     ldp x0,x0,[sp,#16] @ read ELR_EL1
     mrs x0,ELR_EL1 @ apply ELR_EL1.
     ldp x30,x0,[sp],#16 @ read x30 and SPSR_EL1    
-    mrs x0,SPSR_EL1 @ apply spsr.
+    msr SPSR_EL1,x0 @ apply spsr.
     ldp x28,x29,[sp],#16    
     ldp x26,x27,[sp],#16    
     ldp x24,x25,[sp],#16    
@@ -289,7 +308,7 @@ EL1_LOWER_RETURN:
     
     ldp x2,x3,[sp],#16 @ load x0 and x1 into temp registers.
     stp x2,x3,[x1],#16 @ store it on pcb (this line completes the whole context save).
-    
+
     bl task_schaduler
     bl task_dispatcher
 

@@ -62,8 +62,11 @@ lower_el_pc_alignment_handler:
     mov x29,sp
     @ set x0 to current running pcb of core.
 
-    str #3,[x0,#274] @ set process state to terminated.
-    str #2,[x0,#300] @ set process fault code to pc alignment fault.
+    mov x1,#3
+    mov x2,#2
+
+    str x1,[x0,#274] @ set process state to terminated.
+    str x2,[x0,#300] @ set process fault code to pc alignment fault.
     mov sp,x29
     ldp x29,x30,[sp],#16
     ret
@@ -73,8 +76,11 @@ lower_el_sp_alignment_handler:
     mov x29,sp
     @ set x0 to current running pcb of core.
 
-    str #3,[x0,#274] @ set process status to terminated.
-    str #1,[x0,#300] @ set process fault code to stack alignment fault.
+    mov x1,#3
+    mov x2,#1
+
+    str x1,[x0,#274] @ set process status to terminated.
+    str x2,[x0,#300] @ set process fault code to stack alignment fault.
     mov sp,x29
     ldp x29,x30,[sp],#16
     ret
@@ -83,7 +89,9 @@ lower_el_wfi_wfe_handler:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
 
-    str #2,[x0,#274] @ set process status to waiting.
+    mov x1,#2
+
+    str x1,[x0,#274] @ set process status to waiting.
     
     ldr x0,[sp,#288] @ read only first arguement of task.
     str x0,[sp,#308] @ store sensetive (waking causes) list to pcb.

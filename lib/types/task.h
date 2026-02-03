@@ -43,6 +43,8 @@ typedef struct
     u64_t stack_end;
     u64_t fault_code;
     u8_t *sensess;
+    u64_t parent;
+    u64_t *childs;
     u64_t padding;
 } pcb_t;
 
