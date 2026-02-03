@@ -2,7 +2,7 @@
 #define TYPES_TASK_H
 #include "./base.h"
 
-typedef struct
+typedef struct pcb_t
 {
     u64_t spsr;
     u64_t x30;
@@ -46,6 +46,6 @@ typedef struct
     u64_t parent;
     u64_t *childs;
     u64_t padding;
-} pcb_t;
+};
 
 #endif

@@ -1,9 +1,12 @@
 #ifndef TYPE_BASE_H
 #define TYPE_BASE_H
-#define NULL ((void *)0) // Define NULL if not already defined
 
+#define NULL ((void *)0)  // Define NULL if not already defined
 #define true ((void *)1)  // Define true if not already defined
 #define false ((void *)0) // Define false if not already defined
+
+#define CORES_RUNNING_TASK_BASE
+#define MUART_METADATA_BASE
 
 extern unsigned long __core_stack_table__;
 
