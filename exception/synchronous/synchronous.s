@@ -36,14 +36,11 @@
 
 .section sync_lower_el_handlers
 .global lower_el_svc_handler,lower_el_smc_handler,lower_el_pc_alignment_handler,lower_el_sp_alignment_handler
+.equiv CORES_RUNNING_TASK_BASE, @ table of current running task of cores.
 
 lower_el_svc_handler:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
-
-    ldr x1,=svc_table
-    mul x0,x0,#4
-    add x1,x1,x0
 
     add x19,sp,#288 @ set x19 to start of saved context.
     ldp x0,x1,[x19,#-16]!
@@ -51,7 +48,15 @@ lower_el_svc_handler:
     ldp x4,x5,[x19,#-16]!
     ldp x6,x7,[x19,#-16]! @ restore arguements of task.
 
+    stp x19,x19,[sp,#-16] @ save start of saved context into stack.
+
     bl x1 @ call the svc handler from table.
+
+    ldp x19,x19,[sp],#16 @ read start of saved context info stack.
+    stp x6,x7,[x19,#-16]!
+    stp x4,x5,[x19,#-16]!
+    stp x2,x3,[x19,#-16]!
+    stp x0,x1,[x19,#-16]! @ save params and result into context.
 
     mov sp,x29
     ldp x29,x30,[sp],#16
@@ -60,7 +65,16 @@ lower_el_svc_handler:
 lower_el_pc_alignment_handler:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
-    @ set x0 to current running pcb of core.
+
+    mrs x0,MPIDR_El1 @ read cores info.
+    and x0,x0,#0xFF @ mask core id.
+
+    mul x0,x0,#8
+    ldr x1,=svc_table
+    mul x0,x0,#4
+    add x0,x0,x1
+
+    ldr x0,[x0] @ point to pcb.
 
     mov x1,#3
     mov x2,#2
@@ -74,7 +88,16 @@ lower_el_pc_alignment_handler:
 lower_el_sp_alignment_handler:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
-    @ set x0 to current running pcb of core.
+
+    mrs x0,MPIDR_El1 @ read cores info.
+    and x0,x0,#0xFF @ mask core id.
+
+    mul x0,x0,#8
+    ldr x1,=svc_table
+    mul x0,x0,#4
+    add x0,x0,x1
+
+    ldr x0,[x0] @ point to pcb.
 
     mov x1,#3
     mov x2,#1
