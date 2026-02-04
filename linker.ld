@@ -74,13 +74,13 @@ SECTIONS {
     }
     .stacks(NOLOAD):{
         ALIGN(16)
-        __stack0_top__ = .;
-        . += 8193; /* reserve 8KB */
-        __stack1_top__ = .;
+        __stack3_top__ = .;
         . += 8193; /* reserve 8KB */
         __stack2_top__ = .;
         . += 8193; /* reserve 8KB */
-        __stack3_top__ = .;
+        __stack1_top__ = .;
+        . += 8193; /* reserve 8KB */
+        __stack0_top__ = .;
         . += 8193; /* reserve 8KB */
     }
 }
