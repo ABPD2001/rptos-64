@@ -10,7 +10,6 @@ SECTIONS {
     .cores_info(NOLOAD):{
         ALIGN(4)
         __core_stack_table__=.;
-        *(.cores_info)
         .+=28; /* 3 dwords and 1 word reserved. */
     }
 
