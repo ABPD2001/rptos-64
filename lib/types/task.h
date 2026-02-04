@@ -4,6 +4,7 @@
 
 typedef struct pcb_t
 {
+    // its recommended to apply simd registers later...
     u64_t spsr;
     u64_t x30;
     u64_t x29;
@@ -37,15 +38,16 @@ typedef struct pcb_t
     u64_t x1;
     u64_t x0;
     u64_t id;
-    u64_t status;
+    u64_t status; // 0: created, 1:ready, 2:running, 3:terminated, 4:waiting, 5:sleeping
     u64_t priority;
     u64_t stack_start;
     u64_t stack_end;
-    u64_t fault_code;
+    u64_t fault_code; // 1: stack alignment fault ,2: pc alignment fault
     u8_t *sensess;
     u64_t parent;
     u64_t *childs;
-    u64_t padding;
+    u64_t fault_dump;
+    u64_t flags; //
 };
 
 #endif

@@ -3,15 +3,14 @@
 #include "./base.h"
 
 typedef struct
-    muart_settings_t
+    muart_settings_t // 32 bytes.
 {
     u16_t baudrate;
     u8_t data_bits;
-    u8_t enablation;
-    u32_t padding;
+    u8_t enablation; // bits --> 0: enable whole uart, 1: tx enable, 2: rx enable, 3: tx irq enable, 4: rx irq enable, 5-7: padding.
 };
 
-typedef struct muart_metadata_t
+typedef struct muart_metadata_t // 48 bytes.
 {
     struct muart_settings_t *settings;
     u64_t owner_task;
@@ -19,6 +18,8 @@ typedef struct muart_metadata_t
     u64_t write_length;
     u8_t *read_buffer;
     u64_t read_maximum_length;
+    u64_t timeout;
+    u8_t *delimiter;
 };
 
 #endif

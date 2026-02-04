@@ -2,6 +2,34 @@
 .equiv EL1_CORE_STACK_TABLE,
 .global core_spinlock,cinit
 
+minit:
+    mrs x0,HCR_EL2
+
+    ldr x1,=(1<<31) @ Enable 64-bit EL1.
+    orr x0,x0,x1
+    bic x0,x0,#0x18 @ disable IMO and FMO.
+    bic x0,x0,#(1<<27) @ disable tge.
+    msr HCR_EL2,x0 @ apply changes.
+
+    adr x0,cinit
+    msr ELR_EL2,x0
+
+    mov x1,#0x3c5
+    msr SPSR_EL2,x1
+    
+    ldr x0,=__core_stack_table__
+    ldr x1,=__stack0_top__
+    ldr x2,=__stack1_top__
+    ldr x3,=__stack2_top__
+    ldr x4,=__stack3_top__
+    
+    str x1,[x0],#8
+    str x2,[x0],#8
+    str x3,[x0],#8
+    str x4,[x0],#8
+
+    eret
+
 cinit:
     mrs #__vector_table__,VBAR_EL1 @ set vector base address.
 
@@ -49,21 +77,13 @@ core_spinlock:
     cbz x0,core_spinlock @ if not enabled, wait again.
 .ltorg
 
-.section cores_info
-.balign 4
-.org 0x00, .double  @ core 0 stack info
-.org 0x08, .double  @ core 1 stack info
-.org 0x10, .double  @ core 2 stack info
-.org 0x18, .double  @ core 3 stack info
-.org 0x1C, .word @ core counts.
-.ltorg
-
 .section vectors
 .equiv EL1_CUR_HANDLER_TABLE,
 .equiv EL1_CUR_IRQ_HANDLER_TABLE,
 .equiv EL1_CUR_FIQ_HANDLER_TABLE,
 
 .macro _exception_entry
+    @ its recommneded to apply simd registers later...
     stp x0,x1,[sp,#-16] 
     stp x2,x3,[sp,#-16]        
     stp x4,x5,[sp,#-16]    
@@ -132,7 +152,7 @@ vector_table:
 
     bl determine_id
 
-    ldr x19,=EL1_LOWER_HANDLER_TABLE
+    ldr x19,=__sync_same_el_table_start__
     mul x20,x20,#4 @ calculate callback relative address of table.
     add x19,x19,x20
 
@@ -148,7 +168,7 @@ vector_table:
 
     @ read GIC-400 for IRQ id.
 
-    ldr x1,=EL1_CUR_IRQ_HANDLER_TABLE
+    ldr x1,=__irq_table__
     mul x0,#4 @ calculate callback relative address of table.
     add x1,x1,x0
 
@@ -164,7 +184,7 @@ vector_table:
 
     @ read GIC-400 for FIQ id.
 
-    ldr x1,=EL1_CUR_FIQ_HANDLER_TABLE
+    ldr x1,=__fiq_table__
     mul x0,#4 @ calculate callback relative address of table.
     add x1,x1,x0
 
@@ -177,6 +197,8 @@ vector_table:
     @ SError/vSError exception (reentrant)
     .balign 128
     _serror_panic
+
+
 
     @ <--- LOWER EXECUTION LEVEL with SPx (Aarch64) --->
     @ synchronous exception
@@ -193,7 +215,7 @@ vector_table:
 
     bl determine_id
 
-    ldr x19,=EL1_LOWER_HANDLER_TABLE
+    ldr x19,=__sync_same_el_table_start__
     mul x20,x20,#4 @ calculate callback relative address of table.
     add x19,x19,x20
 
@@ -208,7 +230,7 @@ vector_table:
     _exception_entry
     @ read GIC-400 for IRQ id.
 
-    ldr x1,=EL1_LOWER_IRQ_HANDLER_TABLE
+    ldr x1,=__irq_table__
     mul x0,#4 @ calculate callback relative address of table.
     add x1,x1,x0
     
@@ -222,7 +244,7 @@ vector_table:
     _exception_entry
     @ read GIC-400 for FIQ id.
 
-    ldr x1,=EL1_LOWER_FIQ_HANDLER_TABLE
+    ldr x1,=__fiq_table__
     mul x0,#4 @ calculate callback relative address of table.
     add x1,x1,x0
     

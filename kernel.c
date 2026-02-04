@@ -24,6 +24,11 @@ volatile struct fwlist_header_t *c1_terminated_queue_pcb;
 volatile struct fwlist_header_t *c2_terminated_queue_pcb;
 volatile struct fwlist_header_t *c3_terminated_queue_pcb;
 
+volatile struct fwlist_header_t *c0_sleeping_queue_pcb;
+volatile struct fwlist_header_t *c1_sleeping_queue_pcb;
+volatile struct fwlist_header_t *c2_sleeping_queue_pcb;
+volatile struct fwlist_header_t *c3_sleeping_queue_pcb;
+
 volatile struct muart_metadata_t *muart_metadata;
 
 void task_dispatcher();

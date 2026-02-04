@@ -89,3 +89,50 @@ u64_t svc_get_task_id()
 
     return *ctask;
 }
+
+u64_t svc_mini_uart_settings(u16_t baudrate, u8_t data_bits, u8_t enablation)
+{
+    const u8_t cid = core_id();
+    const volatile u64_t *ctask = (CORES_RUNNING_TASK_BASE + cid * 8);
+    volatile struct muart_metadata_t *muart = (MUART_METADATA_BASE);
+    volatile u32_t *baudrate_reg = AUX_MU_BAUD_REG;
+    volatile u32_t *cntl = AUX_MU_CNTL_REG;
+    volatile u32_t *en = AUX_ENABLES_REG;
+    volatile u32_t *ier = AUX_IER_REG;
+
+    if (muart->owner_task != *ctask)
+        return 1; // not allocated to allowed by task.
+
+    if (data_bits)
+        *cntl = *cntl | (0x1);
+    else
+        *cntl = *cntl & (0xFFFFFFFE);
+    *baudrate_reg = baudrate;
+
+    if (enablation & 0x01)
+        *en = *en | 0x1;
+    else
+        *en = *en & 0xFFFFFFFE;
+    if (enablation & 0x2)
+        *cntl = *cntl | 0x2;
+    else
+        *cntl = *cntl | 0xFFFFFFFD;
+    if (enablation & 0x4)
+        *cntl = *cntl | 0x1;
+    else
+        *cntl = *cntl & 0xFFFFFFFE;
+    if (enablation & 0x8)
+        *ier = *ier | 0x1;
+    else
+        *ier = *ier & 0xFFFFFFFE;
+    if (enablation & 0xF)
+        *ier = *ier | 0x2;
+    else
+        *ier = *ier & 0xFFFFFFFD;
+
+    muart->settings->baudrate = baudrate;
+    muart->settings->enablation = enablation;
+    muart->settings->data_bits = data_bits; // update new settings of uart.
+
+    return 0;
+}
