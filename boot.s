@@ -17,7 +17,7 @@ minit:
     mov x1,#0x3c5
     msr SPSR_EL2,x1
     
-    ldr x0,=__core_stack_table__
+    ldr x0,=__core_info_table__
     ldr x1,=__stack0_top__
     ldr x2,=__stack1_top__
     ldr x3,=__stack2_top__
@@ -26,7 +26,12 @@ minit:
     str x1,[x0],#8
     str x2,[x0],#8
     str x3,[x0],#8
-    str x4,[x0],#8
+    str x4,[x0],#8 
+
+    str xzr,[x0],#8
+    str xzr,[x0],#8
+    str xzr,[x0],#8
+    str xzr,[x0],#8 @ set to zero task ids of cores.
 
     eret
 
@@ -56,9 +61,9 @@ cinit:
 
 retry_to_count:
     ldr x2,=__core_stack_table__ @ load core stack table base.
-    ldxr w0,[x2,#0x1C]
+    ldxr w0,[x2,#64]
     add w0,w0,#1
-    stxr w0,w1,[x2,#0x1C]
+    stxr w0,w1,[x2,#64]
     cmp w1,#0
     
     b.ne retry_to_count
@@ -73,7 +78,7 @@ clear_bss_loop:
 
 core_spinlock:
     wfe
-    ldr w0,[#__core_stack_table__,#0x1C] @ read if multi-core is enabled.
+    ldr w0,[#__core_stack_table__,#64] @ read if multi-core is enabled.
     cbz x0,core_spinlock @ if not enabled, wait again.
 .ltorg
 
@@ -160,7 +165,7 @@ vector_table:
 
     bl x19 # call the callback (c handler)
 
-    b EL1_CUR_RETURN
+    b RETURN_TO_TASK
     
     @ IRQ/vIRQ exception (reentrant)
     .balign 128
@@ -176,7 +181,7 @@ vector_table:
 
     bl x1 # call the callback (c handler)
 
-    b EL1_CUR_RETURN
+    b RETURN_TO_TASK
     
     @ FIQ/vFIQ exception (reentrant)
     .balign 128
@@ -192,7 +197,7 @@ vector_table:
 
     bl x1 # call the callback (c handler)
 
-    b EL1_CUR_RETURN
+    b RETURN_TO_TASK
     
     @ SError/vSError exception (reentrant)
     .balign 128
@@ -251,7 +256,7 @@ vector_table:
     _exception_fiq_enable
 
     bl x1 # call the callback (c handler)
-    bl EL1_LOWER_RETURN
+    bl RETURN_TO_TASK
 
     @ SError/vSError exception
     .balign
@@ -269,7 +274,7 @@ vector_table:
 .ltorg
 
 .section vector_table_handlers
-EL1_CUR_RETURN:
+RETURN_TO_TASK:
     ldp x0,x0,[sp,#16] @ read ELR_EL1
     mrs x0,ELR_EL1 @ apply ELR_EL1.
     ldp x30,x0,[sp],#16 @ read x30 and SPSR_EL1    
@@ -291,48 +296,6 @@ EL1_CUR_RETURN:
     ldp x0,x1,[sp],#16 @ restore context.
 
     eret @ return.
-
-EL1_LOWER_RETURN:
-    @ x1 has current running pcb of core.
-    add sp,sp,#16 @ skip ELR_EL1, becuase there is no return to task.
-    ldp x30,x0,[sp],#16
-
-    stp x0,x30,[x1],#16 @ save SPSR_EL1 and x30 into pcb.
-    ldp x28,x29,[sp],#16    
-    ldp x26,x27,[sp],#16   
-    ldp x24,x25,[sp],#16
-    ldp x22,x23,[sp],#16
-    ldp x20,x21,[sp],#16
-    ldp x18,x19,[sp],#16
-    ldp x16,x17,[sp],#16
-    ldp x14,x15,[sp],#16
-    ldp x12,x13,[sp],#16
-    ldp x10,x11,[sp],#16
-    ldp x8,x9,[sp],#16
-    ldp x6,x7,[sp],#16
-    ldp x4,x5,[sp],#16
-    ldp x2,x3,[sp],#16
-    
-    stp x29,x28,[x1],#16
-    stp x27,x26,[x1],#16
-    stp x25,x24,[x1],#16
-    stp x23,x22,[x1],#16
-    stp x21,x20,[x1],#16
-    stp x19,x18,[x1],#16
-    stp x17,x16,[x1],#16
-    stp x15,x14,[x1],#16
-    stp x13,x12,[x1],#16
-    stp x11,x10,[x1],#16
-    stp x9,x8,[x1],#16
-    stp x7,x6,[x1],#16
-    stp x5,x4,[x1],#16
-    stp x3,x2,[x1],#16
-    
-    ldp x2,x3,[sp],#16 @ load x0 and x1 into temp registers.
-    stp x2,x3,[x1],#16 @ store it on pcb (this line completes the whole context save).
-
-    bl task_schaduler
-    bl task_dispatcher
 
 determine_id:
     stp x29,x30,[sp,#-16]! @ store FP and LR.

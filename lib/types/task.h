@@ -2,7 +2,7 @@
 #define TYPES_TASK_H
 #include "./base.h"
 
-typedef struct pcb_t
+typedef struct pcb_t // 352 B
 {
     // its recommended to apply simd registers later...
     u64_t spsr;
@@ -47,7 +47,7 @@ typedef struct pcb_t
     u64_t parent;
     u64_t *childs;
     u64_t fault_dump;
-    u64_t flags; //
+    u64_t flags; // 0-1: dedicated core.
     void *next;
 };
 

@@ -9,8 +9,22 @@ SECTIONS {
     }
     .cores_info(NOLOAD):{
         ALIGN(4)
-        __core_stack_table__=.;
-        .+=28; /* 3 dwords and 1 word reserved. */
+        __core_info_table__=.;
+        .+=68; /* 10 dwords reserved. */
+        /*
+        (table in bytes)
+        0-7: core 0 stack.
+        8-15: core 1 stack.
+        8-15: core 2 stack.
+        16-23: core 3 stack.
+
+        24-31: core 0 task.
+        32-39: core 1 task.
+        40-47: core 2 task.
+        48-64: core 3 task.
+        
+        65-71: cores count (for acknowledging core 0 about "other cores are started")
+        */
     }
 
     /* TABLES */
@@ -82,5 +96,31 @@ SECTIONS {
         . += 8193; /* reserve 8KB */
         __stack0_top__ = .;
         . += 8193; /* reserve 8KB */
+    }
+    
+    /* KERNEL GLOBAL STRUCTURE */
+    .external_preipherals(NOLAOD):{
+        ALIGN(8);
+        __global_timer_ticks__=.;
+        .+=8; /* reserve dword for global timer ticks. */
+        __global_muart_settings__ = .;
+        .+=32; /* reserve 32 bytes for global mini uart settings struct. */ 
+        __global_muart_metadata__ = .;
+        .+=48; /* reserve 48 bytes for global mini uart metadata struct. */  
+    }
+
+    /* BANKS AND QUEUES */
+
+    .pcb_bank(NOLOAD):{
+        ALIGN(352) /* pcb struct size is 352 Bytes */
+        
+        __pcb_bank_base__ = .;
+        .+=22528; /* Reserve 64 struct of pcb. (352*64) Bytes */
+    }
+    .pcb_queues(NOLAOD):{
+        ALIGN(16) /* header struct size is 16 Bytes */
+
+        __pcb_queue_base__ = .;
+        .+=256; /* Reserve 4 queues header of 4 states. (4*16*4) */
     }
 }

@@ -8,6 +8,11 @@
 #define CORES_RUNNING_TASK_BASE
 #define MUART_METADATA_BASE
 
+extern unsigned long __global_timer_ticks__;
+extern unsigned long __global_muart_settings__;
+extern unsigned long __global_muart_metadata__;
+extern unsigned long __pcb_bank_base__;
+extern unsigned long __pcb_queue_base__;
 extern unsigned long __core_stack_table__;
 
 typedef unsigned long u64_t;

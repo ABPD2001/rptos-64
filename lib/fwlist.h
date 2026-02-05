@@ -1,7 +1,7 @@
 #ifndef FW_LIST_H
 #define FW_LIST_H
 #include "./types/task.h"
-typedef struct
+typedef struct // 16 B
 {
     struct pcb_t *head;
     struct pcb_t *tail;
