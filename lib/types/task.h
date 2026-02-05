@@ -48,6 +48,7 @@ typedef struct pcb_t
     u64_t *childs;
     u64_t fault_dump;
     u64_t flags; //
+    void *next;
 };
 
 #endif
