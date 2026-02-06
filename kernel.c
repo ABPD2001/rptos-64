@@ -8,31 +8,6 @@ volatile u64_t *global_system_ticks = NULL;
 volatile muart_settings_t *global_mini_uart_settings = NULL;
 volatile muart_metadata_t *global_mini_uart_metadata = NULL;
 
-// volatile struct fwlist_header_t *c0_created_queue_pcb;
-// volatile struct fwlist_header_t *c1_created_queue_pcb;
-// volatile struct fwlist_header_t *c2_created_queue_pcb;
-// volatile struct fwlist_header_t *c3_created_queue_pcb;
-
-// volatile struct fwlist_header_t *c0_ready_queue_pcb;
-// volatile struct fwlist_header_t *c1_ready_queue_pcb;
-// volatile struct fwlist_header_t *c2_ready_queue_pcb;
-// volatile struct fwlist_header_t *c3_ready_queue_pcb;
-
-// volatile struct fwlist_header_t *c0_waiting_queue_pcb;
-// volatile struct fwlist_header_t *c1_waiting_queue_pcb;
-// volatile struct fwlist_header_t *c2_waiting_queue_pcb;
-// volatile struct fwlist_header_t *c3_waiting_queue_pcb;
-
-// volatile struct fwlist_header_t *c0_terminated_queue_pcb;
-// volatile struct fwlist_header_t *c1_terminated_queue_pcb;
-// volatile struct fwlist_header_t *c2_terminated_queue_pcb;
-// volatile struct fwlist_header_t *c3_terminated_queue_pcb;
-
-// volatile struct fwlist_header_t *c0_sleeping_queue_pcb;
-// volatile struct fwlist_header_t *c1_sleeping_queue_pcb;
-// volatile struct fwlist_header_t *c2_sleeping_queue_pcb;
-// volatile struct fwlist_header_t *c3_sleeping_queue_pcb;
-
 volatile struct muart_metadata_t *muart_metadata;
 
 volatile struct fwlist_header_t created_queues[4];

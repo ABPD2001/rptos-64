@@ -3,8 +3,8 @@
 u64_t svc_mini_uart_write(u8_t *buffer, u64_t length)
 {
     const u8_t cid = core_id();
-    const u64_t *ctask = (CORES_RUNNING_TASK_BASE + cid * 8);
-    volatile struct muart_metadata_t *muart = (MUART_METADATA_BASE);
+    const u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
+    volatile struct muart_metadata_t *muart = __global_muart_metadata__;
 
     if (muart->owner_task != *ctask)
         return 1; // not allocated to allowed by task.
@@ -17,8 +17,8 @@ u64_t svc_mini_uart_write(u8_t *buffer, u64_t length)
 u64_t svc_mini_uart_read(u8_t *buffer, u64_t maximum_length)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = (CORES_RUNNING_TASK_BASE + cid * 8);
-    volatile struct muart_metadata_t *muart = (MUART_METADATA_BASE);
+    const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
+    volatile struct muart_metadata_t *muart = __global_muart_metadata__;
 
     if (muart->owner_task != *ctask)
         return 1; // not allocated to allowed by task.
@@ -30,8 +30,8 @@ u64_t svc_mini_uart_read(u8_t *buffer, u64_t maximum_length)
 u64_t svc_mini_uart_write_char(u8_t ch)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = (CORES_RUNNING_TASK_BASE + cid * 8);
-    volatile struct muart_metadata_t *muart = (MUART_METADATA_BASE);
+    const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
+    volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u8_t *mu_io = AUX_MU_IO_REG;
 
     if (muart->owner_task != *ctask)
@@ -48,8 +48,8 @@ u64_t svc_mini_uart_write_char(u8_t ch)
 u64_t svc_mini_uart_read_char(u8_t *ch)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = (CORES_RUNNING_TASK_BASE + cid * 8);
-    volatile struct muart_metadata_t *muart = (MUART_METADATA_BASE);
+    const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
+    volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u8_t *mu_io = AUX_MU_IO_REG;
 
     if (muart->owner_task != *ctask)
@@ -85,7 +85,7 @@ u8_t svc_mini_uart_availablity()
 u64_t svc_get_task_id()
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = (CORES_RUNNING_TASK_BASE + cid * 8);
+    const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
 
     return *ctask;
 }
@@ -93,8 +93,8 @@ u64_t svc_get_task_id()
 u64_t svc_mini_uart_settings(u16_t baudrate, u8_t data_bits, u8_t enablation)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = (CORES_RUNNING_TASK_BASE + cid * 8);
-    volatile struct muart_metadata_t *muart = (MUART_METADATA_BASE);
+    const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
+    volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u32_t *baudrate_reg = AUX_MU_BAUD_REG;
     volatile u32_t *cntl = AUX_MU_CNTL_REG;
     volatile u32_t *en = AUX_ENABLES_REG;

@@ -36,7 +36,6 @@
 
 .section sync_lower_el_handlers
 .global lower_el_svc_handler,lower_el_smc_handler,lower_el_pc_alignment_handler,lower_el_sp_alignment_handler
-.equiv CORES_RUNNING_TASK_BASE, @ table of current running task of cores.
 
 .equiv TASK_STAT_SLEEPING,#5
 .equiv TASK_STAT_WAITING,#4
@@ -49,7 +48,8 @@ lower_el_unkown_handler:
     mrs x0,MPIDR_El1 @ read cores info.
     and x0,x0,#0xFF @ mask core id.
 
-    ldr x1,=CORES_RUNNING_TASK_BASE
+    ldr x1,=__core_info_table__
+    add x1,x1,#32 @ skip stack table
     mul x0,x0,#8
     add x0,x0,x1
 
@@ -72,7 +72,8 @@ lower_el_wfi_wfe_handler:
     mrs x0,MPIDR_El1 @ read cores info.
     and x0,x0,#0xFF @ mask core id.
 
-    ldr x1,=CORES_RUNNING_TASK_BASE
+    ldr x1,=__core_info_table__
+    add x1,x1,#32 @ skip stack table
     mul x0,x0,#8
     add x0,x0,x1
 
@@ -116,7 +117,8 @@ lower_el_pc_alignment_handler:
     mrs x0,MPIDR_El1 @ read cores info.
     and x0,x0,#0xFF @ mask core id.
 
-    ldr x1,=CORES_RUNNING_TASK_BASE
+    ldr x1,=__core_info_table__
+    add x1,x1,#32 @ skip stack table
     mul x0,x0,#8
     add x0,x0,x1
 
@@ -138,7 +140,8 @@ lower_el_sp_alignment_handler:
     mrs x0,MPIDR_El1 @ read cores info.
     and x0,x0,#0xFF @ mask core id.
 
-    ldr x1,=CORES_RUNNING_TASK_BASE
+    ldr x1,=__core_info_table__
+    add x1,x1,#32 @ skip stack table
     mul x0,x0,#8
     add x0,x0,x1
 

@@ -5,8 +5,13 @@
 #define true ((void *)1)  // Define true if not already defined
 #define false ((void *)0) // Define false if not already defined
 
-#define CORES_RUNNING_TASK_BASE
-#define MUART_METADATA_BASE
+#define AUX_BASE 0x7e215000
+#define AUX_ENABLES_REG (AUX_BASE + 0x04)
+#define AUX_IER_REG (AUX_BASE + 0x44)
+#define AUX_MU_IO_REG (AUX_BASE + 0x40)
+#define AUX_MU_LSR_REG (AUX_BASE + 0x54)
+#define AUX_MU_CNTL_REG (AUX_BASE + 0x60)
+#define AUX_MU_BAUD_REG (AUX_BASE + 0x68)
 
 extern unsigned long __global_timer_ticks__;
 extern unsigned long __global_muart_settings__;
@@ -14,6 +19,7 @@ extern unsigned long __global_muart_metadata__;
 extern unsigned long __pcb_bank_base__;
 extern unsigned long __pcb_queue_base__;
 extern unsigned long __core_stack_table__;
+extern unsigned long __core_info_table__;
 
 typedef unsigned long u64_t;
 typedef signed long s64_t;
