@@ -41,11 +41,20 @@ cinit:
     msr x0,MPIDR_EL1 @ read core id.
     and x0,x0,#0xFF @ get core 0 id (first 8-bits).
     
-    ldr x1,=__core_stack_table__ @ load core stack table base.
+    ldr x1,=__core_info_table__ @ load core stack table base.
     mul x2,x0,#8 @ calculate relative address of core stack table.
     add x1,x1,x2
     ldr sp,[x1] @ load core stack pointer.
-    
+
+    mrs x0,CPACR_EL1
+    ldr x1,=(1<<20)
+    orr x0,x0,x1 @ enable fpu only for kernel.
+    ldr x1,=(1<<21) @ enable fpu for user-mode.
+    mvn x1,x1 @ not bitwise the mrs.
+    and x0,x0,x1 @ disable fpu for user-mode.
+
+    msr CPACR_EL1,x0 @ apply settings.
+
     dsb sy @ memory barrier.
     isb @ flush pipeline.
 
@@ -60,7 +69,7 @@ cinit:
     b.ne kernel @ load kernel (core n>0).
 
 retry_to_count:
-    ldr x2,=__core_stack_table__ @ load core stack table base.
+    ldr x2,=__core_info_table__ @ load core info table base.
     ldxr w0,[x2,#64]
     add w0,w0,#1
     stxr w0,w1,[x2,#64]
@@ -78,7 +87,7 @@ clear_bss_loop:
 
 core_spinlock:
     wfe
-    ldr w0,[#__core_stack_table__,#64] @ read if multi-core is enabled.
+    ldr w0,[#__core_info_table__,#64] @ read if multi-core is enabled.
     cbz x0,core_spinlock @ if not enabled, wait again.
 .ltorg
 

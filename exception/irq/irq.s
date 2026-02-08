@@ -54,3 +54,12 @@ core_generic_timer: @ generic timer of core gonna used for task schaduling...
 
     bl task_schaduler   
     bl task_dispatcher
+
+system_timer: @ handler by core 0 only.
+    @ handler for incrementing global system timer ticks and schaduling timer services.
+    ldr x0,=__global_timer_ticks__ @ load.
+    add x0,x0,#1 @ increment.
+    str x0,=__global_timer_ticks__ @ store.
+    @ send each core a irq (sgi).
+    b wakeup_service
+    ret @ done.
