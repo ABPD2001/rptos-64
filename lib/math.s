@@ -7,5 +7,5 @@ built_in_floor:
 
 built_in_ceil:
     mov s0,x0 @ set s0 (simd/neos & fpu registers) to x0 (parameter).
-    fcvtms  x0, s0 @ ceil s0 and store on x0.
+    fcvtps x0, s0 @ ceil s0 and store on x0.
     ret @ return
