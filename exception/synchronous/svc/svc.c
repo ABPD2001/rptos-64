@@ -136,3 +136,20 @@ u64_t svc_mini_uart_settings(u16_t baudrate, u8_t data_bits, u8_t enablation)
 
     return 0;
 }
+
+u64_t svc_tsleep_ms(u32_t ms)
+{
+    const u8_t cid = core_id();
+
+    volatile tfwlist_header_t *timer_requests_queue = &timer_requestes_queues[cid];
+    volatile u64_t **current_running_task = core_tasks[cid];
+
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (global_timer_requests_bank[i]->next == NULL)
+        {
+        }
+    }
+
+    tfw_push_back(timer_requests_queue, )
+}

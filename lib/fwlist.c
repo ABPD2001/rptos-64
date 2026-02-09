@@ -31,7 +31,7 @@ u64_t fw_rm(fwlist_header_t *header, u64_t idx)
     pcb_t *prev_task = NULL;
 
     idx--;
-    if (target_task == NULL)
+    if (pointed_task == NULL)
         return 1;
     for (; idx != -1; idx--)
     {
@@ -104,4 +104,97 @@ u64_t fw_len(fwlist_header_t *header)
     }
 
     return length;
+}
+
+void tfw_push_back(tfwlist_header_t *header, timer_request_t *request)
+{
+    if (header->head == NULL && header->tail == NULL)
+    {
+        header->head = request;
+        header->tail = header->head;
+        return;
+    }
+
+    header->tail->next = request; // set pointer of headers tail to new request.
+    header->tail = request;       // set new tail for header.
+}
+
+timer_request_t *tfw_find(tfwlist_header_t *header, u64_t id)
+{
+    timer_request_t *temp_request = header->head;
+
+    if (temp_request == NULL)
+        return 1;
+    // means list is empty.
+
+    while (1)
+    {
+        if (temp_request->task_id == id)
+            return temp_request;
+        if (temp_request->next == NULL)
+            break;
+        temp_request = temp_request->next; // seek to next timer request.
+    }
+
+    return 0; // means not found.
+}
+
+u64_t tfw_rm(tfwlist_header_t *header, u64_t idx)
+{
+    timer_request_t *pointed_request = header->head;
+    timer_request_t *prev_request = NULL;
+
+    idx--;
+    if (pointed_request == NULL)
+        return 1;
+    for (; idx != -1; idx--)
+    {
+        if (pointed_request->next == NULL)
+        {
+            if (idx)
+                return 2;
+            break;
+        }
+        prev_request = pointed_request;
+        pointed_request = pointed_request->next;
+    }
+
+    if (pointed_request == header->tail && pointed_request == header->head)
+    {
+        header->head = NULL;
+        header->tail = NULL;
+
+        return 0;
+    }
+
+    if (pointed_request == header->head)
+    {
+
+        header->head = pointed_request->next;
+        pointed_request->next = NULL; // just in case...
+    }
+    else if (pointed_request == header->tail)
+    {
+
+        header->tail = prev_request;
+        prev_request->next = NULL; // just in case...
+    }
+
+    return 0;
+}
+
+u64_t tfw_idx(tfwlist_header_t *header, u64_t id)
+{
+    timer_request_t *temp_req = header->head;
+    u64_t idx = 0;
+
+    while (1)
+    {
+        if (temp_req->id == id)
+            return idx; // if found, return idx.
+        idx++;
+        if (temp_req->next == NULL)
+            break;
+        temp_req = temp_req->next; // seek to next request in queue.
+    }
 }

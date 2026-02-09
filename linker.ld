@@ -112,15 +112,22 @@ SECTIONS {
     /* BANKS AND QUEUES */
 
     .pcb_bank(NOLOAD):{
-        ALIGN(352) /* pcb struct size is 352 Bytes */
+        ALIGN(352) /* pcb struct size is 360 Bytes */
         
         __pcb_bank_base__ = .;
         .+=23040; /* Reserve 64 struct of pcb. (360*64) Bytes */
+    }
+    .timer_bank(NOLOAD):{
+        ALIGN(24)
+
+        __timer_request_bank_base__ = .;
+        .+=1536; /* Reserve 64 struct of timer request. (24*64) Bytes0 */
     }
     .pcb_queues(NOLAOD):{
         ALIGN(16) /* header struct size is 16 Bytes */
 
         __pcb_queue_base__ = .;
         .+=712; /* Reserve 3 queues header of 4 states (and 8 ready queues). (8*4*16 + 3*16*4) + priority map for each core (8-bits each) + ticks for each core (8-bits each) */
+        .+=64; /* Reserve 4 timer requests queues. */
     }
 }
