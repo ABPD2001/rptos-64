@@ -121,6 +121,6 @@ SECTIONS {
         ALIGN(16) /* header struct size is 16 Bytes */
 
         __pcb_queue_base__ = .;
-        .+=256; /* Reserve 4 queues header of 4 states. (4*16*4) */
+        .+=712; /* Reserve 3 queues header of 4 states (and 8 ready queues). (8*4*16 + 3*16*4) + priority map for each core (8-bits each) + ticks for each core (8-bits each) */
     }
 }

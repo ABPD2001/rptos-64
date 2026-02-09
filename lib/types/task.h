@@ -48,7 +48,7 @@ typedef struct pcb_t // 352 B
     u64_t *childs;
     u64_t fault_dump;
     u64_t flags; // 0-1: dedicated core, 2: ready flag.
-    void *next;
+    struct pcb_t *next;
 };
 
 #endif
