@@ -38,8 +38,8 @@ typedef struct pcb_t // 352 B
     u64_t x1;
     u64_t x0;
     u64_t id;
-    u64_t status; // 0: created, 1:ready, 2:running, 3:terminated, 4:waiting, 5:sleeping
-    u64_t priority;
+    u64_t status;   // 0: created, 1:ready, 2:running, 3:terminated, 4:waiting, 5:sleeping
+    u64_t priority; // 0~7: 0 is least and 7 is most.
     u64_t stack_start;
     u64_t stack_end;
     u64_t fault_code; // 1: stack alignment fault ,2: pc alignment fault
@@ -48,6 +48,7 @@ typedef struct pcb_t // 352 B
     u64_t *childs;
     u64_t fault_dump;
     u64_t flags; // 0-1: dedicated core, 2: ready flag.
+    u64_t pc;    // program counter.
     struct pcb_t *next;
 };
 

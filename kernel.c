@@ -3,6 +3,7 @@
 #include "./lib/types/uart.h"
 #include "./lib/core.h"
 #include "./lib/math.h"
+#include "./preipherals/timer.h"
 
 volatile pcb_t *global_pcb_bank = NULL; // limit of 64 tasks.
 volatile u64_t *global_system_ticks = NULL;
@@ -54,7 +55,9 @@ void kernel()
     sleeping_queues = __pcb_queue_base__ + 44 * 16;
 
     pri_map = __pcb_queue_base__ + 704;
+    *pri_map = 0x07070707; // set highest priority at first. (8 is most and 0 is least).
     sch_ticks = __pcb_queue_base__ + 708;
+    *sch_ticks = 0; // just in case... (to prevent from unkown behavior).
 
     // then, if core id was zero, enabling multi-core mode and waiting until all cores acknowledged core zero.
     if (!core_id())
@@ -95,7 +98,7 @@ void task_schaduler(pcb_t *current_running_task)
     current_running_task->status = 1;                                                     // change status to ready.
     current_running_task->priority = built_in_max(0, current_running_task->priority - 1); // punish task, because didnt done its job in range of quantum time.
 
-    u8_t local_sch_ticks = (*sch_ticks & (~0xFF << cid) >> cid * 8);
+    u8_t local_sch_ticks = (*sch_ticks & (~0xFF << cid * 8 - 1) >> cid * 8 - 1);
     local_sch_ticks++;
 
     for (u64_t i = 0; i < 8; i++)
@@ -103,9 +106,9 @@ void task_schaduler(pcb_t *current_running_task)
         if (ready_multi_queues[i]->head != NULL)
         {
             u32_t cpy_pri_map = *pri_map;
-            cpy_pri_map &= ~(0xFF << cid); // first, clear core priority map.
-            cpy_pri_map |= i << cid;       // then, set priority map.
-            *pri_map = cpy_pri_map;        // at last, store it on global pointer.
+            cpy_pri_map &= ~(0xFF << cid * 8 - 1); // first, clear core priority map.
+            cpy_pri_map |= i << cid * 8 - 1;       // then, set priority map.
+            *pri_map = cpy_pri_map;                // at last, store it on global pointer.
 
             break;
         }
@@ -175,6 +178,26 @@ void task_schaduler(pcb_t *current_running_task)
 void task_dispatcher()
 {
     const u8_t cid = core_id(); // get core id.
+
+    fwlist_header_t *pri0_ready_queue = &pri0_ready_queue[cid];
+    fwlist_header_t *pri1_ready_queue = &pri1_ready_queues[cid];
+    fwlist_header_t *pri2_ready_queue = &pri2_ready_queue[cid];
+    fwlist_header_t *pri3_ready_queue = &pri3_ready_queues[cid];
+    fwlist_header_t *pri4_ready_queue = &pri4_ready_queues[cid];
+    fwlist_header_t *pri5_ready_queue = &pri5_ready_queues[cid];
+    fwlist_header_t *pri6_ready_queue = &pri6_ready_queues[cid];
+    fwlist_header_t *pri7_ready_queue = &pri7_ready_queues[cid];
+
+    fwlist_header_t *ready_multi_queues[8] = {pri0_ready_queue, pri1_ready_queue, pri2_ready_queue, pri3_ready_queue, pri4_ready_queue, pri5_ready_queue, pri6_ready_queue, pri7_ready_queue};
+
+    u64_t local_pri_map = (*pri_map & (0xFF << cid * 8 - 1)) >> cid * 8 - 1;
+    pcb_t *target_task = ready_multi_queues[local_pri_map]->head;
+
+    fw_rm(ready_multi_queues[local_pri_map], 0);                  // remove first task of queue (because, task after a running cycle, must sits at end of queue).
+    target_task->status = 2;                                      // set task status to running.
+    fw_push_back(ready_multi_queues[local_pri_map], target_task); // push back task (to sit at end of queue).
+
+    set_timer(100 - (*pri_map * 10)); // quantum time: (100 - (queue_priority*10)) ms.
 }
 
 void wakeup_service()

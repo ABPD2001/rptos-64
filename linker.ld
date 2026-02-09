@@ -115,7 +115,7 @@ SECTIONS {
         ALIGN(352) /* pcb struct size is 352 Bytes */
         
         __pcb_bank_base__ = .;
-        .+=22528; /* Reserve 64 struct of pcb. (352*64) Bytes */
+        .+=23040; /* Reserve 64 struct of pcb. (360*64) Bytes */
     }
     .pcb_queues(NOLAOD):{
         ALIGN(16) /* header struct size is 16 Bytes */
