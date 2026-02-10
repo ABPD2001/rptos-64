@@ -60,6 +60,6 @@ system_timer: @ handler by core 0 only.
     ldr x0,=__global_timer_ticks__ @ load.
     add x0,x0,#1 @ increment.
     str x0,=__global_timer_ticks__ @ store.
-    @ send each core a irq (sgi).
+    @ send each a broadcast to all cores. (sgi).
     b wakeup_service
     ret @ done.

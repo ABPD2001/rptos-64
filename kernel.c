@@ -3,7 +3,7 @@
 #include "./lib/types/uart.h"
 #include "./lib/core.h"
 #include "./lib/math.h"
-#include "./preipherals/timer.h"
+#include "./preipherals/gtimer.h"
 
 volatile pcb_t *global_pcb_bank = NULL; // limit of 64 tasks.
 volatile timer_request_t *global_timer_requests_bank = NULL;
