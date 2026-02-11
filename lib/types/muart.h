@@ -16,10 +16,18 @@ typedef struct muart_metadata_t // 48 bytes.
     u64_t owner_task;
     u8_t *write_buffer;
     u64_t write_length;
+    u64_t written_length;
     u8_t *read_buffer;
     u64_t read_maximum_length;
+    u64_t read_length;
     u64_t timeout;
     u8_t *delimiter;
+};
+
+typedef struct muart_statistics_t
+{
+    u64_t receiver_overruns; // times of receiver overrun happens.
+    u64_t wt_rejections;     // if buffer/write length/written length isnt valid.
 };
 
 #endif

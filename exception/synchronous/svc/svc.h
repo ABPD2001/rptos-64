@@ -1,7 +1,7 @@
 #ifndef SVC_H
 #define SVC_H
 #include "../../../lib/types/base.h"
-#include "../../../lib/types/uart.h"
+#include "../../../lib/types/muart.h"
 #include "../../../lib/core.h"
 #include "../../../lib/fwlist.h"
 #include "../../../lib/types/timer.h"

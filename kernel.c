@@ -1,6 +1,6 @@
 #include "./lib/fwlist.h"
 #include "./lib/types/task.h"
-#include "./lib/types/uart.h"
+#include "./lib/types/muart.h"
 #include "./lib/core.h"
 #include "./lib/math.h"
 #include "./preipherals/gtimer.h"
