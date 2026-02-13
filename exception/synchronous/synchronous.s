@@ -33,35 +33,7 @@
 .ltorg
 
 .section sync_lower_el_handlers
-.global lower_el_svc_handler,lower_el_smc_handler,lower_el_pc_alignment_handler,lower_el_sp_alignment_handler
-
-.equiv TASK_STAT_SLEEPING,#5
-.equiv TASK_STAT_WAITING,#4
-.equiv TASK_STAT_TERMINATED,#3
-
-lower_el_unkown_handler:
-    stp x29,x30,[sp,#-16]!
-    mov x29,sp
-
-    mrs x0,MPIDR_El1 @ read cores info.
-    and x0,x0,#0xFF @ mask core id.
-
-    ldr x1,=__core_info_table__
-    add x1,x1,#32 @ skip stack table
-    mul x0,x0,#8
-    add x0,x0,x1
-
-    ldr x0,[x0] @ point to pcb.
-
-    mov x1,#TASK_STAT_TERMINATED
-    str x1,[x0,#274] @ set process state to terminated.
-    mov x1,#3
-    str x1,[x0,#300] @ set process fault code to unkown instruction.
-    str x2,[x0,#332] @ set process fault dump to instruction of exception syndrome.
-
-    mov sp,x29
-    ldp x29,x30,[sp],#16
-    ret
+.global lower_el_svc_handler
 
 lower_el_svc_handler:
     stp x29,x30,[sp,#-16]!
@@ -83,52 +55,6 @@ lower_el_svc_handler:
     stp x2,x3,[x19,#-16]!
     stp x0,x1,[x19,#-16]! @ save params and result into context.
 
-    mov sp,x29
-    ldp x29,x30,[sp],#16
-    ret
-
-lower_el_pc_alignment_handler:
-    stp x29,x30,[sp,#-16]!
-    mov x29,sp
-
-    mrs x0,MPIDR_El1 @ read cores info.
-    and x0,x0,#0xFF @ mask core id.
-
-    ldr x1,=__core_info_table__
-    add x1,x1,#32 @ skip stack table
-    mul x0,x0,#8
-    add x0,x0,x1
-
-    ldr x0,[x0] @ point to pcb.
-
-    mov x1,#TASK_STAT_TERMINATED
-    mov x2,#2
-
-    str x1,[x0,#274] @ set process state to terminated.
-    str x2,[x0,#300] @ set process fault code to pc alignment fault.
-    mov sp,x29
-    ldp x29,x30,[sp],#16
-    ret
-
-lower_el_sp_alignment_handler:
-    stp x29,x30,[sp,#-16]!
-    mov x29,sp
-
-    mrs x0,MPIDR_El1 @ read cores info.
-    and x0,x0,#0xFF @ mask core id.
-
-    ldr x1,=__core_info_table__
-    add x1,x1,#32 @ skip stack table
-    mul x0,x0,#8
-    add x0,x0,x1
-
-    ldr x0,[x0] @ point to pcb.
-
-    mov x1,#3
-    mov x2,#1
-
-    str x1,[x0,#274] @ set process status to terminated.
-    str x2,[x0,#300] @ set process fault code to stack alignment fault.
     mov sp,x29
     ldp x29,x30,[sp],#16
     ret
