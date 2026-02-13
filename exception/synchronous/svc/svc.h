@@ -18,5 +18,6 @@ u64_t svc_mini_uart_read_char(u8_t *ch);
 u8_t svc_mini_uart_availablity();
 
 u64_t svc_get_task_id();
+u64_t svc_termination_request();
 u64_t svc_tsleep_ms(u32_t us);
 #endif

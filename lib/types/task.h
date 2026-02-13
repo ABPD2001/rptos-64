@@ -2,7 +2,7 @@
 #define TYPES_TASK_H
 #include "./base.h"
 
-typedef struct pcb_t // 352 B
+typedef struct pcb_t // 360 B
 {
     // its recommended to apply simd registers later...
     u64_t spsr;

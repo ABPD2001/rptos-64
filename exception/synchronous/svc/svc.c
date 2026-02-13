@@ -158,3 +158,15 @@ u64_t svc_tsleep_ms(u32_t us)
     }
     return 1;
 }
+
+u64_t svc_termination_request()
+{
+    const u8_t cid = core_id();
+    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    ctask->status = 3; // set status to terminated.
+
+    set_gtimer(1); // allow generic timer to work for a ms on a loop.
+    while (1)
+    {
+    } // just loop.
+}

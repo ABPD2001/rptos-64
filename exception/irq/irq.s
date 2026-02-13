@@ -122,3 +122,15 @@ uart_tx_empty:
     mov sp,x29 @ set sp to frame pointer.
     bl uart_tx_empty_loop @ start loop.
     ret @ return.
+
+
+uart_receiver_overrun:
+    ldr x0,=__global_muart_statistics__
+    ldr x1,[x0] @ load from statistics (receiver overrun).
+    add x1,x1,#1 @ increment.
+    str x1,[x0] @ store on statistics (receiver overrun).
+
+    ldr x0,=AUX_BASE
+    ldr xzr,[x0,#AUX_MU_IO] @ discard a byte.
+
+    ret @ return.
