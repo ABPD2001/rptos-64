@@ -1,4 +1,4 @@
-.section init
+.section .init
 .equiv EL1_CORE_STACK_TABLE,
 .global core_spinlock,cinit
 
@@ -91,7 +91,7 @@ core_spinlock:
     cbz x0,core_spinlock @ if not enabled, wait again.
 .ltorg
 
-.section vectors
+.section .vectors
 .equiv EL1_CUR_HANDLER_TABLE,
 .equiv EL1_CUR_IRQ_HANDLER_TABLE,
 .equiv EL1_CUR_FIQ_HANDLER_TABLE,
@@ -282,7 +282,7 @@ vector_table:
     eret
 .ltorg
 
-.section vector_table_handlers
+.section .vector_table_handlers
 RETURN_TO_TASK:
     ldp x0,x0,[sp,#16] @ read ELR_EL1
     mrs x0,ELR_EL1 @ apply ELR_EL1.
