@@ -4,6 +4,7 @@
 #include "./lib/core.h"
 #include "./lib/math.h"
 #include "./preipherals/gtimer.h"
+#include "./preipherals/muart.h"
 
 volatile pcb_t *global_pcb_bank = NULL; // limit of 64 tasks.
 volatile timer_request_t *global_timer_requests_bank = NULL;
@@ -71,13 +72,16 @@ void kernel()
     // then, if core id was zero, enabling multi-core mode and waiting until all cores acknowledged core zero.
     if (!core_id())
     {
-        // initialize mini-uart here...
+        initialize_muart();                         // initialize mini-uart.
         multi_core_enable();                        // wake up other cores.
         u32_t *counts = (__core_info_table__ + 64); // set pointer to counts.
         while (1)                                   // wait until all cores are ready.
             if (*counts == 4)
                 break;
     }
+    char buffer[16] = "rptos-64 is up.";
+    buffer[15] = '\0';
+    muart_write(buffer, 15);
 }
 
 void task_schaduler(pcb_t *current_running_task)

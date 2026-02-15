@@ -2,6 +2,7 @@
 #define MUART_H
 #include "../types/base.h"
 #include "../types/muart.h"
+#include "./gpio.h"
 
 void initialize_muart();
 u64_t muart_write(u8_t *buffer, u64_t length);

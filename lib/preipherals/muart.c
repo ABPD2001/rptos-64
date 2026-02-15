@@ -2,7 +2,7 @@
 
 u64_t muart_write(u8_t *buffer, u64_t length)
 {
-    volatile struct muart_metadata_t *muart = (MUART_METADATA_BASE);
+    volatile struct muart_metadata_t *muart = __global_muart_metadata__;
 
     muart->write_buffer = buffer;
     muart->write_length = length;
@@ -12,7 +12,7 @@ u64_t muart_write(u8_t *buffer, u64_t length)
 
 u64_t muart_read(u8_t *buffer, u64_t maximum_length)
 {
-    volatile struct muart_metadata_t *muart = (MUART_METADATA_BASE);
+    volatile struct muart_metadata_t *muart = __global_muart_metadata__;
 
     muart->read_buffer = buffer;
     muart->read_maximum_length = maximum_length;
@@ -20,7 +20,7 @@ u64_t muart_read(u8_t *buffer, u64_t maximum_length)
 
 u64_t muart_write_char(u8_t ch)
 {
-    volatile struct muart_metadata_t *muart = (MUART_METADATA_BASE);
+    volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u8_t *mu_io = AUX_MU_IO_REG;
 
     while (!(muart_availablity() & 0x1))
@@ -33,7 +33,7 @@ u64_t muart_write_char(u8_t ch)
 
 u64_t muart_read_char(u8_t *ch)
 {
-    volatile struct muart_metadata_t *muart = (MUART_METADATA_BASE);
+    volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u8_t *mu_io = AUX_MU_IO_REG;
 
     while (!(muart_availablity() & 0x2))
@@ -65,7 +65,7 @@ u8_t muart_availablity()
 
 u64_t muart_settings(u16_t baudrate, u8_t data_bits, u8_t enablation)
 {
-    volatile struct muart_metadata_t *muart = (MUART_METADATA_BASE);
+    volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u32_t *baudrate_reg = AUX_MU_BAUD_REG;
     volatile u32_t *cntl = AUX_MU_CNTL_REG;
     volatile u32_t *en = AUX_ENABLES_REG;
@@ -107,7 +107,14 @@ u64_t muart_settings(u16_t baudrate, u8_t data_bits, u8_t enablation)
 
 void initialize_muart()
 {
+    volatile muart_settings_t *muart_settings = __global_muart_settings__;
     volatile u32_t *aux_en = AUX_ENABLES_REG;
     *aux_en |= 0x1; // enable uart on aux_enable register.
-    // set gpio functionality for mini-uart.
+
+    gpfunction(GPIO_FSEL1, 1, GPIO_UART); // set pin 14 functionality to "alternative function 5" or in other words, "uart functionality".
+    gpfunction(GPIO_FSEL1, 2, GPIO_UART); // set pin 15 functionality to "alternative function 5" or in other words, "uart functionality".
+
+    muart_settings->baudrate = MUART_DEFAULT_BAUD;         // set baudrate to default.
+    muart_settings->data_bits = MUART_DEFAULT_DATABITS;    // set data bits to default.
+    muart_settings->enablation = MUART_DEFAULT_ENABLATION; // set enablation to default.
 }
