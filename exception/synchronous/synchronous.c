@@ -1,6 +1,5 @@
-#include "./synchronous.h"
-
 __attribute__((section(".sync_lower_el_handlers")));
+#include "./synchronous.h"
 
 void lower_el_wfi_wfe_handler()
 {

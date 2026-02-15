@@ -1,3 +1,4 @@
+__attribute__((section(".svc_handlers")));
 #include "./svc.h"
 
 u64_t svc_mini_uart_write(u8_t *buffer, u64_t length)
