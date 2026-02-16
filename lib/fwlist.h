@@ -1,7 +1,7 @@
 #ifndef FW_LIST_H
 #define FW_LIST_H
-#include "./types/task.h"
-#include "./types/timer.h"
+#include "../structure/task.h"
+#include "../structure/timer.h"
 
 // TASK
 typedef struct // 16 B

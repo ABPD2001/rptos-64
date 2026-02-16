@@ -1,7 +1,7 @@
 #ifndef MUART_H
 #define MUART_H
-#include "../types/base.h"
-#include "../types/muart.h"
+#include ".../structure/base.h"
+#include ".../structure/muart.h"
 #include "./gpio.h"
 
 void initialize_muart();

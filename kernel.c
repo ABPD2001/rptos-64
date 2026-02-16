@@ -1,10 +1,10 @@
 #include "./lib/fwlist.h"
-#include "./lib/types/task.h"
-#include "./lib/types/muart.h"
+#include "./structure/task.h"
+#include "./structure/muart.h"
 #include "./lib/core.h"
 #include "./lib/math.h"
-#include "./preipherals/gtimer.h"
-#include "./preipherals/muart.h"
+#include "../drivers/gtimer.h"
+#include "../drivers/muart.h"
 
 volatile pcb_t *global_pcb_bank = NULL; // limit of 64 tasks.
 volatile timer_request_t *global_timer_requests_bank = NULL;

@@ -1,6 +1,6 @@
 #ifndef LIB_GPIO_H
 #define LIB_GPIO_H
-#include "../types/base.h"
+#include ".../structure/base.h"
 
 void gpfunction(u64_t table, u8_t nth, u8_t functionality);
 void gpset(u64_t table, u8_t nth);

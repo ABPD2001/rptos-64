@@ -1,6 +1,6 @@
 #ifndef LIB_STIMER_H
 #define LIB_STIMER_H
-#include "../types/base.h"
+#include ".../structure/base.h"
 
 void set_stimer(u32_t cmp_us);
 u64_t read_stimer_us();

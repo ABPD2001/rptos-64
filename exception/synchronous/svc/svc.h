@@ -1,10 +1,10 @@
 #ifndef SVC_H
 #define SVC_H
-#include "../../../lib/types/base.h"
-#include "../../../lib/types/muart.h"
+#include "../../../structure/base.h"
+#include "../../../structure/muart.h"
 #include "../../../lib/core.h"
 #include "../../../lib/fwlist.h"
-#include "../../../lib/types/timer.h"
+#include "../../../structure/timer.h"
 #include "../../../lib/preipherals/stimer.h"
 
 extern volatile tfwlist_header_t *timer_requestes_queues;
@@ -20,4 +20,8 @@ u8_t svc_mini_uart_availablity();
 u64_t svc_get_task_id();
 u64_t svc_termination_request();
 u64_t svc_tsleep_ms(u32_t us);
+
+// u64_t svc_gpfunction(u64_t table, u8_t nth, u8_t function);
+// u64_t svc_gpset(u64_t table, u8_t nth);
+// u64_t svc_gpclear(u64_t table, u8_t nth);
 #endif

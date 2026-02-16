@@ -171,3 +171,13 @@ u64_t svc_termination_request()
     {
     } // just loop.
 }
+
+// u64_t svc_gpfunction(u64_t table, u8_t nth, u8_t function)
+// {
+//     volatile u32_t *ftable = table;
+
+//     *ftable &= ~(0b111 << nth * 3);
+//     *ftable |= (function << nth * 3);
+
+//     return 0;
+// }

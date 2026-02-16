@@ -1,7 +1,7 @@
 #ifndef SYNCHRONOUS_H
 #define SYNCHRONOUS_H
-#include "../../lib/types/base.h"
-#include "../../lib/types/task.h"
+#include "../../structure/base.h"
+#include "../../structure/task.h"
 #include "../../lib/core.h"
 
 extern void task_dispatcher();
