@@ -35,7 +35,8 @@ volatile u32_t *pri_map = NULL;
 volatile u32_t *sch_ticks = NULL;
 
 void task_dispatcher();
-void task_schaduler();
+void task_schaduler(pcb_t *current_running_task);
+void wakeup_service();
 
 void kernel()
 {
@@ -78,10 +79,11 @@ void kernel()
         while (1)                                   // wait until all cores are ready.
             if (*counts == 4)
                 break;
+
+        char buffer[16] = "rptos-64 is up.";
+        buffer[15] = '\0';
+        muart_write(buffer, 16);
     }
-    char buffer[16] = "rptos-64 is up.";
-    buffer[15] = '\0';
-    muart_write(buffer, 15);
 }
 
 void task_schaduler(pcb_t *current_running_task)
