@@ -8,7 +8,10 @@
 // GPIO45 --> red led.
 
 void initialize_bleds();
-void bled_on();
-void bled_off();
-void bled_set(u8_t value);
+void brled_on();
+void bgled_on();
+void brled_off();
+void bgled_off();
+void brled_set(u8_t value);
+void bgled_set(u8_t value);
 #endif
