@@ -5,8 +5,10 @@
 #include "./lib/math.h"
 #include "../drivers/gtimer.h"
 #include "../drivers/muart.h"
+#include "../structure/gpio.h"
 
-volatile pcb_t *global_pcb_bank = NULL; // limit of 64 tasks.
+volatile pcb_t *global_pcb_bank = NULL;             // limit of 64 tasks.
+volatile gpio_ownership_t *global_gpio_bank = NULL; // limit of 64 ownerships.
 volatile timer_request_t *global_timer_requests_bank = NULL;
 volatile u64_t *global_system_ticks = NULL;
 volatile muart_settings_t *global_mini_uart_settings = NULL;
@@ -46,6 +48,7 @@ void kernel()
     global_timer_requests_bank = __timer_request_bank_base__; // reminder: it has limit of 64 requests.
     global_mini_uart_settings = __global_muart_settings__;
     global_mini_uart_metadata = __global_muart_metadata__;
+    global_gpio_bank = __gpio_ownerships_bank_base__; // reminder: it has limit of 64 ownerships.
     core_tasks = __core_info_table__ + (4 * 4);
 
     // initialize pcb queues.

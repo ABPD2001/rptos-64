@@ -113,11 +113,13 @@ SECTIONS {
 
     /* BANKS AND QUEUES */
 
-    .pcb_bank(NOLOAD):{
+    .banks(NOLOAD):{
         ALIGN(352) /* pcb struct size is 360 Bytes */
         
         __pcb_bank_base__ = .;
         .+=23040; /* Reserve 64 struct of pcb. (360*64) Bytes */
+        __gpio_ownerships_bank_base__ = .;
+        .+=1536; /* Reserve 64 struct of ownership. (24*64) Bytes */
     }
     .timer_bank(NOLOAD):{
         ALIGN(24)

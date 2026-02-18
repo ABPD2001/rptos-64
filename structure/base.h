@@ -42,6 +42,7 @@ extern unsigned long __pcb_queue_base__;
 extern unsigned long __core_info_table__;
 extern unsigned long __timer_request_bank_base__;
 extern unsigned long __user_region_start__;
+extern unsigned long __gpio_ownerships_bank_base__;
 
 typedef unsigned long u64_t;
 typedef signed long s64_t;

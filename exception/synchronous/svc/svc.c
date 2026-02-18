@@ -172,12 +172,123 @@ u64_t svc_termination_request()
     } // just loop.
 }
 
-// u64_t svc_gpfunction(u64_t table, u8_t nth, u8_t function)
-// {
-//     volatile u32_t *ftable = table;
+u64_t svc_gpalloc(u64_t table, u8_t nth)
+{
+    const u8_t cid = core_id();
+    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
 
-//     *ftable &= ~(0b111 << nth * 3);
-//     *ftable |= (function << nth * 3);
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (!global_gpio_bank[i].owner_task_id)
+        {
+            global_gpio_bank[i].owner_task_id = ctask->id; // set ownership id to current running task id.
+            global_gpio_bank[i].table = table;
+            global_gpio_bank[i].nth = (u64_t)nth;
+        }
+        return 0; // done.
+    }
+    return 1; // out of space.
+}
 
-//     return 0;
-// }
+u64_t svc_gpfree(u64_t task_id, u64_t table, u8_t nth)
+{
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (global_gpio_bank[i].owner_task_id == task_id)
+        {
+            if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
+            {
+                global_gpio_bank[i].owner_task_id = 0; // clear task id.
+                global_gpio_bank[i].table = 0;         // clear table.
+                global_gpio_bank[i].nth = 0;           // clear nth.
+
+                return 0; // done.
+            }
+            return 1; // invalid information.
+        }
+    }
+    return 2; // no ownership with this id.
+}
+
+u64_t svc_gpfunction(u64_t table, u8_t nth, u8_t function)
+{
+    const u8_t cid = core_id();
+    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (ctask->id == global_gpio_bank[i].owner_task_id)
+        {
+            if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
+            {
+                gpfunction(table, nth, function); // set function.
+                return 0;                         // done.
+            }
+            return 1; // invalid information.
+        }
+    }
+    return 2; // no ownership with this id.
+}
+
+u64_t svc_gpset(u64_t table, u8_t nth)
+{
+    const u8_t cid = core_id();
+    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (ctask->id == global_gpio_bank[i].owner_task_id)
+        {
+            if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
+            {
+                gpset(table, nth); // set pin.
+                return 0;          // done.
+            }
+            return 1; // invalid information.
+        }
+    }
+    return 2; // no ownership with this id.
+}
+
+u64_t svc_gpclear(u64_t table, u8_t nth)
+{
+    const u8_t cid = core_id();
+    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (ctask->id == global_gpio_bank[i].owner_task_id)
+        {
+            if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
+            {
+                gpclear(table, nth); // clear pin.
+                return 0;            // done.
+            }
+            return 1; // invalid information.
+        }
+    }
+    return 2; // no ownership with this id.
+}
+u64_t svc_gpvalue(u64_t table, u8_t nth, u8_t value)
+{
+    const u8_t cid = core_id();
+    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (ctask->id == global_gpio_bank[i].owner_task_id)
+        {
+            if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
+            {
+                if (value)
+                    gpset(table, nth); // set pin.
+                else
+                    gpclear(table, nth); // clear pin.
+
+                return 0; // done.
+            }
+            return 1; // invalid information.
+        }
+    }
+    return 2; // no ownership with this id.
+}

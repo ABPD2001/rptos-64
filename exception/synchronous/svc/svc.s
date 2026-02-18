@@ -8,4 +8,9 @@
 .org 0x18, b svc_get_task_id
 .org 0x20, b svc_tsleep_ms
 .org 0x24, b svc_termination_request
+.org 0x28, b svc_gpalloc
+.org 0x2C, b svc_gpfree
+.org 0x30, b svc_gpset
+.org 0x34, b svc_gpclear
+.org 0x38, b svc_gpvalue
 .ltorg
