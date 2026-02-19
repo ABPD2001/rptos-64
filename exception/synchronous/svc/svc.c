@@ -1,7 +1,7 @@
 __attribute__((section(".svc_handlers")));
 #include "./svc.h"
 
-u64_t svc_mini_uart_write(u8_t *buffer, u64_t length)
+u64_t svc_muart_write(u8_t *buffer, u64_t length)
 {
     const u8_t cid = core_id();
     const u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
@@ -15,7 +15,7 @@ u64_t svc_mini_uart_write(u8_t *buffer, u64_t length)
     return 0;
 }
 
-u64_t svc_mini_uart_read(u8_t *buffer, u64_t maximum_length)
+u64_t svc_muart_read(u8_t *buffer, u64_t maximum_length)
 {
     const u8_t cid = core_id();
     const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
@@ -28,7 +28,7 @@ u64_t svc_mini_uart_read(u8_t *buffer, u64_t maximum_length)
     muart->read_maximum_length = maximum_length;
 }
 
-u64_t svc_mini_uart_write_char(u8_t ch)
+u64_t svc_muart_write_char(u8_t ch)
 {
     const u8_t cid = core_id();
     const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
@@ -38,7 +38,7 @@ u64_t svc_mini_uart_write_char(u8_t ch)
     if (muart->owner_task != *ctask)
         return 1; // not allocated to allowed by task.
 
-    while (!(svc_mini_uart_availablity() & 0x1))
+    while (!(svc_muart_availablity() & 0x1))
     {
     }
     *mu_io = ch; // write character to TX FIFO.
@@ -46,7 +46,7 @@ u64_t svc_mini_uart_write_char(u8_t ch)
     return 0;
 }
 
-u64_t svc_mini_uart_read_char(u8_t *ch)
+u64_t svc_muart_read_char(u8_t *ch)
 {
     const u8_t cid = core_id();
     const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
@@ -56,7 +56,7 @@ u64_t svc_mini_uart_read_char(u8_t *ch)
     if (muart->owner_task != *ctask)
         return 1; // not allocated to allowed by task.
 
-    while (!(svc_mini_uart_availablity() & 0x2))
+    while (!(svc_muart_availablity() & 0x2))
     {
     }
     *ch = *mu_io;
@@ -64,7 +64,7 @@ u64_t svc_mini_uart_read_char(u8_t *ch)
     return 0;
 }
 
-u8_t svc_mini_uart_availablity()
+u8_t svc_muart_availablity()
 {
     u8_t output = 0;
     volatile u32_t *aux_en = AUX_ENABLES_REG;
@@ -91,7 +91,7 @@ u64_t svc_get_task_id()
     return *ctask;
 }
 
-u64_t svc_mini_uart_settings(u16_t baudrate, u8_t data_bits, u8_t enablation)
+u64_t svc_muart_settings(u16_t baudrate, u8_t data_bits, u8_t enablation)
 {
     const u8_t cid = core_id();
     const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);

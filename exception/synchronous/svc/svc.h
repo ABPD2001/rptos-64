@@ -14,11 +14,11 @@ extern volatile timer_request_t *global_timer_requests_bank;
 extern volatile u64_t **core_tasks;
 extern volatile gpio_ownership_t *global_gpio_bank;
 
-u64_t svc_mini_uart_write(u8_t *buffer, u64_t length);
-u64_t svc_mini_uart_read(u8_t *buffer, u64_t maximum_length);
-u64_t svc_mini_uart_write_char(u8_t ch);
-u64_t svc_mini_uart_read_char(u8_t *ch);
-u8_t svc_mini_uart_availablity();
+u64_t svc_muart_write(u8_t *buffer, u64_t length);
+u64_t svc_muart_read(u8_t *buffer, u64_t maximum_length);
+u64_t svc_muart_write_char(u8_t ch);
+u64_t svc_muart_read_char(u8_t *ch);
+u8_t svc_muart_availablity();
 
 u64_t svc_get_task_id();
 u64_t svc_termination_request();
