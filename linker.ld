@@ -114,18 +114,21 @@ SECTIONS {
     /* BANKS AND QUEUES */
 
     .banks(NOLOAD):{
-        ALIGN(352) /* pcb struct size is 360 Bytes */
+        ALIGN(8) /* Alignment of 8 bytes for better and compatibility performance. */
         
         __pcb_bank_base__ = .;
         .+=23040; /* Reserve 64 struct of pcb. (360*64) Bytes */
+        
         __gpio_ownerships_bank_base__ = .;
         .+=1536; /* Reserve 64 struct of ownership. (24*64) Bytes */
-    }
-    .timer_bank(NOLOAD):{
-        ALIGN(24)
-
+        
+        __global_ipcmailboxes_segments_bank_base__ = .;
+        .+=28672; /* Reserve 512 struct of ipcmailbox segment (512*52) Bytes*/
+        __global_ipcmailbox_headers_bank_base__ = .;
+        .+=3584; /* Reserve 64 struct of ipcmailbox header (16*56) Bytes*/
+    
         __timer_request_bank_base__ = .;
-        .+=1536; /* Reserve 64 struct of timer request. (24*64) Bytes0 */
+        .+=1536; /* Reserve 64 struct of timer request. (24*64) Bytes */
     }
     .pcb_queues(NOLAOD):{
         ALIGN(16) /* header struct size is 16 Bytes */

@@ -3,26 +3,16 @@
 #include "../structure/base.h"
 #include "../structure/ipcmailbox.h"
 
-// universal IPC-MAILBOX
+volatile struct ipcmailbox_t *global_ipcmailbox_bank;                  // limit of 64 headers.
+volatile struct ipcmailbox_segment_t *global_ipcmailbox_segments_bank; // limit of 512 segments.
 
-ipcmailbox_universal_t *alloc_uniipcmailbox();
-void free_uniipcmailbox(ipcmailbox_universal_t *mailbox);
+struct ipcmailbox_t *alloc_ipcmailbox();
+struct ipcmailbox_segment_t *alloc_ipcmailboxsegment();
 
-u64_t largewrite_uniipcmailbox(ipcmailbox_universal_t *mailbox, u64_t content, u64_t id);  // 0 for id if its by kernel.
-u64_t mediumwrite_uniipcmailbox(ipcmailbox_universal_t *mailbox, u32_t content, u64_t id); // 0 for id if its by kernel.
-u64_t smallwrite_uniipcmailbox(ipcmailbox_universal_t *mailbox, u16_t content, u64_t id);  // 0 for id if its by kernel.
-u64_t tinywrite_uniipcmailbox(ipcmailbox_universal_t *mailbox, u8_t content, u64_t id);    // 0 for id if its by kernel.
+void free_ipcmailbox(volatile struct ipcmailbox_t *mailbox);
+void free_ipcmailboxsegment(volatile struct ipcmailbox_segment_t *segment);
 
-// one line IPC-MAILBOX
-
-ipcmailbox_oneline_t *alloc_onelineipcmailbox();
-void free_onelineipcmailbox(ipcmailbox_oneline_t *mailbox);
-
-u64_t largewrite_uniipcmailbox(ipcmailbox_oneline_t *mailbox, u64_t content, u64_t id);  // 0 for id if its by kernel.
-u64_t mediumwrite_uniipcmailbox(ipcmailbox_oneline_t *mailbox, u32_t content, u64_t id); // 0 for id if its by kernel.
-u64_t smallwrite_uniipcmailbox(ipcmailbox_oneline_t *mailbox, u16_t content, u64_t id);  // 0 for id if its by kernel.
-u64_t tinywrite_uniipcmailbox(ipcmailbox_oneline_t *mailbox, u8_t content, u64_t id);    // 0 for id if its by kernel.
-
-// dual line IPC-MAILBOX
+u64_t write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t author_id);
+struct ipcmailbox_message_t read_ipcmailbox(volatile struct ipcmailbox_t *mailbox); // 0 for reading from top.
 
 #endif
