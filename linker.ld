@@ -1,7 +1,7 @@
 ENTRY(minit)
 SECTIONS {
     /* INITIAL CODE TO SETUP CORES */
-    . = 0x8000;
+    . = 0x80000;
     .init:{
         __init_start__=.;
         ALIGN(8)
