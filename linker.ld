@@ -123,7 +123,7 @@ SECTIONS {
         .+=1536; /* Reserve 64 struct of ownership. (24*64) Bytes */
         
         __global_ipcmailboxes_segments_bank_base__ = .;
-        .+=28672; /* Reserve 512 struct of ipcmailbox segment (512*52) Bytes*/
+        .+=32768; /* Reserve 512 struct of ipcmailbox segment (512*64) Bytes*/
         __global_ipcmailbox_headers_bank_base__ = .;
         .+=3584; /* Reserve 64 struct of ipcmailbox header (16*56) Bytes*/
     

@@ -13,4 +13,7 @@
 .org 0x30, b svc_gpset
 .org 0x34, b svc_gpclear
 .org 0x38, b svc_gpvalue
+.org 0x3C, b svc_create_ipcmailbox
+.org 0x40, b svc_write_ipcmailbox
+.org 0x44, b svc_read_ipcmailbox
 .ltorg

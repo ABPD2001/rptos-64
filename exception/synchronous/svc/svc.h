@@ -8,6 +8,8 @@
 #include "../../../lib/preipherals/stimer.h"
 #include "../../structure/gpio.h"
 #include "../../drivers/gpio.h"
+#include "../../structure/ipcmailbox.h"
+#include "../../lib/ipcmailbox.h"
 
 extern volatile tfwlist_header_t *timer_requestes_queues;
 extern volatile timer_request_t *global_timer_requests_bank;
@@ -29,4 +31,8 @@ u64_t svc_gpfree(u64_t task_id, u64_t table, u8_t nth);
 u64_t svc_gpset(u64_t table, u8_t nth);
 u64_t svc_gpclear(u64_t table, u8_t nth);
 u64_t svc_gpvalue(u64_t table, u8_t nth, u8_t value);
+
+u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t *whitelist_tasks_id, u64_t *blacklist_tasks_id, u8_t type, u32_t maximum_length);
+u64_t svc_write_ipcmailbox(struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t done, u64_t receiver_task_id); // set receiver_task_id to 0 for anyone access.
+u64_t svc_read_ipcmailbox(struct ipcmailbox_t *mailbox, u64_t *content_pt1, u64_t *content_pt2, u64_t receiver_task_id);            // set receiver_task_id to 0 for any readable messages.
 #endif

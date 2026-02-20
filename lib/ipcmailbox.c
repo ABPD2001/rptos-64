@@ -6,8 +6,8 @@ struct ipcmailbox_t *alloc_ipcmailbox()
 
     for (u64_t i = 0; i < 63; i++)
     {
-        u64_t status = (nav_mailbox->metadata & 0x18) >> 3;
-        if (!status)
+        u64_t status = (nav_mailbox->metadata & 0x6) >> 2;
+        if (!status && nav_mailbox->access_mutex)
             return nav_mailbox;
         nav_mailbox++; // go to next mailbox.
     }
@@ -21,7 +21,7 @@ struct ipcmailbox_segment_t *alloc_ipcmailboxsegment()
 
     for (u64_t i = 0; i < 511; i++)
     {
-        if (!nav_segment->status)
+        if (!nav_segment->status && nav_segment->access_mutex)
             return nav_segment;
         nav_segment++; // go to next segment.
     }
@@ -31,7 +31,7 @@ struct ipcmailbox_segment_t *alloc_ipcmailboxsegment()
 
 void free_ipcmailbox(volatile struct ipcmailbox_t *mailbox)
 {
-    mailbox->metadata &= ~(0x18);       // clear status flag in metadata.
+    mailbox->metadata &= ~(0x6);        // clear status flag in metadata.
     mailbox->accessibility = NULL;      // clear accessiblity.
     mailbox->blacklist_tasks_id = NULL; // clear blacklist.
     mailbox->whitelist_tasks_id = NULL; // clear whitelist.
@@ -51,42 +51,45 @@ void free_ipcmailboxsegment(volatile struct ipcmailbox_segment_t *segment)
     segment->mailbox_type = 3;              // set mailbox to raw.
 }
 
-u64_t write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t author_id)
+u64_t write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t author_id, u64_t receiver_task_id) // set receiver_task_id to 0 for anyone access.
 {
-    volatile struct ipcmailbox_segment_t *nav_segment = global_ipcmailbox_segments_bank;
+    volatile struct ipcmailbox_segment_t *segment = alloc_ipcmailboxsegment();
+    if (!segment)
+        return 1; // out of segment space.
 
-    for (u64_t i = 0; i < 511; i++)
-    {
-        if (!nav_segment->status) // if it was empty
-        {
-            // lock the mutex.
-            nav_segment->context.content_pt1 = content_pt1; // set first part of data.
-            nav_segment->context.content_pt2 = content_pt2; // set second part of data.
-            nav_segment->context.author_task_id = author_id;
-            nav_segment->mailbox_id = mailbox->id;
-            nav_segment->mailbox_type = mailbox->metadata & 0x7;
+    // lock the mutex.
+    segment->status = 1;                        // set status flag to 'filling'.
+    segment->context.content_pt1 = content_pt1; // set first part of data.
+    segment->context.content_pt2 = content_pt2; // set second part of data.
+    segment->context.author_task_id = author_id;
+    segment->mailbox_id = mailbox->id;
+    segment->context.receiver_task_id = receiver_task_id;
+    segment->mailbox_type = mailbox->metadata & (0x3);
+    segment->mailbox_type = 2; // set status to 'fill'.
 
-            return 0; // done, no problem.
-        }
-    }
-
-    return 1; // out of segment space.
+    return 0; // done, no problem.
 }
 
-struct ipcmailbox_message_t read_ipcmailbox(volatile struct ipcmailbox_t *mailbox)
+struct ipcmailbox_message_t read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t receiver_task_id) // set receiver_task_id to 0 for checking all readable messages.
 {
     volatile struct ipcmailbox_segment_t *nav_segment = global_ipcmailbox_segments_bank + 56 * 511;
     struct ipcmailbox_message_t output_msg;
 
     for (u64_t i = 0; i < 512; i++)
     {
-        if (nav_segment->mailbox_id == mailbox->id)
+        if (nav_segment->mailbox_id == mailbox->id && nav_segment->status == 2 && nav_segment->access_mutex)
         {
+            if (!(receiver_task_id && nav_segment->context.receiver_task_id == receiver_task_id))
+                continue;
             // copy struct pointer into local struct (for security reasons).
+
+            // gain mutex of nav_segment.
+            nav_segment->status = 3; // set status to 'reading'.
             output_msg.content_pt1 = nav_segment->context.content_pt1;
             output_msg.content_pt2 = nav_segment->context.content_pt2;
             output_msg.author_task_id = nav_segment->context.author_task_id;
             output_msg.done = nav_segment->context.done;
+            nav_segment->status = 2; // set status to 'fill'.
 
             return output_msg;
         }

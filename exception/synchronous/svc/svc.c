@@ -292,3 +292,60 @@ u64_t svc_gpvalue(u64_t table, u8_t nth, u8_t value)
     }
     return 2; // no ownership with this id.
 }
+
+u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t *whitelist_tasks_id, u64_t *blacklist_tasks_id, u8_t type, u32_t maximum_length)
+{
+    const u8_t cid = core_id();
+    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct ipcmailbox_t *mailbox = alloc_ipcmailbox();
+
+    if (!mailbox)
+        return 1; // failed to allocate mailbox.
+
+    // gain mutex lock.
+    mailbox->metadata |= 0x4; // set status flag to 'filling'.
+    mailbox->metadata |= (type & 0x3);
+    mailbox->accessibility = accessblity;
+    mailbox->whitelist_tasks_id = whitelist_tasks_id;
+    mailbox->blacklist_tasks_id = blacklist_tasks_id;
+    mailbox->maximum_length = maximum_length;
+    mailbox->task_owner = ctask->id;
+    mailbox->metadata &= ~(0xC); // clear status flag.
+    mailbox->metadata |= 0x8;    // set status flag to 'fill'.
+
+    return 0; // done.
+}
+
+u64_t svc_write_ipcmailbox(struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t done, u64_t receiver_task_id)
+{
+    const u8_t cid = core_id();
+    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+
+    if (mailbox->blacklist_tasks_id && mailbox->whitelist_tasks_id)
+        return 2; // invalid input.
+    if (mailbox->blacklist_tasks_id && (mailbox->blacklist_tasks_id & 1 << ctask->id))
+        return 3; // task included in blacklist.
+    else if (mailbox->whitelist_tasks_id && !(mailbox->whitelist_tasks_id & 1 << ctask->id))
+        return 4; // task does not included in whitelist.
+    else if (!(mailbox->accessibility & 0x1))
+        return 5; // invalid access.
+
+    return write_ipcmailbox(mailbox, content_pt1, content_pt2, ctask->id, receiver_task_id);
+}
+
+u64_t svc_read_ipcmailbox(struct ipcmailbox_t *mailbox, u64_t *content_pt1, u64_t *content_pt2, u64_t receiver_task_id)
+{
+    const u8_t cid = core_id();
+    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+
+    if (mailbox->blacklist_tasks_id && mailbox->whitelist_tasks_id)
+        return 2; // invalid input.
+    if (mailbox->blacklist_tasks_id && (mailbox->blacklist_tasks_id & 1 << ctask->id))
+        return 3; // task included in blacklist.
+    else if (mailbox->whitelist_tasks_id && !(mailbox->whitelist_tasks_id & 1 << ctask->id))
+        return 4; // task does not included in whitelist.
+    else if (!(mailbox->accessibility & 0x2))
+        return 5; // invalid access.
+
+    return read_ipcmailbox(mailbox, receiver_task_id);
+}
