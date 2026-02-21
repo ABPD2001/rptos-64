@@ -5,5 +5,6 @@
 
 u8_t core_id();
 extern void multi_core_enable();
-extern void restore_context(pcb_t *task);
+extern void restore_context(struct pcb_t *task);
+extern void terminate_context(struct pcb_t *task);
 #endif

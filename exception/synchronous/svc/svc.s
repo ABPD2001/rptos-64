@@ -5,21 +5,23 @@
 .org 0x0C, b svc_muart_read_char
 .org 0x10, b svc_muart_settings
 .org 0x14, b svc_muart_availablity
-.org 0x18, b svc_get_task_id
-.org 0x20, b svc_tsleep_ms
-.org 0x24, b svc_termination_request
-.org 0x28, b svc_gpalloc
-.org 0x2C, b svc_gpfree
-.org 0x30, b svc_gpset
-.org 0x34, b svc_gpclear
-.org 0x38, b svc_gpvalue
-.org 0x3C, b svc_create_ipcmailbox
-.org 0x40, b svc_write_ipcmailbox
-.org 0x44, b svc_read_ipcmailbox
+.org 0x18, b svc_muart_free
+.org 0x1C, b svc_muart_alloc
+.org 0x20, b svc_get_task_id
+.org 0x24, b svc_tsleep_ms
+.org 0x28, b svc_termination_request
+.org 0x2C, b svc_gpalloc
+.org 0x30, b svc_gpfree
+.org 0x34, b svc_gpset
+.org 0x38, b svc_gpclear
+.org 0x3C, b svc_gpvalue
+.org 0x40, b svc_create_ipcmailbox
+.org 0x44, b svc_write_ipcmailbox
+.org 0x48, b svc_read_ipcmailbox
 .ltorg
 
 .section .svc_handlers
-.global svc_muart_alloc
+.global svc_muart_alloc,svc_muart_free
 
 svc_muart_alloc_free_ret:
     ldp x29,x30, [sp],#16 @ restore frame pointer and return address.
