@@ -15,7 +15,7 @@
 
 #define MUART_DEFAULT_BAUD 9600
 #define MUART_DEFAULT_DATABITS 1      // 8 bit mode.
-#define MUART_DEFAULT_ENABLATION 0x1F // 8 bit mode.
+#define MUART_DEFAULT_ENABLATION 0x1F // everything is enable (fifo, tx, rx, entire muart unit).
 
 #define GPIO_BASE 0x7e200000
 #define GPIO_FSEL0 (GPIO_BASE + 0x00)
@@ -31,7 +31,7 @@
 
 #define GPIO_INPUT 0b000
 #define GPIO_OUTPUT 0b001
-#define GPIO_UART 0b010
+#define GPIO_MUART 0b010
 
 extern unsigned long __global_timer_ticks__;
 extern unsigned long __global_muart_settings__;

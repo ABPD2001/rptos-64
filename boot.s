@@ -181,6 +181,7 @@ vector_table:
     _exception_entry
 
     @ read GIC-400 for IRQ id.
+    @ if it was timer, continue, else disable timer irq (to make sure everything works properly).
 
     ldr x1,=__irq_table__
     mul x0,#4 @ calculate callback relative address of table.
@@ -237,12 +238,13 @@ vector_table:
 
     bl x19 # call the callback (c handler)
 
-    b EL1_LOWER_RETURN
+    b RETURN_TO_TASK
     
     @ IRQ/vIRQ exception
     .balign 128
     _exception_entry
     @ read GIC-400 for IRQ id.
+    @ if it was timer, continue, else disable timer irq (to make sure everything works properly).
 
     ldr x1,=__irq_table__
     mul x0,#4 @ calculate callback relative address of table.

@@ -21,6 +21,8 @@ u64_t svc_muart_read(u8_t *buffer, u64_t maximum_length);
 u64_t svc_muart_write_char(u8_t ch);
 u64_t svc_muart_read_char(u8_t *ch);
 u8_t svc_muart_availablity();
+extern u64_t svc_muart_alloc();
+extern u64_t svc_muart_free();
 
 u64_t svc_get_task_id();
 u64_t svc_termination_request();

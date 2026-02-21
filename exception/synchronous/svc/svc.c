@@ -68,6 +68,7 @@ u8_t svc_muart_availablity()
 {
     u8_t output = 0;
     volatile u32_t *aux_en = AUX_ENABLES_REG;
+    volatile struct muart_metadata_t *muart_metadata = __global_muart_metadata__;
 
     if (!*aux_en & 1)
         return 0; // mini UART not enabled.
@@ -79,6 +80,8 @@ u8_t svc_muart_availablity()
         output |= 0x1;
     if ((*aux_mu_lsr & 1) && (*aux_mu_lsr & 128))
         output |= 0x2;
+    if (muart_metadata->owner_task)
+        output &= ~(0x4); // if owner task exist, clear free flag.
 
     return output;
 }

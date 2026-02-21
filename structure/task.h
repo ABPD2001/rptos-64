@@ -42,8 +42,8 @@ typedef struct pcb_t // 360 B
     u64_t priority; // 0~7: 0 is least and 7 is most.
     u64_t stack_start;
     u64_t stack_end;
-    u64_t fault_code; // 1: stack alignment fault ,2: pc alignment fault
-    u8_t *sensess;
+    u64_t fault_code;  // 1: stack alignment fault ,2: pc alignment fault
+    u8_t *preipherals; // using this to free all allocated preipherals by this task when this task is terminating.
     u64_t parent;
     u64_t *childs;
     u64_t fault_dump;

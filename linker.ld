@@ -106,7 +106,7 @@ SECTIONS {
         __global_muart_settings__ = .;
         .+=32; /* reserve 32 bytes for global mini uart settings struct. */ 
         __global_muart_metadata__ = .;
-        .+=56; /* reserve 56 bytes for global mini uart metadata struct. */  
+        .+=54; /* reserve 54 bytes for global mini uart metadata struct. */  
         __global_muart_statistics__ = .;
         .+=16; /* reserve 16 bytes for global mini uart statistics. */
     }
