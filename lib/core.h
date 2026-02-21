@@ -4,7 +4,8 @@
 #include "../structure/task.h"
 
 u8_t core_id();
+void terminate_context(struct pcb_t *task);
+
 extern void multi_core_enable();
 extern void restore_context(struct pcb_t *task);
-extern void terminate_context(struct pcb_t *task);
 #endif
