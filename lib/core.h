@@ -3,7 +3,8 @@
 #include "../structure/base.h"
 #include "../structure/task.h"
 #include "../structure/gpio.h"
-#include "../structure/semaphore.h"
+#include "../structure/softwarelock.h"
+#include "../lib/softwarelock.h"
 #include "../structure/muart.h"
 
 extern volatile struct gpio_ownership_t *global_gpio_bank;

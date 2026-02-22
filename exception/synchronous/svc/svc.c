@@ -305,7 +305,8 @@ u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t *whitelist_tasks_id, u64_t 
     if (!mailbox)
         return 1; // failed to allocate mailbox.
 
-    // gain mutex lock.
+    // -- wait for mutex to open befroe gain! --
+    gain_mutex(mailbox->access_mutex);
     mailbox->metadata |= 0x4; // set status flag to 'filling'.
     mailbox->metadata |= (type & 0x3);
     mailbox->accessibility = accessblity;
@@ -313,8 +314,9 @@ u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t *whitelist_tasks_id, u64_t 
     mailbox->blacklist_tasks_id = blacklist_tasks_id;
     mailbox->maximum_length = maximum_length;
     mailbox->task_owner = ctask->id;
-    mailbox->metadata &= ~(0xC); // clear status flag.
-    mailbox->metadata |= 0x8;    // set status flag to 'fill'.
+    mailbox->metadata &= ~(0xC);          // clear status flag.
+    mailbox->metadata |= 0x8;             // set status flag to 'fill'.
+    release_mutex(mailbox->access_mutex); // release mutex.
 
     return 0; // done.
 }

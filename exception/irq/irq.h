@@ -2,6 +2,6 @@
 #define IRQ_H
 #include "../../structure/muart.h"
 
-void uart_receiver_overrun();
-void uart_tx_empty();
+void muart_receiver_overrun();
+void muart_tx_empty();
 #endif

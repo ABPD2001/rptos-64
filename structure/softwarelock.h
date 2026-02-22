@@ -15,17 +15,4 @@ typedef struct slcb_t
     u32_t reserved; // padding (4 Bytes).
 }; // software lock control block;
 
-// -- mutex --
-
-void gain_mutex(mutex_t *mlock);
-void release_mutex(mutex_t *mlock);
-void spinwait_mutex(mutex_t *mlock);
-u8_t availablity_mutex(mutex_t *mlock);
-
-// -- semaphore --
-
-void gain_semaphore(semaphore_t *sem);
-void release_semaphore(semaphore_t *sem);
-void spinwait_semaphore(semaphore_t *sem);
-
 #endif

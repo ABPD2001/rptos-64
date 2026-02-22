@@ -2,7 +2,7 @@
 
 __attribute__((section(".irq_handlers")));
 
-void uart_receiver_overrun()
+void muart_receiver_overrun()
 {
     volatile muart_statistics_t *statistics = __global_muart_statistics__;
     statistics->receiver_overruns++; // increment receiver overrun in statistics.
@@ -11,7 +11,7 @@ void uart_receiver_overrun()
     *aux_mu_io; // discard a byte.
 }
 
-void uart_tx_empty()
+void muart_tx_empty()
 {
     volatile struct muart_metadata_t *muart_metadata = __global_muart_metadata__;
     volatile struct muart_statistics_t *muart_statistics = __global_muart_statistics__;

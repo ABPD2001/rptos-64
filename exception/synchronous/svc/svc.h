@@ -10,6 +10,7 @@
 #include "../../drivers/gpio.h"
 #include "../../structure/ipcmailbox.h"
 #include "../../lib/ipcmailbox.h"
+#include "../../lib/softwarelock.h"
 
 extern volatile tfwlist_header_t *timer_requestes_queues;
 extern volatile timer_request_t *global_timer_requests_bank;
