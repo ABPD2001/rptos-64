@@ -1,5 +1,5 @@
-#ifndef TYPES_SEMAPHORE_H
-#define TYPES_SEMAPHORE_H
+#ifndef TYPES_SOFTWARELOCK_H
+#define TYPES_SOFTWARELOCK_H
 #include "./base.h"
 
 typedef u64_t semaphore_t;
