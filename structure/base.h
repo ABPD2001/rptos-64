@@ -45,6 +45,7 @@ extern unsigned long __user_region_start__;
 extern unsigned long __gpio_ownerships_bank_base__;
 extern unsigned long __global_ipcmailboxes_segments_bank_base__;
 extern unsigned long __global_ipcmailbox_headers_bank_base__;
+extern unsigned long __global_software_locks_bank_base__;
 
 typedef unsigned long u64_t;
 typedef signed long s64_t;

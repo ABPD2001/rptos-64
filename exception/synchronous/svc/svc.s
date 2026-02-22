@@ -29,8 +29,53 @@ svc_muart_alloc_free_ret:
     mov x0,#1 @ set x0 to 1, which means is allocated already by other tasks.
     ret @ return.
 
+svc_muart_alloc_free_ctxswitch_void_loop:
+    b svc_muart_alloc_free_ctxswitch_void_loop
+
 svc_muart_alloc_free_ctxswitch:
-    @ nothing , just do a context switch to other task, and when the task which is trying to allocate muart gets scheduled again, it will try to allocate muart again and check if it was allocated by other tasks or not.
+    ldr x3,=__core_info_table__
+    
+    mrs x4,MPIDR_EL1 @ read core id.
+    and x4,x4,#0xFF @ mask core id.
+
+    mov x5,#0 @ clear register (just in case).
+    add x5,x5,#32 @ skip stack table
+    mul x5,x4,#8 @ calculate relative address of task table.
+
+    add x3,x3,x5 @ point into table.
+    ldr x3,[x3] @ point to pcb (by pointing to it self).
+    
+    mov x4,#4 @ evaluate register.
+    str x4,[x3,#256] @ set status of pcb to 'waiting'.
+
+    ldr x4,[x3,#264] @ read pcb priority.
+    add x4,x4,#2 @ increment by 2 (because, at start of schaduler, its gonna be decremented by one.)    
+    
+    cmp x4,#7 @ compare priority with maximum value.
+    mov x5,#7
+    csel x4,x4,x5,LE @ set x4 to (x4 if it wasnt greater than 7, else set to x5 which is 7/maximum value).
+
+    str x4,[#264] @ store pcb priority.
+    mov x4,x0 @ store x0 register value.
+    mov x5,x29 @ store link register.
+    mov x0,#1 @ set argument to 1ms.
+
+    bl set_gtimer @ call the set_gtimer.
+    
+    mov x0,x4 @ restore x0 register value.
+    mov x29,x5 @ restore link register.
+    
+    ret @ return.
+
+svc_muart_alloc_free_gainmutex:
+    cas x1,x2,[x0,#72] @ gain mutex if it was 0 and set it to 1. (Compare-And-Swap)
+
+    cmp x1,#0 @ check if mutex is gain.
+    b.ne svc_muart_alloc_ctxswitch @ if it was not 0, which means some other task is trying to allocate muart, do a context switch (voluntarily, which means, priority increment).
+    cmp x1,#0 @ check if mutex is gain (just in case).
+    b.ne svc_muart_alloc_free_gainmutex
+    
+    ret @ return.
 
 svc_muart_alloc:
     stp x29,x30, [sp,#-16] @ save frame pointer and return address.
@@ -44,10 +89,8 @@ svc_muart_alloc:
 
     mov x1,#0 @ set to 0 for gaining mutex.
     mov x2,#1 @ set to 1 for gaining mutex.
-    cas x1,x2,[x0,#72] @ gain mutex if it was 0 and set it to 1. (Compare-And-Swap)
-
-    cmp x1,#0 @ check if mutex is gain.
-    b.ne svc_muart_alloc_ctxswitch @ if it was not 0, which means some other task is trying to allocate muart, do a context switch (voluntarily, which means, priority increment).
+    
+    bl svc_muart_alloc_free_gainmutex @ start gaining mutex loop.
 
     ldr x1,=__core_info_table__
 
@@ -92,10 +135,8 @@ svc_muart_free:
 
     mov x1,#0 @ set to 0 for gaining mutex.
     mov x2,#1 @ set to 1 for gaining mutex.
-    cas x1,x2,[x0,#72] @ gain mutex.
-
-    cmp x1,#0 @ check if mutex is gain.
-    b.ne svc_muart_alloc_free_ctxswitch @ @ if it was not 0, which means some other task is trying to allocate muart, do a context switch (voluntarily, which means, priority increment).
+    
+    bl svc_muart_alloc_free_gainmutex @ start gaining mutex loop.
 
     mov x1,#0 @ clear x0, (for loop).
     bl svc_muart_free_loop @ do a loop for clearing metadata.

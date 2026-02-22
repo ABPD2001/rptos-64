@@ -117,21 +117,24 @@ SECTIONS {
         ALIGN(8) /* Alignment of 8 bytes for better and compatibility performance. */
         
         __pcb_bank_base__ = .;
-        .+=23040; /* Reserve 64 struct of pcb. (360*64) Bytes */
+        .+=23552; /* Reserve 64 struct of pcb. (368*64) Bytes. */
         
         __gpio_ownerships_bank_base__ = .;
-        .+=1536; /* Reserve 64 struct of ownership. (24*64) Bytes */
+        .+=1536; /* Reserve 64 struct of ownership. (24*64) Bytes. */
         
         __global_ipcmailboxes_segments_bank_base__ = .;
-        .+=32768; /* Reserve 512 struct of ipcmailbox segment (512*64) Bytes*/
+        .+=32768; /* Reserve 512 struct of ipcmailbox segment (512*64) Bytes. */
         __global_ipcmailbox_headers_bank_base__ = .;
-        .+=3584; /* Reserve 64 struct of ipcmailbox header (16*56) Bytes*/
-    
+        .+=3584; /* Reserve 64 struct of ipcmailbox header (16*56) Bytes. */
+
+        __global_software_locks_bank_base__ = .;
+        .+=4096; /* Reserve 128 struct of software locks. (128*32) Bytes. */
+
         __timer_request_bank_base__ = .;
-        .+=1536; /* Reserve 64 struct of timer request. (24*64) Bytes */
+        .+=1536; /* Reserve 64 struct of timer request. (24*64) Bytes. */
     }
     .pcb_queues(NOLAOD):{
-        ALIGN(16) /* header struct size is 16 Bytes */
+        ALIGN(16) /* header struct size is 16 Bytes. */
 
         __pcb_queue_base__ = .;
         .+=712; /* Reserve 3 queues header of 4 states (and 8 ready queues). (8*4*16 + 3*16*4) + priority map for each core (8-bits each) + ticks for each core (8-bits each) */

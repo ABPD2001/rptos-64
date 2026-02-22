@@ -8,33 +8,34 @@
 #include "../structure/gpio.h"
 #include "../structure/ipcmailbox.h"
 
-volatile pcb_t *global_pcb_bank = NULL;             // limit of 64 tasks.
-volatile gpio_ownership_t *global_gpio_bank = NULL; // limit of 64 ownerships.
-volatile timer_request_t *global_timer_requests_bank = NULL;
+volatile struct pcb_t *global_pcb_bank = NULL;             // limit of 64 tasks.
+volatile struct gpio_ownership_t *global_gpio_bank = NULL; // limit of 64 ownerships.
+volatile struct timer_request_t *global_timer_requests_bank = NULL;
+volatile struct slcb_t *global_software_locks_bank = NULL; // limit of 128 software locks.
 
-volatile ipcmailbox_t *global_ipcmailbox_bank = NULL;                  // limit of 64 headers.
-volatile ipcmailbox_segment_t *global_ipcmailbox_segments_bank = NULL; // limit of 512 segments.
+volatile struct ipcmailbox_t *global_ipcmailbox_bank = NULL;                  // limit of 64 headers.
+volatile struct ipcmailbox_segment_t *global_ipcmailbox_segments_bank = NULL; // limit of 512 segments.
 
 volatile u64_t *global_system_ticks = NULL;
-volatile muart_settings_t *global_mini_uart_settings = NULL;
-volatile muart_metadata_t *global_mini_uart_metadata = NULL;
+volatile struct muart_settings_t *global_mini_uart_settings = NULL;
+volatile struct muart_metadata_t *global_mini_uart_metadata = NULL;
 
-volatile muart_metadata_t *muart_metadata = NULL;
+volatile struct muart_metadata_t *muart_metadata = NULL;
 
-volatile fwlist_header_t *created_queues = NULL;
-volatile fwlist_header_t *pri0_ready_queues = NULL;
-volatile fwlist_header_t *pri1_ready_queues = NULL;
-volatile fwlist_header_t *pri2_ready_queues = NULL;
-volatile fwlist_header_t *pri3_ready_queues = NULL;
-volatile fwlist_header_t *pri4_ready_queues = NULL;
-volatile fwlist_header_t *pri5_ready_queues = NULL;
-volatile fwlist_header_t *pri6_ready_queues = NULL;
-volatile fwlist_header_t *pri7_ready_queues = NULL;
-volatile fwlist_header_t *waiting_queues = NULL;
-volatile fwlist_header_t *terminated_queues = NULL;
-volatile fwlist_header_t *sleeping_queues = NULL;
+volatile struct fwlist_header_t *created_queues = NULL;
+volatile struct fwlist_header_t *pri0_ready_queues = NULL;
+volatile struct fwlist_header_t *pri1_ready_queues = NULL;
+volatile struct fwlist_header_t *pri2_ready_queues = NULL;
+volatile struct fwlist_header_t *pri3_ready_queues = NULL;
+volatile struct fwlist_header_t *pri4_ready_queues = NULL;
+volatile struct fwlist_header_t *pri5_ready_queues = NULL;
+volatile struct fwlist_header_t *pri6_ready_queues = NULL;
+volatile struct fwlist_header_t *pri7_ready_queues = NULL;
+volatile struct fwlist_header_t *waiting_queues = NULL;
+volatile struct fwlist_header_t *terminated_queues = NULL;
+volatile struct fwlist_header_t *sleeping_queues = NULL;
 
-volatile tfwlist_header_t *timer_requestes_queues = NULL;
+volatile struct tfwlist_header_t *timer_requestes_queues = NULL;
 
 volatile u64_t **core_tasks = NULL;
 
@@ -42,7 +43,7 @@ volatile u32_t *pri_map = NULL;
 volatile u32_t *sch_ticks = NULL;
 
 void task_dispatcher();
-void task_schaduler(pcb_t *current_running_task);
+void task_schaduler(struct pcb_t *current_running_task);
 void wakeup_service();
 
 void kernel()
@@ -53,7 +54,8 @@ void kernel()
     global_timer_requests_bank = __timer_request_bank_base__; // reminder: it has limit of 64 requests.
     global_mini_uart_settings = __global_muart_settings__;
     global_mini_uart_metadata = __global_muart_metadata__;
-    global_gpio_bank = __gpio_ownerships_bank_base__; // reminder: it has limit of 64 ownerships.
+    global_gpio_bank = __gpio_ownerships_bank_base__;                 // reminder: it has limit of 64 ownerships.
+    global_software_locks_bank = __global_software_locks_bank_base__; // reminder: it has limit of 128 software locks.
     global_ipcmailbox_bank = __global_ipcmailbox_headers_bank_base__;
     global_ipcmailbox_segments_bank = __global_ipcmailboxes_segments_bank_base__;
     core_tasks = __core_info_table__ + (4 * 4);
@@ -96,28 +98,28 @@ void kernel()
     }
 }
 
-void task_schaduler(pcb_t *current_running_task)
+void task_schaduler(struct pcb_t *current_running_task)
 {
     const u8_t cid = core_id(); // read the core id (for calculation of queues).
 
     // calculating queues for each state.
-    volatile fwlist_header_t *created_queue = &created_queues[cid];
+    volatile struct fwlist_header_t *created_queue = &created_queues[cid];
 
     // multi-level queue
-    volatile fwlist_header_t *pri0_ready_queue = &pri0_ready_queue[cid];
-    volatile fwlist_header_t *pri1_ready_queue = &pri1_ready_queues[cid];
-    volatile fwlist_header_t *pri2_ready_queue = &pri2_ready_queue[cid];
-    volatile fwlist_header_t *pri3_ready_queue = &pri3_ready_queues[cid];
-    volatile fwlist_header_t *pri4_ready_queue = &pri4_ready_queues[cid];
-    volatile fwlist_header_t *pri5_ready_queue = &pri5_ready_queues[cid];
-    volatile fwlist_header_t *pri6_ready_queue = &pri6_ready_queues[cid];
-    volatile fwlist_header_t *pri7_ready_queue = &pri7_ready_queues[cid];
+    volatile struct fwlist_header_t *pri0_ready_queue = &pri0_ready_queue[cid];
+    volatile struct fwlist_header_t *pri1_ready_queue = &pri1_ready_queues[cid];
+    volatile struct fwlist_header_t *pri2_ready_queue = &pri2_ready_queue[cid];
+    volatile struct fwlist_header_t *pri3_ready_queue = &pri3_ready_queues[cid];
+    volatile struct fwlist_header_t *pri4_ready_queue = &pri4_ready_queues[cid];
+    volatile struct fwlist_header_t *pri5_ready_queue = &pri5_ready_queues[cid];
+    volatile struct fwlist_header_t *pri6_ready_queue = &pri6_ready_queues[cid];
+    volatile struct fwlist_header_t *pri7_ready_queue = &pri7_ready_queues[cid];
 
-    volatile fwlist_header_t *ready_multi_queues[8] = {pri0_ready_queue, pri1_ready_queue, pri2_ready_queue, pri3_ready_queue, pri4_ready_queue, pri5_ready_queue, pri6_ready_queue, pri7_ready_queue};
+    volatile struct fwlist_header_t *ready_multi_queues[8] = {pri0_ready_queue, pri1_ready_queue, pri2_ready_queue, pri3_ready_queue, pri4_ready_queue, pri5_ready_queue, pri6_ready_queue, pri7_ready_queue};
 
-    volatile fwlist_header_t *waiting_queue = &waiting_queues[cid];
-    volatile fwlist_header_t *terminated_queue = &terminated_queues[cid];
-    volatile fwlist_header_t *sleep_queue = &sleeping_queues[cid];
+    volatile struct fwlist_header_t *waiting_queue = &waiting_queues[cid];
+    volatile struct fwlist_header_t *terminated_queue = &terminated_queues[cid];
+    volatile struct fwlist_header_t *sleep_queue = &sleeping_queues[cid];
 
     // processing current task.
     current_running_task->status = 1;                                                     // change status to ready.
@@ -147,7 +149,7 @@ void task_schaduler(pcb_t *current_running_task)
         *pri_map = built_in_max(0, *pri_map - 1);
     }
 
-    pcb_t *temp_task = created_queue->head;
+    volatile struct pcb_t *temp_task = created_queue->head;
     if (temp_task != NULL)
         for (u64_t i = 0; i < 64; i++)
         {
@@ -205,19 +207,19 @@ void task_dispatcher()
 {
     const u8_t cid = core_id(); // get core id.
 
-    volatile fwlist_header_t *pri0_ready_queue = &pri0_ready_queue[cid];
-    volatile fwlist_header_t *pri1_ready_queue = &pri1_ready_queues[cid];
-    volatile fwlist_header_t *pri2_ready_queue = &pri2_ready_queue[cid];
-    volatile fwlist_header_t *pri3_ready_queue = &pri3_ready_queues[cid];
-    volatile fwlist_header_t *pri4_ready_queue = &pri4_ready_queues[cid];
-    volatile fwlist_header_t *pri5_ready_queue = &pri5_ready_queues[cid];
-    volatile fwlist_header_t *pri6_ready_queue = &pri6_ready_queues[cid];
-    volatile fwlist_header_t *pri7_ready_queue = &pri7_ready_queues[cid];
+    volatile struct fwlist_header_t *pri0_ready_queue = &pri0_ready_queue[cid];
+    volatile struct fwlist_header_t *pri1_ready_queue = &pri1_ready_queues[cid];
+    volatile struct fwlist_header_t *pri2_ready_queue = &pri2_ready_queue[cid];
+    volatile struct fwlist_header_t *pri3_ready_queue = &pri3_ready_queues[cid];
+    volatile struct fwlist_header_t *pri4_ready_queue = &pri4_ready_queues[cid];
+    volatile struct fwlist_header_t *pri5_ready_queue = &pri5_ready_queues[cid];
+    volatile struct fwlist_header_t *pri6_ready_queue = &pri6_ready_queues[cid];
+    volatile struct fwlist_header_t *pri7_ready_queue = &pri7_ready_queues[cid];
 
-    volatile fwlist_header_t *ready_multi_queues[8] = {pri0_ready_queue, pri1_ready_queue, pri2_ready_queue, pri3_ready_queue, pri4_ready_queue, pri5_ready_queue, pri6_ready_queue, pri7_ready_queue};
+    volatile struct fwlist_header_t *ready_multi_queues[8] = {pri0_ready_queue, pri1_ready_queue, pri2_ready_queue, pri3_ready_queue, pri4_ready_queue, pri5_ready_queue, pri6_ready_queue, pri7_ready_queue};
 
     u64_t local_pri_map = (*pri_map & (0xFF << cid * 8 - 1)) >> cid * 8 - 1;
-    pcb_t *target_task = ready_multi_queues[local_pri_map]->head;
+    volatile struct pcb_t *target_task = ready_multi_queues[local_pri_map]->head;
 
     fw_rm(ready_multi_queues[local_pri_map], 0);                  // remove first task of queue (because, task after a running cycle, must sits at end of queue).
     target_task->status = 2;                                      // set task status to running.
@@ -231,27 +233,27 @@ void wakeup_service()
 {
     const u8_t cid = core_id(); // get core id.
 
-    volatile tfwlist_header_t *timer_request_queue = &timer_requestes_queues[cid];
+    volatile struct tfwlist_header_t *timer_request_queue = &timer_requestes_queues[cid];
 
-    volatile fwlist_header_t *sleeping_queue = &sleeping_queues[cid];
-    volatile fwlist_header_t *pri0_ready_queue = &pri0_ready_queue[cid];
-    volatile fwlist_header_t *pri1_ready_queue = &pri1_ready_queues[cid];
-    volatile fwlist_header_t *pri2_ready_queue = &pri2_ready_queue[cid];
-    volatile fwlist_header_t *pri3_ready_queue = &pri3_ready_queues[cid];
-    volatile fwlist_header_t *pri4_ready_queue = &pri4_ready_queues[cid];
-    volatile fwlist_header_t *pri5_ready_queue = &pri5_ready_queues[cid];
-    volatile fwlist_header_t *pri6_ready_queue = &pri6_ready_queues[cid];
-    volatile fwlist_header_t *pri7_ready_queue = &pri7_ready_queues[cid];
+    volatile struct fwlist_header_t *sleeping_queue = &sleeping_queues[cid];
+    volatile struct fwlist_header_t *pri0_ready_queue = &pri0_ready_queue[cid];
+    volatile struct fwlist_header_t *pri1_ready_queue = &pri1_ready_queues[cid];
+    volatile struct fwlist_header_t *pri2_ready_queue = &pri2_ready_queue[cid];
+    volatile struct fwlist_header_t *pri3_ready_queue = &pri3_ready_queues[cid];
+    volatile struct fwlist_header_t *pri4_ready_queue = &pri4_ready_queues[cid];
+    volatile struct fwlist_header_t *pri5_ready_queue = &pri5_ready_queues[cid];
+    volatile struct fwlist_header_t *pri6_ready_queue = &pri6_ready_queues[cid];
+    volatile struct fwlist_header_t *pri7_ready_queue = &pri7_ready_queues[cid];
 
-    volatile fwlist_header_t *ready_multi_queues[8] = {pri0_ready_queue, pri1_ready_queue, pri2_ready_queue, pri3_ready_queue, pri4_ready_queue, pri5_ready_queue, pri6_ready_queue, pri7_ready_queue};
+    volatile struct fwlist_header_t *ready_multi_queues[8] = {pri0_ready_queue, pri1_ready_queue, pri2_ready_queue, pri3_ready_queue, pri4_ready_queue, pri5_ready_queue, pri6_ready_queue, pri7_ready_queue};
 
-    pcb_t *temp_task = sleeping_queue->head;
+    volatile struct pcb_t *temp_task = sleeping_queue->head;
 
     if (temp_task != NULL)
         for (u64_t i = 0; i < 64; i++)
         {
-            timer_request_t *req = tfw_find(timer_request_queue, temp_task->id);
-            pcb_t *next_task = temp_task->next; // store next pcb address.
+            volatile struct timer_request_t *req = tfw_find(timer_request_queue, temp_task->id);
+            volatile struct pcb_t *next_task = temp_task->next; // store next pcb address.
 
             if (req > 1) // if was correct and valid.
             {
