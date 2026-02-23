@@ -104,7 +104,7 @@ SECTIONS {
         __global_timer_ticks__=.;
         .+=8; /* reserve dword for global timer ticks. */
         __global_muart_settings__ = .;
-        .+=32; /* reserve 32 bytes for global mini uart settings struct. */ 
+        .+=8; /* reserve 8 bytes for global mini uart settings struct. */ 
         __global_muart_metadata__ = .;
         .+=54; /* reserve 54 bytes for global mini uart metadata struct. */  
         __global_muart_statistics__ = .;

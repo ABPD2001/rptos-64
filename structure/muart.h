@@ -4,11 +4,12 @@
 #include "./semaphore.h"
 
 typedef struct
-    muart_settings_t // 32 bytes.
+    muart_settings_t // 8 bytes.
 {
     u16_t baudrate;
     u8_t data_bits;
     u8_t enablation; // bits --> 0: enable whole uart, 1: tx enable, 2: rx enable, 3: tx irq enable, 4: rx irq enable, 5-7: padding.
+    u32_t reserved;  // padding.
 };
 
 typedef struct muart_metadata_t // 54 bytes.
