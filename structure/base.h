@@ -1,9 +1,9 @@
 #ifndef TYPE_BASE_H
 #define TYPE_BASE_H
 
-#define NULL ((void *)0)  // Define NULL if not already defined
-#define true ((void *)1)  // Define true if not already defined
-#define false ((void *)0) // Define false if not already defined
+#define NULL ((void *)0) // Define NULL if not already defined
+#define true ((void *)1) // Define true if not already defined
+#define false 0          // Define false if not already defined
 
 #define AUX_BASE 0x7e215000
 #define AUX_ENABLES_REG (AUX_BASE + 0x04)
@@ -29,9 +29,12 @@
 #define GPIO_OUT_CLR0 (GPIO_BASE + 0x24)
 #define GPIO_OUT_CLR1 (GPIO_BASE + 0x28)
 
-#define GPIO_INPUT 0b000
-#define GPIO_OUTPUT 0b001
-#define GPIO_MUART 0b010
+#define GPIO_INPUT 0b000  // input
+#define GPIO_OUTPUT 0b001 // output
+#define GPIO_MUART 0b010  // mini uart (alt 5)
+#define GPIO_ALT2 0b110   // uart 0
+#define GPIO_ALT3 0b111   // uart 0
+#define GPIO_ALT4 0b011   // uart 2,3,4
 
 #define UART0_BASE 0x7e201000
 #define UART2_BASE 0x7e201400
@@ -57,18 +60,40 @@
 #define UART_TDR 0x8C
 
 extern unsigned long __global_timer_ticks__;
-extern unsigned long __global_muart_settings__;
-extern unsigned long __global_muart_metadata__;
-extern unsigned long __global_muart_statistics__;
 extern unsigned long __pcb_bank_base__;
 extern unsigned long __pcb_queue_base__;
 extern unsigned long __core_info_table__;
 extern unsigned long __timer_request_bank_base__;
 extern unsigned long __user_region_start__;
 extern unsigned long __gpio_ownerships_bank_base__;
+extern unsigned long __global_software_locks_bank_base__;
+
 extern unsigned long __global_ipcmailboxes_segments_bank_base__;
 extern unsigned long __global_ipcmailbox_headers_bank_base__;
-extern unsigned long __global_software_locks_bank_base__;
+
+extern unsigned long __global_muart_settings__;
+extern unsigned long __global_muart_metadata__;
+extern unsigned long __global_muart_statistics__;
+
+extern unsigned long __global_uart0_statistics__;
+extern unsigned long __global_uart0_settings__;
+extern unsigned long __global_uart0_metadata__;
+
+extern unsigned long __global_uart2_statistics__;
+extern unsigned long __global_uart2_settings__;
+extern unsigned long __global_uart2_metadata__;
+
+extern unsigned long __global_uart3_statistics__;
+extern unsigned long __global_uart3_settings__;
+extern unsigned long __global_uart3_metadata__;
+
+extern unsigned long __global_uart4_statistics__;
+extern unsigned long __global_uart4_settings__;
+extern unsigned long __global_uart4_metadata__;
+
+extern unsigned long __global_uart5_statistics__;
+extern unsigned long __global_uart5_settings__;
+extern unsigned long __global_uart5_metadata__;
 
 typedef unsigned long u64_t;
 typedef signed long s64_t;
