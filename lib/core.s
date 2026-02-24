@@ -1,7 +1,7 @@
 .section .text
 .balign 4
 
-.global multi_core_enable,restore_context
+.global multi_core_enable,restore_context,enable_irq,enable_fiq,disable_irq,disable_fiq,enable_daif,disable_daif
 
 multi_core_enable:
     stp x29,x30,[sp,#-16]!
@@ -45,3 +45,72 @@ restore_context:
     ldp x0,x1,[x0,#-16]! @ all context is restored.
 
     eret @ return to task.
+
+disable_daif:
+    stp x29,x30,[sp,#-16]!
+    mov x29,sp
+
+    mrs xzr,DAIF_EL1
+
+    ldp x29,x30,[sp],#16
+    mov sp,x29
+    ret
+
+enable_daif:
+    stp x29,x30,[sp,#-16]!
+    mov x29,sp
+
+    mov x0,#0xF
+    msr DAIF_EL1,x0
+
+    ldp x29,x30,[sp],#16
+    mov sp,x29
+    ret
+
+enable_irq:
+    stp x29,x30,[sp,#-16]!
+    mov x29,sp
+
+    mrs x0,DAIF_EL1
+    orr x0,x0,#0x4
+    msr DAIF_EL1,x0
+
+    ldp x29,x30,[sp],#16
+    mov sp,x29
+    ret
+
+disable_irq:
+    stp x29,x30,[sp,#-16]!
+    mov x29,sp
+
+    mrs x0,DAIF_EL1
+    and x0,x0,#0xC
+    msr DAIF_EL1,x0
+
+    ldp x29,x30,[sp],#16
+    mov sp,x29
+    ret
+
+enable_fiq:
+    stp x29,x30,[sp,#-16]!
+    mov x29,sp
+
+    mrs x0,DAIF_EL1
+    orr x0,x0,#0x8
+    msr DAIF_EL1,x0
+
+    ldp x29,x30,[sp],#16
+    mov sp,x29
+    ret
+
+enable_fiq:
+    stp x29,x30,[sp,#-16]!
+    mov x29,sp
+
+    mrs x0,DAIF_EL1
+    and x0,x0,#0x7
+    msr DAIF_EL1,x0
+
+    ldp x29,x30,[sp],#16
+    mov sp,x29
+    ret

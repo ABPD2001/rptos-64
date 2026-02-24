@@ -4,6 +4,8 @@
 #define NULL ((void *)0) // Define NULL if not already defined
 #define true ((void *)1) // Define true if not already defined
 #define false 0          // Define false if not already defined
+#define U64FILL ((u64_t) ~(0))
+#define U32FILL ((u32_t) ~(0))
 
 #define AUX_BASE 0x7e215000
 #define AUX_ENABLES_REG (AUX_BASE + 0x04)
@@ -59,6 +61,44 @@
 #define UART_ITOP 0x88
 #define UART_TDR 0x8C
 
+#define GICC_BASE 0xFF841000 // GIC CPU Interface
+
+#define GICC_CTLR 0x0000
+#define GICC_PMR 0x0004
+#define GICC_BPR 0x0008
+#define GICC_IAR 0x000C
+#define GICC_EOIR 0x0010
+#define GICC_RPR 0x0014
+#define GICC_HPPIR 0x0018
+#define GICC_ABPR 0x001C
+#define GICC_AIAR 0x0020
+#define GICC_AEOIR 0x0024
+#define GICC_AHPPIR 0x0028
+#define GICC_APR_BASE 0x00D0
+#define GICC_NSAPR_BASE 0x00E0
+#define GICC_IIDR 0x00FC
+#define GICC_DIR 0x1000
+
+#define GICD_BASE 0xFF841000 // GIC Distributor
+
+#define GICD_CTLR 0x000
+#define GICD_TYPER 0x004
+#define GICD_IIDR 0x008
+#define GICD_IGROUPR_BASE 0x080
+#define GICD_ISENABLER_BASE 0x100
+#define GICD_ICENABLER_BASE 0x180
+#define GICD_ISPENDR_BASE 0x200
+#define GICD_ICPENDR_BASE 0x280
+#define GICD_ISACTIVER_BASE 0x300
+#define GICD_ICACTIVER_BASE 0x380
+#define GICD_IPRIORITYR_BASE 0x400
+#define GICD_ITARGETSR_BASE 0x800
+#define GICD_ICFGR_BASE 0xC00
+#define GICD_NSACR_BASE 0xE00
+#define GICD_SGIR 0xF00
+#define GICD_CPENDSGIR_BASE 0xF10
+#define GICD_SPENDSGIR_BASE 0xF20
+
 extern unsigned long __global_timer_ticks__;
 extern unsigned long __pcb_bank_base__;
 extern unsigned long __pcb_queue_base__;
@@ -94,6 +134,8 @@ extern unsigned long __global_uart4_metadata__;
 extern unsigned long __global_uart5_statistics__;
 extern unsigned long __global_uart5_settings__;
 extern unsigned long __global_uart5_metadata__;
+
+extern unsigned long __global_gic400_metadata__;
 
 typedef unsigned long u64_t;
 typedef signed long s64_t;

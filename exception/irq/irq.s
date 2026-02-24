@@ -1,8 +1,10 @@
-.section irq_table:
+.section irq_table
+.balign 4
 .org 0x0, b test
 .ltorg
 
 .section .irq_handlers
+.balign 4
 .equiv AUX_BASE,#0x7e215000
 .equiv AUX_LSR_REG,#0x54
 .equiv AUX_MU_IO,#0x40
@@ -66,3 +68,5 @@ system_timer: @ handler by core 0 only.
     @ send each a broadcast to all cores. (sgi).
     b wakeup_service
     ret @ done.
+
+.ltorg

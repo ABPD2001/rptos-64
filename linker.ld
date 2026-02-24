@@ -144,6 +144,8 @@ SECTIONS {
         __global_uart5_settings__ = .;
         .+=48; /* reserve 48 bytes for uart5 settings. */
 
+        __global_gic400_metadata__ = .;
+        .+=16; /* reserve 16 bytes for gic-400 metadata. */
     }
     /* BANKS AND QUEUES */
 

@@ -1,8 +1,8 @@
 .section .init
-.equiv EL1_CORE_STACK_TABLE,
 .global core_spinlock,cinit
 
 minit:
+    msr DAIF_EL2,xzr @ disable irq, fiq, serror and debug
     mrs x0,HCR_EL2
 
     ldr x1,=(1<<31) @ Enable 64-bit EL1.
@@ -92,9 +92,6 @@ core_spinlock:
 .ltorg
 
 .section .vectors
-.equiv EL1_CUR_HANDLER_TABLE,
-.equiv EL1_CUR_IRQ_HANDLER_TABLE,
-.equiv EL1_CUR_FIQ_HANDLER_TABLE,
 
 .macro _exception_entry
     @ its recommneded to apply simd registers later...
@@ -245,7 +242,8 @@ vector_table:
     _exception_entry
     @ read GIC-400 for IRQ id.
     @ if it was timer, continue, else disable timer irq (to make sure everything works properly).
-
+    
+    
     ldr x1,=__irq_table__
     mul x0,#4 @ calculate callback relative address of table.
     add x1,x1,x0

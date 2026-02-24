@@ -1,4 +1,5 @@
 .section .text
+.balign 4
 
 .global set_stimer, read_stimer_us
 .equiv SYSTEM_TIMER_BASE,#0x7E003000
@@ -25,3 +26,5 @@ read_stimer_us:
 
     ldp x29,x30,[sp],#16
     ret @ return
+
+.ltorg

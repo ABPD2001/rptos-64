@@ -17,4 +17,11 @@ void terminate_context(struct pcb_t *task);
 
 extern void multi_core_enable();
 extern void restore_context(struct pcb_t *task);
+
+extern void enable_irq();
+extern void disable_irq();
+extern void enable_fiq();
+extern void disable_fiq();
+extern void enable_daif();
+extern void disable_daif();
 #endif

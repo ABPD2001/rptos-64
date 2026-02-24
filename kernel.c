@@ -7,6 +7,7 @@
 #include "../drivers/muart.h"
 #include "../structure/gpio.h"
 #include "../structure/ipcmailbox.h"
+#include "../structure/gic400.h"
 
 volatile struct pcb_t *global_pcb_bank = NULL;             // limit of 64 tasks.
 volatile struct gpio_ownership_t *global_gpio_bank = NULL; // limit of 64 ownerships.
@@ -19,6 +20,8 @@ volatile struct ipcmailbox_segment_t *global_ipcmailbox_segments_bank = NULL; //
 volatile u64_t *global_system_ticks = NULL;
 volatile struct muart_settings_t *global_mini_uart_settings = NULL;
 volatile struct muart_metadata_t *global_mini_uart_metadata = NULL;
+
+volatile struct gic400_metadata_t *global_gic400_metadata = NULL;
 
 volatile struct muart_metadata_t *muart_metadata = NULL;
 
@@ -58,6 +61,7 @@ void kernel()
     global_software_locks_bank = __global_software_locks_bank_base__; // reminder: it has limit of 128 software locks.
     global_ipcmailbox_bank = __global_ipcmailbox_headers_bank_base__;
     global_ipcmailbox_segments_bank = __global_ipcmailboxes_segments_bank_base__;
+    global_gic400_metadata = __global_gic400_metadata__;
     core_tasks = __core_info_table__ + (4 * 4);
 
     // initialize pcb queues.
@@ -82,6 +86,8 @@ void kernel()
     sch_ticks = __pcb_queue_base__ + 708;
     *sch_ticks = 0; // just in case... (to prevent from unkown behavior).
 
+    turn_on_gtimer(); // turn on generic timer of current core.
+
     // then, if core id was zero, enabling multi-core mode and waiting until all cores acknowledged core zero.
     if (!core_id())
     {
@@ -96,6 +102,8 @@ void kernel()
         buffer[15] = '\0';
         muart_write(buffer, 16);
     }
+
+    enable_daif(); // enable IRQ, FIQ, SError, Debug
 }
 
 void task_schaduler(struct pcb_t *current_running_task)
