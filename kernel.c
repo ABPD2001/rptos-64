@@ -8,6 +8,7 @@
 #include "../structure/gpio.h"
 #include "../structure/ipcmailbox.h"
 #include "../structure/gic400.h"
+#include "../drivers/gic400.h"
 
 volatile struct pcb_t *global_pcb_bank = NULL;             // limit of 64 tasks.
 volatile struct gpio_ownership_t *global_gpio_bank = NULL; // limit of 64 ownerships.
@@ -92,6 +93,7 @@ void kernel()
     if (!core_id())
     {
         initialize_muart();                         // initialize mini-uart.
+        gic400_setGrp1_distributor();               // enable group 1 interrupt.
         multi_core_enable();                        // wake up other cores.
         u32_t *counts = (__core_info_table__ + 64); // set pointer to counts.
         while (1)                                   // wait until all cores are ready.
@@ -103,7 +105,8 @@ void kernel()
         muart_write(buffer, 16);
     }
 
-    enable_daif(); // enable IRQ, FIQ, SError, Debug
+    gic400_interfacectl(true, true); // enable EOIModeNS and Group 1.
+    enable_daif();                   // enable IRQ, FIQ, SError, Debug
 }
 
 void task_schaduler(struct pcb_t *current_running_task)

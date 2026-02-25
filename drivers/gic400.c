@@ -126,16 +126,6 @@ void gic400_setGrp1_distributor(u8_t enable)
         *gicd_ctlr &= ~(1 << 1); // disable 1th bit.
 }
 
-void initialize_gic400()
-{
-    volatile u32_t *gicc_ctlr = GICC_BASE + GICC_CTLR;
-    volatile u32_t *gicd_ctlr = GICD_BASE + GICD_CTLR;
-
-    *gicc_ctlr |= (1 << 10); // enable 11th bit.
-    *gicc_ctlr |= (1 << 1);  // enable 1th bit.
-    *gicd_ctlr |= (1 << 1);  // enable 1th bit.
-}
-
 u32_t gic400_ackhowledge()
 {
     volatile u32_t *gicc_iar = GICC_BASE + GICC_IAR;

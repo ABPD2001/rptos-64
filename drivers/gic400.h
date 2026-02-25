@@ -29,6 +29,4 @@ void gic400_setGrp1_distributor(u8_t enable);              // disable/enable gro
 u32_t gic400_ackhowledge();                      // interrupt ackhowledge operation.
 void gic400_end_interrupt(u32_t ack_val);        // end of interrupt signal.
 void gic400_deactivate_interrupt(u32_t ack_val); // deactivation interrupt signal. (when EOIModeNs == 1)
-
-void initialize_gic400(); // initializes automatically gic-400 for boot process.
 #endif
