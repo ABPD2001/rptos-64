@@ -2,7 +2,7 @@
 .global core_spinlock,cinit
 
 minit:
-    msr DAIF_EL2,xzr @ disable irq, fiq, serror and debug
+    msr DAIF_EL2,xzr @ disable irq, fiq, serror and debug.
     mrs x0,HCR_EL2
 
     ldr x1,=(1<<31) @ Enable 64-bit EL1.
@@ -35,7 +35,8 @@ minit:
 
     eret
 
-cinit:
+cinit: 
+    msr DAIF_EL1,xzr @ disable fiq, irq, serror and debug.
     mrs #__vector_table__,VBAR_EL1 @ set vector base address.
 
     msr x0,MPIDR_EL1 @ read core id.

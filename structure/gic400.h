@@ -15,4 +15,5 @@ typedef struct gic400_metadata_t // information of gic-400 interrupt controller 
     u8_t product_id;            // general info.
     u8_t reserved[15];          // padding (15 Bytes).
 };
+
 #endif

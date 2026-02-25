@@ -99,6 +99,10 @@
 #define GICD_CPENDSGIR_BASE 0xF10
 #define GICD_SPENDSGIR_BASE 0xF20
 
+#define GIC_SGI_MODE_DIRECT 0b00
+#define GIC_SGI_MODE_BROADCASR 0b01
+#define GIC_SGI_MODE_ME 0b10
+
 extern unsigned long __global_timer_ticks__;
 extern unsigned long __pcb_bank_base__;
 extern unsigned long __pcb_queue_base__;

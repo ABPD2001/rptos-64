@@ -90,7 +90,66 @@ void gic400_setbpr(u8_t binary_point)
     *gicc_bpr = (u32_t)binary_point;
 }
 
-void gic400_sgi(u8_t id, u8_t cores)
+void gic400_sgi(u8_t id, u8_t mode, u8_t targetlist)
 {
     volatile u32_t *gicc_sgir = GICD_BASE + GICD_SGIR;
+    u32_t temp = 0;
+
+    temp |= (id & 0xF);
+    temp |= targetlist << 16;
+    temp |= mode << 24;
+
+    *gicc_sgir = temp; // only one memory operation.
+}
+
+void gic400_interfacectl(u8_t eoimodens, u8_t enableGrp1)
+{
+    volatile u32_t *gicc_ctlr = GICC_BASE + GICC_CTLR;
+
+    if (eoimodens)
+        *gicc_ctlr |= (1 << 10); // enable 11th bit.
+    else
+        *gicc_ctlr &= ~(1 << 10); // disable 11th bit.
+    if (enableGrp1)
+        *gicc_ctlr |= (1 << 1); // enable 1th bit.
+    else
+        *gicc_ctlr &= ~(1 << 1); // disable 1th bit.
+}
+
+void gic400_setGrp1_distributor(u8_t enable)
+{
+    volatile u32_t *gicd_ctlr = GICD_BASE + GICD_CTLR;
+
+    if (enable)
+        *gicd_ctlr |= (1 << 1); // enable 1th bit.
+    else
+        *gicd_ctlr &= ~(1 << 1); // disable 1th bit.
+}
+
+void initialize_gic400()
+{
+    volatile u32_t *gicc_ctlr = GICC_BASE + GICC_CTLR;
+    volatile u32_t *gicd_ctlr = GICD_BASE + GICD_CTLR;
+
+    *gicc_ctlr |= (1 << 10); // enable 11th bit.
+    *gicc_ctlr |= (1 << 1);  // enable 1th bit.
+    *gicd_ctlr |= (1 << 1);  // enable 1th bit.
+}
+
+u32_t gic400_ackhowledge()
+{
+    volatile u32_t *gicc_iar = GICC_BASE + GICC_IAR;
+    return *gicc_iar;
+}
+
+void gic400_end_interrupt(u32_t ack_val)
+{
+    volatile u32_t *gicc_eoir = GICC_BASE + GICC_EOIR;
+    *gicc_eoir = ack_val;
+}
+
+void gic400_deactivate_interrupt(u32_t ack_val)
+{
+    volatile u32_t *gicc_dir = GICC_BASE + GICC_DIR;
+    *gicc_dir = ack_val;
 }
