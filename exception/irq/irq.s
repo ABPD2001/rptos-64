@@ -1,6 +1,10 @@
 .section irq_table
 .balign 4
-.org 0x0, b test
+.org 0x00,core_generic_timer
+.org 0x04, @ aux
+.org 0x08,system_timer
+.org 0x0C, @ uart
+.org 0x10, @ sgis 
 .ltorg
 
 .section .irq_handlers

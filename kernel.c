@@ -105,7 +105,13 @@ void kernel()
         muart_write(buffer, 16);
     }
 
+    // at last, configure gic-400.
+
     gic400_interfacectl(true, true); // enable EOIModeNS and Group 1.
+    gic400_priorityirq(125, 0x80);   // AUX
+    gic400_priorityirq(89, 0x90);    // UART
+    gic400_priorityirq(30, 0xA0);    // generic timer
+    gic400_priorityirq(97, 0xB0);    // system timer
     enable_daif();                   // enable IRQ, FIQ, SError, Debug
 }
 

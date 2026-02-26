@@ -178,12 +178,14 @@ vector_table:
     .balign 128
     _exception_entry
 
+
     @ read GIC-400 for IRQ id.
     @ if it was timer, continue, else disable timer irq (to make sure everything works properly).
+    ldr x0,=GICC_BASE
+    mov x1,#0x000C
+    ldr x0,[x0,x1] @ ackhowledge interrupt.
 
-    ldr x1,=__irq_table__
-    mul x0,#4 @ calculate callback relative address of table.
-    add x1,x1,x0
+    bl IRQ_ROUTINE_ROUTER
 
     _exception_irq_enable
 
@@ -241,13 +243,13 @@ vector_table:
     @ IRQ/vIRQ exception
     .balign 128
     _exception_entry
-    @ read GIC-400 for IRQ id.
     @ if it was timer, continue, else disable timer irq (to make sure everything works properly).
     
+    ldr x0,=GICC_BASE
+    mov x1,#0x000C
+    ldr x0,[x0,x1] @ ackhowledge interrupt.
     
-    ldr x1,=__irq_table__
-    mul x0,#4 @ calculate callback relative address of table.
-    add x1,x1,x0
+    B IRQ_ROUTINE_ROUTER
     
     _exception_irq_enable
 
@@ -306,6 +308,43 @@ RETURN_TO_TASK:
     ldp x0,x1,[sp],#16 @ restore context.
 
     eret @ return.
+
+IRQ_ROUTINE_ROUTE:
+    stp x29,x29,[sp,#-16]! @ store link register.
+    and x1,x0,#0x3FF @ mask only interrupt id.
+    ldr x2,=(0b111<10)
+    and x2,x0,x2 @ mask only cpu id.
+
+    mov x3,#0 @ just in case...
+    
+    cmp x1,#30 @ compare for generic timer
+    cset x1,NE
+    add x3,x3,x1
+    
+    cmp x1,#125 @ compare for (or of all units) aux.
+    cset x1,NE 
+    add x3,x3,x1
+
+    cmp x1,#97 @ compare for system timer 1
+    cset x1,NE
+    add x3,x3,x1
+
+    cmp x1,#153 @ compare for (or of all units) UART.
+    cset x1,NE
+    add x3,x3,x1
+
+    cmp x1,#15 @ compare for sgi interrupts. 
+    cset x1,LE
+    add x3,x3,x1
+
+    mul x3,x3,#4 @ calculate relative address
+    ldr x4,=____irq_table__
+    add x3,x3,x4 @ calculate absolute address
+
+    bl x3 @ call irq main routine. 
+
+    ldp x29,x29,[sp],#16 @ restore link register.
+    ret @ return.
 
 determine_id:
     stp x29,x30,[sp,#-16]! @ store FP and LR.
