@@ -1,17 +1,19 @@
 .section irq_table
 .balign 4
 .org 0x00,core_generic_timer
-.org 0x04, @ aux
-.org 0x08,system_timer
-.org 0x0C, @ uart
-.org 0x10, @ sgis 
+.org 0x04,aux_main_routine
+.org 0x08,system_timer1
+.org 0x0C,uart_main_routine @ uart
+.org 0x10,sgi_main_routine 
 .ltorg
 
 .section .irq_handlers
 .balign 4
-.equiv AUX_BASE,#0x7e215000
-.equiv AUX_LSR_REG,#0x54
-.equiv AUX_MU_IO,#0x40
+.equiv AUX_BASE,0x7e215000
+.equiv AUX_LSR_REG,0x54
+.equiv AUX_IRQ,0x00
+.equiv AUX_IIR_REG,0x48
+.equiv AUX_MU_IO,0x40
 
 core_generic_timer: @ generic timer of core gonna used for task schaduling...
     mrs x1,MPIDR_EL1 @ read cores info.
@@ -64,7 +66,7 @@ core_generic_timer: @ generic timer of core gonna used for task schaduling...
     bl task_schaduler   
     bl task_dispatcher
 
-system_timer: @ handler by core 0 only.
+system_timer1: @ handler by core 0 only.
     @ handler for incrementing global system timer ticks and schaduling timer services.
     ldr x0,=__global_timer_ticks__ @ load.
     add x0,x0,#1 @ increment.
@@ -73,4 +75,99 @@ system_timer: @ handler by core 0 only.
     b wakeup_service
     ret @ done.
 
+aux_main_routine_end:
+    ldr x1,[x0,#AUX_IIR_REG] @ read interrupt register of aux.
+    bic x1,x1,(0b11<<1) @ clear interrupts.
+    str x1,[x0,#AUX_IIR_REG] @ apply.
+
+    mrs x3,DAIF_EL1  @ read DAIF.
+    and x3,x3,#0xC @ disable irq.
+    msr DAIF_EL1,x3 @ apply.
+
+    ldr x0,=__generic_base_irq_statistics__
+
+    mrs x1,MPIDR_EL1 @ read core id.
+    and x1,x1,#0xFF @ mask core id.
+
+    mul x1,x1,#2 @ calculate realtive address of base.
+    add x0,x0,x1 @ calculate absolute address of base.
+
+    ldr x1,[x0] @ read global statistic.
+    add x1,x1,#1 @ increment global statistic.
+    str x1,[x0] @ store global statistic.
+
+    mrs x3,DAIF_EL1  @ read DAIF.
+    orr x3,x3,#0x4 @ enable irq.
+    msr DAIF_EL1,x3 @ apply.
+
+    ret @ return to main handler.
+
+aux_main_routine:
+    stp x30,x30,[sp,#-16]! @ store link register to main handler.
+    
+    ldr x0,=AUX_BASE
+    ldr x1,[x0,#AUX_IRQ] @ read general interrupt status of aux.
+    
+    and x1,x1,#0x1 @ check if interrupt bit is set.
+    cbz x1,aux_main_routine_end @ else end to routine.
+
+    ldr x1,[x0,#AUX_IIR_REG] @ read interrupt status register of mini uart.
+    and x2,x1,#0x1 @ check if interrupt bit is set.
+    cbnz x1,aux_main_routine_end  @ if it wasnt zero (not logic) end to routine.
+    
+    and x2,x1,#0x6 @ mask interrupt id of mini uart.
+    cbz x1,aux_main_routine_end @ end to routine if wasnt any interrupt id.
+
+    cmp x2,#0x4 @ check if it is rx id.
+    adr x30,. @ set link register.
+    b.eq muart_valid_byte @ call routine.
+
+    cmp x2,#0x2 @ check if is tx id.
+    adr x30,. @ set link register.
+    b.eq muart_tx_empty @ call routine.
+
+    ldr x1,[x0,#AUX_IIR_REG] @ read interrupt status.
+    bic x1,x1,#(0b11<<1) @ clear interrupt masks.
+    str x1,[x0,#AUX_IIR_REG] @ apply to interrupt status.
+
+    ldp x30,x30,[sp,#-16]! @ restore link register to main handler.
+    ret @ return to main handler.
+
+sgi_main_routine_end:
+    mrs x3,DAIF_EL1  @ read DAIF.
+    and x3,x3,#0xC @ disable irq.
+    msr DAIF_EL1,x3 @ apply.
+
+    ldr x0,=__generic_base_irq_statistics__
+
+    mrs x1,MPIDR_EL1 @ read core id.
+    and x1,x1,#0xFF @ mask core id.
+
+    mul x1,x1,#2 @ calculate realtive address of base.
+    add x0,x0,x1 @ calculate absolute address of base.
+
+    ldr x1,[x0,#8] @ read oop_sgis_count
+    add x1,x1,#1 @ increment oop_sgis_count.
+    str x1,[x0,#8] @ apply oop_sgis_count.
+
+    mrs x3,DAIF_EL1  @ read DAIF.
+    orr x3,x3,#0x4 @ disable irq.
+    msr DAIF_EL1,x3 @ apply.
+
+    ret @ return to main handler.
+
+sgi_main_routine:
+    stp x30,x30,[sp,#-16]! @ store link register to main handler.
+    
+    cmp x0,#7
+    b.ne sgi_main_routine_end
+
+    adr x30,. @ set link register.
+    b.eq wakeup_service 
+
+    ldp x30,x30,[sp,#-16]! @ restore link register to main handler.
+    ret @ return to main handler.
+
+uart_main_routine:
+    ret @ dummy.
 .ltorg

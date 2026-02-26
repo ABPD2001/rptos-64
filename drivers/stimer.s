@@ -2,11 +2,11 @@
 .balign 4
 
 .global set_stimer, read_stimer_us
-.equiv SYSTEM_TIMER_BASE,#0x7E003000
-.equiv SYSTEM_TIMER_CS,#0x00
-.equiv SYSTEM_TIMER_CLO,#0x04
-.equiv SYSTEM_TIMER_CHI,#0x08
-.equiv SYSTEM_TIMER_C1,#0x10
+.equiv SYSTEM_TIMER_BASE,0x7E003000
+.equiv SYSTEM_TIMER_CS,0x00
+.equiv SYSTEM_TIMER_CLO,0x04
+.equiv SYSTEM_TIMER_CHI,0x08
+.equiv SYSTEM_TIMER_C1,0x10
 
 set_stimer:
     stp x29,x30,[sp,#-16]!

@@ -108,19 +108,7 @@ SECTIONS {
         .+=8; /* reserve 8 bytes for global mini uart settings struct. */ 
         __global_muart_metadata__ = .;
         .+=54; /* reserve 54 bytes for global mini uart metadata struct. */  
-        __global_muart_statistics__ = .;
-        .+=16; /* reserve 16 bytes for global mini uart statistics. */
 
-        __global_uart0_statistics__ = .;
-        .+=24; /* reserve 24 bytes for uart0 statistics. */
-        __global_uart2_statistics__ = .;
-        .+=24; /* reserve 24 bytes for uart2 statistics. */
-        __global_uart3_statistics__ = .;
-        .+=24; /* reserve 24 bytes for uart3 statistics. */
-        __global_uart4_statistics__ = .;
-        .+=24; /* reserve 24 bytes for uart4 statistics. */
-        __global_uart5_statistics__ = .;
-        .+=24; /* reserve 24 bytes for uart5 statistics. */
         
         __global_uart0_metadata__ = .;
         .+=54; /* reserve 54 bytes for uart0 metadata. */
@@ -146,6 +134,27 @@ SECTIONS {
 
         __global_gic400_metadata__ = .;
         .+=16; /* reserve 16 bytes for gic-400 metadata. */
+    }
+
+    .statistics(NOLOAD){
+        ALIGN(8);
+        __global_muart_statistics__ = .;
+        .+=24; /* reserve 24 bytes for global struct of muart statistics. */
+
+        __generic_base_irq_statistics__ = .;
+        .+=64; /* reserve (16*4) shorts for generic. */
+
+        __global_uart0_statistics__ = .;
+        .+=24; /* reserve 24 bytes for uart0 statistics. */
+        __global_uart2_statistics__ = .;
+        .+=24; /* reserve 24 bytes for uart2 statistics. */
+        __global_uart3_statistics__ = .;
+        .+=24; /* reserve 24 bytes for uart3 statistics. */
+        __global_uart4_statistics__ = .;
+        .+=24; /* reserve 24 bytes for uart4 statistics. */
+        __global_uart5_statistics__ = .;
+        .+=24; /* reserve 24 bytes for uart5 statistics. */
+
     }
     /* BANKS AND QUEUES */
 

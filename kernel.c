@@ -9,6 +9,7 @@
 #include "../structure/ipcmailbox.h"
 #include "../structure/gic400.h"
 #include "../drivers/gic400.h"
+#include "../structure/irq.h"
 
 volatile struct pcb_t *global_pcb_bank = NULL;             // limit of 64 tasks.
 volatile struct gpio_ownership_t *global_gpio_bank = NULL; // limit of 64 ownerships.
@@ -21,6 +22,9 @@ volatile struct ipcmailbox_segment_t *global_ipcmailbox_segments_bank = NULL; //
 volatile u64_t *global_system_ticks = NULL;
 volatile struct muart_settings_t *global_mini_uart_settings = NULL;
 volatile struct muart_metadata_t *global_mini_uart_metadata = NULL;
+volatile struct muart_statistics_t *global_mini_uart_statistics = NULL;
+
+volatile struct irq_statistic_t *generic_irq_statistics_base = NULL;
 
 volatile struct gic400_metadata_t *global_gic400_metadata = NULL;
 
@@ -63,6 +67,7 @@ void kernel()
     global_ipcmailbox_bank = __global_ipcmailbox_headers_bank_base__;
     global_ipcmailbox_segments_bank = __global_ipcmailboxes_segments_bank_base__;
     global_gic400_metadata = __global_gic400_metadata__;
+    global_mini_uart_statistics = __global_muart_statistics__;
     core_tasks = __core_info_table__ + (4 * 4);
 
     // initialize pcb queues.

@@ -10,9 +10,11 @@
 #define AUX_BASE 0x7e215000
 #define AUX_ENABLES_REG (AUX_BASE + 0x04)
 #define AUX_IER_REG (AUX_BASE + 0x44)
+#define AUX_IIR_REG (AUX_BASE + 0x48)
 #define AUX_MU_IO_REG (AUX_BASE + 0x40)
 #define AUX_MU_LSR_REG (AUX_BASE + 0x54)
 #define AUX_MU_CNTL_REG (AUX_BASE + 0x60)
+#define AUX_MU_STAT_REG (AUX_BASE + 0x64)
 #define AUX_MU_BAUD_REG (AUX_BASE + 0x68)
 
 #define MUART_DEFAULT_BAUD 9600
@@ -140,6 +142,8 @@ extern unsigned long __global_uart5_settings__;
 extern unsigned long __global_uart5_metadata__;
 
 extern unsigned long __global_gic400_metadata__;
+
+extern unsigned long __generic_base_irq_statistics__;
 
 typedef unsigned long u64_t;
 typedef signed long s64_t;

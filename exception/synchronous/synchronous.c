@@ -11,16 +11,8 @@ void lower_el_wfi_wfe_handler()
     task_dispatcher(); // ignore task and do new schaduling (because of saftey reasons).
 }
 
-void lower_el_unkown_handler()
+void lower_el_unkown_handler(u64_t syndrome)
 {
-    u64_t syndrome;
-
-    __asm__ volatile(
-        "mrs %0, ESR_EL1"
-        : "=r"(syndrome)
-        :
-        :);
-
     const u8_t cid = core_id();
     volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
 

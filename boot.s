@@ -153,22 +153,16 @@ vector_table:
     @ synchronous exception
     .balign 128
     _exception_entry
-    mrs x0,ESR_EL1 @ read ESR_EL1
+    mrs x1,ESR_EL1 @ read ESR_EL1
 
-    mov x1,x0
-    mov x2,x0
-    
     bfc x1,xzr,#0,#26 @ seperate class of sync
     lsr x1,#26 
-    bfc x2,xzr,#25,#6 @ serperate instruction of sync
 
     bl determine_id
 
     ldr x19,=__sync_same_el_table_start__
     mul x20,x20,#4 @ calculate callback relative address of table.
     add x19,x19,x20
-
-    mov x0,x1 @ pass ESR_EL1 to handler
 
     bl x19 # call the callback (c handler)
 
@@ -178,14 +172,12 @@ vector_table:
     .balign 128
     _exception_entry
 
-
-    @ read GIC-400 for IRQ id.
     @ if it was timer, continue, else disable timer irq (to make sure everything works properly).
     ldr x0,=GICC_BASE
-    mov x1,#0x000C
+    mov x1,
     ldr x0,[x0,x1] @ ackhowledge interrupt.
 
-    bl IRQ_ROUTINE_ROUTER
+    bl irq_routine_router
 
     _exception_irq_enable
 
@@ -213,20 +205,14 @@ vector_table:
     .balign 128
     _serror_panic
 
-
-
     @ <--- LOWER EXECUTION LEVEL with SPx (Aarch64) --->
     @ synchronous exception
     .balign 128
     _exception_entry
-    mrs x0,ESR_EL1 @ read ESR_EL1
+    mrs x1,ESR_EL1 @ read ESR_EL1
 
-    mov x1,x0
-    mov x2,x0
-    
     bfc x1,xzr,#0,#26 @ seperate class of sync
     lsr x1,#26 
-    bfc x2,xzr,#25,#6 @ serperate instruction of sync
 
     bl determine_id
 
@@ -234,12 +220,10 @@ vector_table:
     mul x20,x20,#4 @ calculate callback relative address of table.
     add x19,x19,x20
 
-    mov x0,x1 @ pass ESR_EL1 to handler
-
     bl x19 # call the callback (c handler)
 
     b RETURN_TO_TASK
-    
+
     @ IRQ/vIRQ exception
     .balign 128
     _exception_entry
@@ -249,7 +233,7 @@ vector_table:
     mov x1,#0x000C
     ldr x0,[x0,x1] @ ackhowledge interrupt.
     
-    B IRQ_ROUTINE_ROUTER
+    B irq_routine_routerR
     
     _exception_irq_enable
 
@@ -309,8 +293,8 @@ RETURN_TO_TASK:
 
     eret @ return.
 
-IRQ_ROUTINE_ROUTE:
-    stp x29,x29,[sp,#-16]! @ store link register.
+irq_routine_router:
+    stp x30,x30,[sp,#-16]! @ store link register.
     and x1,x0,#0x3FF @ mask only interrupt id.
     ldr x2,=(0b111<10)
     and x2,x0,x2 @ mask only cpu id.
@@ -343,7 +327,7 @@ IRQ_ROUTINE_ROUTE:
 
     bl x3 @ call irq main routine. 
 
-    ldp x29,x29,[sp],#16 @ restore link register.
+    ldp x30,x30,[sp],#16 @ restore link register.
     ret @ return.
 
 determine_id:
