@@ -93,6 +93,10 @@ core_spinlock:
 .ltorg
 
 .section .vectors
+.equiv GICC_BASE,0xFF841000
+.equiv GICC_AIR,0x000C
+.equiv GICC_EOIR,0x0010
+.equiv GICC_DIR,0x1000
 
 .macro _exception_entry
     @ its recommneded to apply simd registers later...
@@ -172,35 +176,18 @@ vector_table:
     .balign 128
     _exception_entry
 
-    @ if it was timer, continue, else disable timer irq (to make sure everything works properly).
     ldr x0,=GICC_BASE
-    mov x1,
-    ldr x0,[x0,x1] @ ackhowledge interrupt.
-
-    bl irq_routine_router
+    ldr x0,[x0,#GICC_AIR] @ ackhowledge interrupt.
+    stp x0,x0,[sp,#-16]! @ store ackhowledge interrupt value. 
 
     _exception_irq_enable
-
-    bl x1 # call the callback (c handler)
+    bl irq_routine_router
+    
+    ldp x1,x1,[sp,#-16]! @ restore ackhowledge interrupt value. 
+    ldr x0,=GICC_BASE
+    str w1,[x0,#GICC_EOI] @ end of interrupt.
 
     b RETURN_TO_TASK
-    
-    @ FIQ/vFIQ exception (reentrant)
-    .balign 128
-    _exception_entry
-
-    @ read GIC-400 for FIQ id.
-
-    ldr x1,=__fiq_table__
-    mul x0,#4 @ calculate callback relative address of table.
-    add x1,x1,x0
-
-    _exception_fiq_enable
-
-    bl x1 # call the callback (c handler)
-
-    b RETURN_TO_TASK
-    
     @ SError/vSError exception (reentrant)
     .balign 128
     _serror_panic
@@ -226,19 +213,19 @@ vector_table:
 
     @ IRQ/vIRQ exception
     .balign 128
-    _exception_entry
-    @ if it was timer, continue, else disable timer irq (to make sure everything works properly).
-    
+    _exception_entry    
     ldr x0,=GICC_BASE
-    mov x1,#0x000C
-    ldr x0,[x0,x1] @ ackhowledge interrupt.
-    
-    B irq_routine_routerR
-    
-    _exception_irq_enable
+    ldr x0,[x0,#GICC_AIR] @ ackhowledge interrupt.
+    stp x0,x0,[sp,#-16]! @ store ackhowledge interrupt value. 
 
-    bl x1 # call the callback (c handler)
-    b EL1_LOWER_RETURN
+    _exception_irq_enable
+    bl irq_routine_router
+    
+    ldp x1,x1,[sp,#-16]! @ restore ackhowledge interrupt value. 
+    ldr x0,=GICC_BASE
+    str w1,[x0,#GICC_EOI] @ end of interrupt.
+
+    b RETURN_TO_TASK
 
     @ FIQ/vFIQ exception
     .balign 128
@@ -251,7 +238,6 @@ vector_table:
     
     _exception_fiq_enable
 
-    bl x1 # call the callback (c handler)
     bl RETURN_TO_TASK
 
     @ SError/vSError exception
@@ -271,6 +257,8 @@ vector_table:
 
 .section .vector_table_handlers
 RETURN_TO_TASK:
+    str w1,[x0,#GICC_DIR] @ interrupt deactivation. 
+
     ldp x0,x0,[sp,#16] @ read ELR_EL1
     mrs x0,ELR_EL1 @ apply ELR_EL1.
     ldp x30,x0,[sp],#16 @ read x30 and SPSR_EL1    
