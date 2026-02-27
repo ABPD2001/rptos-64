@@ -96,7 +96,12 @@ core_spinlock:
 .equiv GICC_BASE,0xFF841000
 .equiv GICC_AIR,0x000C
 .equiv GICC_EOIR,0x0010
+.equiv GICC_HPPIR,0x0018
 .equiv GICC_DIR,0x1000
+
+.equiv SYSTEM_TIMER_BASE,0x7E003000
+.equiv SYSTEM_TIMER_CLO,0x04
+.equiv SYSTEM_TIMER_CHI,0x08
 
 .macro _exception_entry
     @ its recommneded to apply simd registers later...
@@ -148,6 +153,23 @@ core_spinlock:
     stp x0,x2,[x7,#16]!
     stp x3,x4,[x7,#16]!
     stp x5,x6,[x7,#16]!
+
+    ldr x0,=GICC_BASE
+    ldr w1,[x0,#GICC_HPPIR]
+    ldr w2,[x0,#GICC_IAR]
+    ldp x1,x2,[x7,#16]!
+    
+    ldr x0,=SYSTEM_TIMER_BASE
+    ldr w1,[x0,#SYSTEM_TIMER_CHI]
+    lsl x1,#32 @ shift to left.
+    ldr w1,[x0,#SYSTEM_TIMER_CLO]
+
+    str x1,[x7,#8]!
+    mov x1,#0 @ required.
+    
+    bl panic_read_stack_loop
+
+    @ loop and wait for watchdog to exceeds its limit. 
 .endm
 
 vector_table:
@@ -368,4 +390,11 @@ determine_id:
     mov sp,x29 @ reset sp to frame pointer.
     ldp x29,x30,[sp],#16 @ restore FP and LR.
     ret @ return.
+
+panic_read_stack_loop:
+    ldrb x2,[sp,x1]
+    add x1,x1,#1
+    cmp x1,#128
+    b.lt panic_read_stack_loop
+    ret
 .ltorg
