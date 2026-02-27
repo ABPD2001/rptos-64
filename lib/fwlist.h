@@ -21,10 +21,11 @@ u64_t fw_len(volatile struct fwlist_header_t *header);
 // TIMER
 
 struct // 16 B
+    tfwlist_header_t
 {
     volatile struct timer_request_t *head;
     volatile struct timer_request_t *tail;
-} tfwlist_header_t;
+};
 
 void tfw_push_back(volatile struct tfwlist_header_t *header, volatile struct timer_request_t *request);
 volatile struct timer_request_t *tfw_find(volatile struct tfwlist_header_t *header, u64_t id); // task id.
