@@ -338,7 +338,7 @@ u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_
     return write_ipcmailbox(mailbox, content_pt1, content_pt2, ctask->id, receiver_task_id);
 }
 
-struct ipcmailbox_message_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t *content_pt1, u64_t *content_pt2, u64_t receiver_task_id)
+u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_message_t *message, u64_t *content_pt1, u64_t *content_pt2, u64_t receiver_task_id)
 {
     const u8_t cid = core_id();
     volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
@@ -352,5 +352,6 @@ struct ipcmailbox_message_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *ma
     else if (!(mailbox->accessibility & 0x2))
         return 5; // invalid access.
 
-    return read_ipcmailbox(mailbox, receiver_task_id);
+    message = read_ipcmailbox(mailbox, receiver_task_id);
+    return 0;
 }
