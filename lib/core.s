@@ -109,3 +109,4 @@ enable_fiq:
     ldp x29,x30,[sp],#16
     mov sp,x29
     ret
+.ltorg

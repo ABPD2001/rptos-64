@@ -19,3 +19,4 @@ built_in_min:
     cmp x0,x1 @ compare a and b numbers.
     csel x0,x0,x1,LS @ set x0 to (x0 if greater else x1).
     ret @ return
+.ltorg

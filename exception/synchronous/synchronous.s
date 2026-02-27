@@ -58,3 +58,4 @@ lower_el_svc_handler:
     mov sp,x29
     ldp x29,x30,[sp],#16
     ret
+.ltorg

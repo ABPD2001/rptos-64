@@ -99,3 +99,4 @@ spinwait_semaphore:
     mov sp,x29 @ set stack pointer.
     
     ret @ return.
+.ltorg

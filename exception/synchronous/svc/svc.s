@@ -156,3 +156,5 @@ svc_muart_free:
 
     mov x1,#0 @ clear x0, (for loop).
     bl svc_muart_free_loop @ do a loop for clearing metadata.
+
+.ltorg
