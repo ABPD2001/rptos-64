@@ -145,7 +145,7 @@ u64_t svc_tsleep_ms(u32_t us)
 {
     const u8_t cid = core_id();
 
-    volatile struct tfwlist_header_t *timer_requests_queue = (volatile struct tfwlist_header_t *)timer_requestes_queues[cid];
+    volatile struct tfwlist_header_t *timer_requests_queue = timer_requestes_queues[cid];
     volatile struct pcb_t **current_running_task = core_tasks[cid];
 
     for (u64_t i = 0; i < 64; i++)

@@ -14,7 +14,7 @@
 #include "../../../drivers/stimer.h"
 #include "../../../lib/softwarelock.h"
 
-extern volatile struct tfwlist_header_t *timer_requestes_queues;
+volatile struct tfwlist_header_t **timer_requestes_queues;
 extern volatile struct timer_request_t *global_timer_requests_bank;
 extern volatile u64_t **core_tasks;
 extern volatile struct gpio_ownership_t *global_gpio_bank;
