@@ -185,5 +185,14 @@ SECTIONS {
         .+=712; /* Reserve 3 queues header of 4 states (and 8 ready queues). (8*4*16 + 3*16*4) + priority map for each core (8-bits each) + ticks for each core (8-bits each) */
         .+=64; /* Reserve 4 timer requests queues. */
     }
+
+    /* system memory-based logs */
+
+    .log(NOLOAD):{
+        ALIGN(8)
+        __system_panic_log__ = .;
+        .+=88; /* reserve 88 bytes for struct of panic log. */
+    }
+
     __user_region_start__ = .;
 }

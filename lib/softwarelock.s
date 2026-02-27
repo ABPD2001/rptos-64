@@ -7,7 +7,7 @@ gain_mutex:
     
     mov x1,#0 @ set value for cas instruction.
     mov x2,#1 @ set value for cas instruction.
-    cas x1,x2,[x0] @ attempt to gain mutex.
+    cas x1,x2,[x0] @ attempt to gain mutex. (just change to armv8 instead of armv8.2)
 
     cmp x1,#0 @ check mutex is gain.
     cset x0,NE @ set output to zero if gained, else set to one as error.
@@ -17,14 +17,24 @@ gain_mutex:
     
     ret @ return.
 
+clear_mutex:
+    mov x1,#0
+    stxr w1,x1,[x0]
+    ret
+
 release_mutex:
     stp x29,x30,[sp,#-16]! @ store frame pointer and link register into stack.
     mov x29,sp @ set frame pointer.
     mov x1,#1 @ set value for cas instruction.
     mov x2,#0 @ set value for cas instruction.
     
-    cas x1,x2,[x0] @ attempt to release mutex.
-
+    ldaxr x1,[x0] @ read acquire exclusive.
+    cmp x1,#0 @ compare if mutex is gain.
+    adr x30. @ set link register.
+    b.eq clear_mutex @ try to release mutex.
+    cset x2,EQ @ set if mutex gain.
+    and x1,x1,x2 @ bitwise and (mutex gain/exclusive write stats) & mutex gain.
+    
     cmp x1,#0 @ check mutex is released.
     cset x0,NE @ set output to zero if release, else set to one as error.
     

@@ -67,14 +67,30 @@ svc_muart_alloc_free_ctxswitch:
     
     ret @ return.
 
+set_mutex:
+    mov x1,#1 @ set x1 to 1.
+    stxr w1,x1,[x0,#72] @ exclusive write.
+    ret
+
 svc_muart_alloc_free_gainmutex:
-    cas x1,x2,[x0,#72] @ gain mutex if it was 0 and set it to 1. (Compare-And-Swap)
+    stp x30,x30,[sp,#-16]!
+    
+    ldaxr x1,[x0,#72] @ read acquired exclusive.
+    cmp x1,#1 @ compare mutex value.
+    adr x30. @ set link register.
+    b.eq set_mutex @ try to gain mutex if was free.
+    cset x2,EQ @ set if mutex was free.
+    and x1,x1,x2 @ bitwise and (mutex free/exclusive write stat) & mutex free.
 
     cmp x1,#0 @ check if mutex is gain.
+    
+    adr x30,. @ set link register.
     b.ne svc_muart_alloc_ctxswitch @ if it was not 0, which means some other task is trying to allocate muart, do a context switch (voluntarily, which means, priority increment).
-    cmp x1,#0 @ check if mutex is gain (just in case).
+    cmp x1,#0 @ check if mutex is gain (just in case, because a context switch happens).
+    adr x30,. @ set link register.
     b.ne svc_muart_alloc_free_gainmutex
     
+    ldp x30,x30,[sp],#16
     ret @ return.
 
 svc_muart_alloc:
