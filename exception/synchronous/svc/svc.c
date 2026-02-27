@@ -352,6 +352,6 @@ u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailb
     else if (!(mailbox->accessibility & 0x2))
         return 5; // invalid access.
 
-    message = read_ipcmailbox(mailbox, receiver_task_id);
+    *message = read_ipcmailbox(mailbox, receiver_task_id);
     return 0;
 }
