@@ -145,6 +145,8 @@ extern unsigned long __global_gic400_metadata__;
 
 extern unsigned long __generic_base_irq_statistics__;
 
+extern unsigned long __system_panic_log__;
+
 typedef unsigned long u64_t;
 typedef signed long s64_t;
 

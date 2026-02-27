@@ -10,6 +10,7 @@
 #include "../structure/gic400.h"
 #include "../drivers/gic400.h"
 #include "../structure/irq.h"
+#include "../structure/panic.h"
 
 volatile struct pcb_t *global_pcb_bank = NULL;             // limit of 64 tasks.
 volatile struct gpio_ownership_t *global_gpio_bank = NULL; // limit of 64 ownerships.
@@ -28,7 +29,7 @@ volatile struct irq_statistic_t *generic_irq_statistics_base = NULL;
 
 volatile struct gic400_metadata_t *global_gic400_metadata = NULL;
 
-volatile struct muart_metadata_t *muart_metadata = NULL;
+volatile struct system_panic_log_t *system_panic_log = NULL;
 
 volatile struct fwlist_header_t *created_queues = NULL;
 volatile struct fwlist_header_t *pri0_ready_queues = NULL;
@@ -68,7 +69,8 @@ void kernel()
     global_ipcmailbox_segments_bank = __global_ipcmailboxes_segments_bank_base__;
     global_gic400_metadata = __global_gic400_metadata__;
     global_mini_uart_statistics = __global_muart_statistics__;
-    core_tasks = __core_info_table__ + (4 * 4);
+    system_panic_log = __system_panic_log__;
+    core_tasks = __core_info_table__ + 16;
 
     // initialize pcb queues.
 
