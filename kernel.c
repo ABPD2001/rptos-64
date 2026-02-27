@@ -233,9 +233,9 @@ void task_dispatcher()
 {
     const u8_t cid = core_id(); // get core id.
 
-    volatile struct fwlist_header_t *pri0_ready_queue = pri0_ready_queue[cid];
+    volatile struct fwlist_header_t *pri0_ready_queue = pri0_ready_queues[cid];
     volatile struct fwlist_header_t *pri1_ready_queue = pri1_ready_queues[cid];
-    volatile struct fwlist_header_t *pri2_ready_queue = pri2_ready_queue[cid];
+    volatile struct fwlist_header_t *pri2_ready_queue = pri2_ready_queues[cid];
     volatile struct fwlist_header_t *pri3_ready_queue = pri3_ready_queues[cid];
     volatile struct fwlist_header_t *pri4_ready_queue = pri4_ready_queues[cid];
     volatile struct fwlist_header_t *pri5_ready_queue = pri5_ready_queues[cid];
@@ -262,9 +262,9 @@ void wakeup_service()
     volatile struct tfwlist_header_t *timer_request_queue = &timer_requestes_queues[cid];
 
     volatile struct fwlist_header_t *sleeping_queue = sleeping_queues[cid];
-    volatile struct fwlist_header_t *pri0_ready_queue = pri0_ready_queue[cid];
+    volatile struct fwlist_header_t *pri0_ready_queue = pri0_ready_queues[cid];
     volatile struct fwlist_header_t *pri1_ready_queue = pri1_ready_queues[cid];
-    volatile struct fwlist_header_t *pri2_ready_queue = pri2_ready_queue[cid];
+    volatile struct fwlist_header_t *pri2_ready_queue = pri2_ready_queues[cid];
     volatile struct fwlist_header_t *pri3_ready_queue = pri3_ready_queues[cid];
     volatile struct fwlist_header_t *pri4_ready_queue = pri4_ready_queues[cid];
     volatile struct fwlist_header_t *pri5_ready_queue = pri5_ready_queues[cid];
