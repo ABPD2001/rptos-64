@@ -11,7 +11,7 @@
 #include "../../../lib/core.h"
 #include "../../../lib/ipcmailbox.h"
 #include "../../../lib/fwlist.h"
-#include "../../../lib/drivers/stimer.h"
+#include "../../../drivers/stimer.h"
 #include "../../../lib/softwarelock.h"
 
 extern volatile struct tfwlist_header_t *timer_requestes_queues;
