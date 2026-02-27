@@ -8,7 +8,8 @@ SECTIONS {
         *(.init)
     }
     
-    .cores_info (NOLOAD) ALIGN(4) : {
+    .cores_info (NOLOAD) : {
+        .= ALIGN(8);
         __core_info_table__ = .;
         . += 68; /* 10 dwords reserved. */
         /*
@@ -75,7 +76,8 @@ SECTIONS {
         *(.text)
     }
     
-    .stacks (NOLOAD) ALIGN(16) : {
+    .stacks (NOLOAD) : {
+        . = ALIGN(16);
         __stack3_top__ = .;
         . += 8192; /* reserve 8KB */
         __stack2_top__ = .;
@@ -87,7 +89,8 @@ SECTIONS {
     }
     
     /* KERNEL GLOBAL STRUCTURE */
-    .external_preipherals (NOLOAD) ALIGN(8) : {
+    .external_preipherals (NOLOAD) : {
+        . = ALIGN(8);
         __global_timer_ticks__ = .;
         . += 8; /* reserve dword for global timer ticks. */
         
@@ -122,7 +125,8 @@ SECTIONS {
         . += 16; /* reserve 16 bytes for gic-400 metadata. */
     }
 
-    .statistics (NOLOAD) ALIGN(8) : {
+    .statistics (NOLOAD) : {
+        . = ALIGN(8);
         __global_muart_statistics__ = .;
         . += 24; /* reserve 24 bytes for global struct of muart statistics. */
 
@@ -143,7 +147,8 @@ SECTIONS {
     
     /* BANKS AND QUEUES */
 
-    .banks (NOLOAD) ALIGN(8) : {
+    .banks (NOLOAD) : {
+        . = ALIGN(8);
         __pcb_bank_base__ = .;
         . += 23552; /* Reserve 64 struct of pcb. (368*64) Bytes. */
         
@@ -162,7 +167,8 @@ SECTIONS {
         . += 1536; /* Reserve 64 struct of timer request. (24*64) Bytes. */
     }
     
-    .pcb_queues (NOLOAD) ALIGN(16) : {
+    .pcb_queues (NOLOAD) : {
+        . = ALIGN(16);
         __pcb_queue_base__ = .;
         . += 712; /* ... */
         . += 64; /* Reserve 4 timer requests queues. */
@@ -170,7 +176,8 @@ SECTIONS {
 
     /* system memory-based logs */
 
-    .log (NOLOAD) ALIGN(8) : {
+    .log (NOLOAD) : {
+        . = ALIGN(8);
         __system_panic_log__ = .;
         . += 120; /* reserve 120 bytes for struct of panic log. */
     }
