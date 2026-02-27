@@ -1,6 +1,6 @@
 #include "./fwlist.h"
 
-void fw_push_back(fwlist_header_t *header, pcb_t *task)
+void fw_push_back(fwlist_header_t *header, volatile struct pcb_t *task)
 {
     if (header->head == NULL && header->tail == NULL)
     {
@@ -13,7 +13,7 @@ void fw_push_back(fwlist_header_t *header, pcb_t *task)
     header->tail = task;       // set new tail for header.
 }
 
-void fw_push_front(fwlist_header_t *header, pcb_t *task)
+void fw_push_front(fwlist_header_t *header, volatile struct pcb_t *task)
 {
     if (header->head == NULL && header->tail == NULL)
     {
@@ -27,8 +27,8 @@ void fw_push_front(fwlist_header_t *header, pcb_t *task)
 
 u64_t fw_rm(fwlist_header_t *header, u64_t idx)
 {
-    pcb_t *pointed_task = header->head;
-    pcb_t *prev_task = NULL;
+    volatile struct pcb_t *pointed_task = header->head;
+    volatile struct pcb_t *prev_task = NULL;
 
     idx--;
     if (pointed_task == NULL)
@@ -69,9 +69,9 @@ u64_t fw_rm(fwlist_header_t *header, u64_t idx)
     return 0;
 }
 
-pcb_t *fw_at(fwlist_header_t *header, u64_t idx)
+volatile struct pcb_t *fw_at(fwlist_header_t *header, u64_t idx)
 {
-    pcb_t *target_task = header->head;
+    volatile struct pcb_t *target_task = header->head;
     idx--;
 
     if (target_task == NULL)
@@ -94,7 +94,7 @@ u64_t fw_len(fwlist_header_t *header)
 {
     if (header->head == NULL && header->tail == NULL)
         return 0;
-    pcb_t *temp_task = header->head;
+    volatile struct pcb_t *temp_task = header->head;
     u64_t length = 1; // 1 initial value, because its already pointing on a item...
 
     while (temp_task->next == NULL)
@@ -106,7 +106,7 @@ u64_t fw_len(fwlist_header_t *header)
     return length;
 }
 
-void tfw_push_back(tfwlist_header_t *header, timer_request_t *request)
+void tfw_push_back(volatile struct tfwlist_header_t *header, volatile struct timer_request_t *request)
 {
     if (header->head == NULL && header->tail == NULL)
     {
@@ -119,9 +119,9 @@ void tfw_push_back(tfwlist_header_t *header, timer_request_t *request)
     header->tail = request;       // set new tail for header.
 }
 
-timer_request_t *tfw_find(tfwlist_header_t *header, u64_t id)
+volatile struct timer_request_t *tfw_find(volatile struct tfwlist_header_t *header, u64_t id)
 {
-    timer_request_t *temp_request = header->head;
+    volatile struct timer_request_t *temp_request = header->head;
 
     if (temp_request == NULL)
         return 1;
@@ -139,10 +139,10 @@ timer_request_t *tfw_find(tfwlist_header_t *header, u64_t id)
     return 0; // means not found.
 }
 
-u64_t tfw_rm(tfwlist_header_t *header, u64_t idx)
+u64_t tfw_rm(volatile struct tfwlist_header_t *header, u64_t idx)
 {
-    timer_request_t *pointed_request = header->head;
-    timer_request_t *prev_request = NULL;
+    volatile struct timer_request_t *pointed_request = header->head;
+    volatile struct timer_request_t *prev_request = NULL;
 
     idx--;
     if (pointed_request == NULL)

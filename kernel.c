@@ -179,7 +179,7 @@ void task_schaduler(struct pcb_t *current_running_task)
     if (temp_task != NULL)
         for (u64_t i = 0; i < 64; i++)
         {
-            pcb_t *next_ptr = temp_task->next; // store next pcb address.
+            volatile struct pcb_t *next_ptr = temp_task->next; // store next pcb address.
 
             if (temp_task->status == 1)
             {

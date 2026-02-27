@@ -51,7 +51,7 @@ typedef struct pcb_t // 368  B
     u64_t fault_dump;
     u64_t flags; // 0-1: dedicated core, 2: ready flag.
     u64_t pc;    // program counter.
-    struct pcb_t *next;
+    volatile struct pcb_t *next;
 };
 
 #endif

@@ -68,7 +68,7 @@ void __free_muart(u64_t task_id)
     muart_metadata->delimiter = NULL;
 }
 
-void terminate_context(struct pcb_t *task)
+void terminate_context(volatile struct pcb_t *task)
 {
     u64_t task_id = task->id;
     u64_t preipherals = task->preipherals;

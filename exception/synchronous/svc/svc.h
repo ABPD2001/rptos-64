@@ -11,13 +11,13 @@
 #include "../../../lib/core.h"
 #include "../../../lib/ipcmailbox.h"
 #include "../../../lib/fwlist.h"
-#include "../../../lib/preipherals/stimer.h"
+#include "../../../lib/drivers/stimer.h"
 #include "../../../lib/softwarelock.h"
 
-extern volatile tfwlist_header_t *timer_requestes_queues;
-extern volatile timer_request_t *global_timer_requests_bank;
+extern volatile struct tfwlist_header_t *timer_requestes_queues;
+extern volatile struct timer_request_t *global_timer_requests_bank;
 extern volatile u64_t **core_tasks;
-extern volatile gpio_ownership_t *global_gpio_bank;
+extern volatile struct gpio_ownership_t *global_gpio_bank;
 
 u64_t svc_muart_write(u8_t *buffer, u64_t length);
 u64_t svc_muart_read(u8_t *buffer, u64_t maximum_length);
