@@ -7,10 +7,11 @@ struct pcb_t;
 
 // TASK
 struct // 16 B
+    fwlist_header_t
 {
     volatile struct pcb_t *head;
     volatile struct pcb_t *tail;
-} fwlist_header_t;
+};
 
 void fw_push_back(volatile struct fwlist_header_t *header, volatile struct pcb_t *task);
 void fw_push_front(volatile struct fwlist_header_t *header, volatile struct pcb_t *task);
