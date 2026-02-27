@@ -4,11 +4,11 @@ SECTIONS {
     . = 0x80000;
     .init:{
         __init_start__=.;
-        .=ALIGN(8)
+        .=ALIGN(8);
         *(.init)
     }
     .cores_info(NOLOAD):{
-        .=ALIGN(4)
+        .=ALIGN(4);
         __core_info_table__=.;
         .+=68; /* 10 dwords reserved. */
         /*
@@ -29,32 +29,32 @@ SECTIONS {
 
     /* TABLES */
     .vectors:{
-        .=ALIGN(32)
+        .=ALIGN(32);
         __vector_table__=.;
         *(.vectors)
     }
     .sync_same_el_table:{
         __sync_same_el_table_start__=.;
-        .=ALIGN(4)
+        .=ALIGN(4);
         *(.sync_same_el_table)
     }
     .sync_lower_el_table:{
         __sync_same_el_table_start__=.;
-        .=ALIGN(4);
+        .=ALIGN(4);;
         *(.sync_same_el_table)
     }
     .irq_table:{
-        .=ALIGN(4)
+        .=ALIGN(4);
         __irq_table__=.;
         *(.irq_table)
     }
     .fiq_table:{
-        .=ALIGN(4)
+        .=ALIGN(4);
         __fiq_table__=.;
         *(.fiq_table)
     }
     .svc_table:{
-        .=ALIGN(4)
+        .=ALIGN(4);
         __svc_table__ = .;
         *(.svc_table)
     }
@@ -62,32 +62,32 @@ SECTIONS {
     /* HANDLERS & INSTRUCTIONS */
 
     .vector_table_handlers:{
-        .=ALIGN(8)
+        .=ALIGN(8);
         *(vector_table_handlers)
     }
     
     .sync_lower_el_handlers:{
-        .=ALIGN(8)
+        .=ALIGN(8);
         *(sync_lower_el_handlers)
     }
 
     .bss:{
-        .=ALIGN(16)
+        .=ALIGN(16);
         __bss_start__=.;
         *(.bss)
         *(COMMON)
         __bss_end__=.;
     }
     .rodata:{
-        .=ALIGN(16)
+        .=ALIGN(16);
         *(.rodata)
     }
     .text:{
-        .=ALIGN(8)
+        .=ALIGN(8);
         *(.text)
     }
     .stacks(NOLOAD):{
-        .=ALIGN(16)
+        .=ALIGN(16);
         __stack3_top__ = .;
         . += 8193; /* reserve 8KB */
         __stack2_top__ = .;
@@ -99,8 +99,8 @@ SECTIONS {
     }
     
     /* KERNEL GLOBAL STRUCTURE */
-    .external_preipherals(NOLAOD):{
-        .=ALIGN(8);
+    .external_preipherals(NOLOAD):{
+        .=ALIGN(8);;
         __global_timer_ticks__=.;
         .+=8; /* reserve dword for global timer ticks. */
         
@@ -137,7 +137,7 @@ SECTIONS {
     }
 
     .statistics(NOLOAD){
-        .=ALIGN(8);
+        .=ALIGN(8);;
         __global_muart_statistics__ = .;
         .+=24; /* reserve 24 bytes for global struct of muart statistics. */
 
@@ -159,7 +159,7 @@ SECTIONS {
     /* BANKS AND QUEUES */
 
     .banks(NOLOAD):{
-        .=ALIGN(8) /* Alignment of 8 bytes for better and compatibility performance. */
+        .=ALIGN(8); /* Alignment of 8 bytes for better and compatibility performance. */
         
         __pcb_bank_base__ = .;
         .+=23552; /* Reserve 64 struct of pcb. (368*64) Bytes. */
@@ -178,8 +178,8 @@ SECTIONS {
         __timer_request_bank_base__ = .;
         .+=1536; /* Reserve 64 struct of timer request. (24*64) Bytes. */
     }
-    .pcb_queues(NOLAOD):{
-        ALIGN(16) /* header struct size is 16 Bytes. */
+    .pcb_queues(NOLOAD):{
+        .=ALIGN(16); /* header struct size is 16 Bytes. */
 
         __pcb_queue_base__ = .;
         .+=712; /* Reserve 3 queues header of 4 states (and 8 ready queues). (8*4*16 + 3*16*4) + priority map for each core (8-bits each) + ticks for each core (8-bits each) */
@@ -189,7 +189,7 @@ SECTIONS {
     /* system memory-based logs */
 
     .log(NOLOAD):{
-        ALIGN(8)
+       .= ALIGN(8);
         __system_panic_log__ = .;
         .+=120; /* reserve 120 bytes for struct of panic log. */
     }
