@@ -3,8 +3,8 @@ SECTIONS {
     /* INITIAL CODE TO SETUP CORES */
     . = 0x80000;
     .init:{
-        __init_start__=.;
         .=ALIGN(8);
+        __init_start__=.;
         *(.init)
     }
     .cores_info(NOLOAD):{
@@ -40,7 +40,7 @@ SECTIONS {
     }
     .sync_lower_el_table:{
         __sync_same_el_table_start__=.;
-        .=ALIGN(4);;
+        .=ALIGN(4);
         *(.sync_same_el_table)
     }
     .irq_table:{
@@ -100,7 +100,7 @@ SECTIONS {
     
     /* KERNEL GLOBAL STRUCTURE */
     .external_preipherals(NOLOAD):{
-        .=ALIGN(8);;
+        .=ALIGN(8);
         __global_timer_ticks__=.;
         .+=8; /* reserve dword for global timer ticks. */
         
@@ -137,7 +137,7 @@ SECTIONS {
     }
 
     .statistics(NOLOAD){
-        .=ALIGN(8);;
+        .=ALIGN(8);
         __global_muart_statistics__ = .;
         .+=24; /* reserve 24 bytes for global struct of muart statistics. */
 
