@@ -80,9 +80,7 @@ aux_main_routine_end:
     bic x1,x1,(0b11<<1) @ clear interrupts.
     str x1,[x0,#AUX_IIR_REG] @ apply.
 
-    mrs x3,DAIF_EL1  @ read DAIF.
-    and x3,x3,#0xC @ disable irq.
-    msr DAIF_EL1,x3 @ apply.
+    msr daifset,#0x2 @ disable IRQs.
 
     ldr x0,=__generic_base_irq_statistics__
 
@@ -96,9 +94,7 @@ aux_main_routine_end:
     add x1,x1,#1 @ increment global statistic.
     str x1,[x0] @ store global statistic.
 
-    mrs x3,DAIF_EL1  @ read DAIF.
-    orr x3,x3,#0x4 @ enable irq.
-    msr DAIF_EL1,x3 @ apply.
+    msr daifclr,#0x2 @ enable IRQs.
 
     ret @ return to main handler.
 
@@ -134,9 +130,7 @@ aux_main_routine:
     ret @ return to main handler.
 
 sgi_main_routine_end:
-    mrs x3,DAIF_EL1  @ read DAIF.
-    and x3,x3,#0xC @ disable irq.
-    msr DAIF_EL1,x3 @ apply.
+    msr daifset,#0x2 @ disable IRQs.
 
     ldr x0,=__generic_base_irq_statistics__
 
@@ -150,9 +144,7 @@ sgi_main_routine_end:
     add x1,x1,#1 @ increment oop_sgis_count.
     str x1,[x0,#8] @ apply oop_sgis_count.
 
-    mrs x3,DAIF_EL1  @ read DAIF.
-    orr x3,x3,#0x4 @ disable irq.
-    msr DAIF_EL1,x3 @ apply.
+    msr daifclr,#0x2 @ disable IRQs.
 
     ret @ return to main handler.
 

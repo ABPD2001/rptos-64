@@ -50,7 +50,7 @@ disable_daif:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
 
-    mrs xzr,DAIF_EL1
+    msr daifset,#0xF
 
     ldp x29,x30,[sp],#16
     mov sp,x29
@@ -60,8 +60,7 @@ enable_daif:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
 
-    mov x0,#0xF
-    msr DAIF_EL1,x0
+    msr daifclr,#0xF
 
     ldp x29,x30,[sp],#16
     mov sp,x29
@@ -71,9 +70,7 @@ enable_irq:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
 
-    mrs x0,DAIF_EL1
-    orr x0,x0,#0x4
-    msr DAIF_EL1,x0
+    msr daifclr,#0x2
 
     ldp x29,x30,[sp],#16
     mov sp,x29
@@ -83,9 +80,7 @@ disable_irq:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
 
-    mrs x0,DAIF_EL1
-    and x0,x0,#0xC
-    msr DAIF_EL1,x0
+    msr daifset,#0x2
 
     ldp x29,x30,[sp],#16
     mov sp,x29
@@ -95,9 +90,7 @@ enable_fiq:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
 
-    mrs x0,DAIF_EL1
-    orr x0,x0,#0x8
-    msr DAIF_EL1,x0
+    msr daifclr,#0x1
 
     ldp x29,x30,[sp],#16
     mov sp,x29
@@ -107,9 +100,7 @@ enable_fiq:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
 
-    mrs x0,DAIF_EL1
-    and x0,x0,#0x7
-    msr DAIF_EL1,x0
+    msr daifclr,#0x1
 
     ldp x29,x30,[sp],#16
     mov sp,x29
