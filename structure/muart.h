@@ -1,7 +1,7 @@
 #ifndef TYPES_UART_H
 #define TYPES_UART_H
 #include "./base.h"
-#include "./semaphore.h"
+#include "./softwarelock.h"
 
 typedef struct
     muart_settings_t // 8 bytes.

@@ -1,18 +1,18 @@
 #ifndef SVC_H
 #define SVC_H
 #include "../../../structure/base.h"
-#include "../../structure/gpio.h"
-#include "../../structure/ipcmailbox.h"
+#include "../../../structure/gpio.h"
+#include "../../../structure/ipcmailbox.h"
 #include "../../../structure/muart.h"
 #include "../../../structure/timer.h"
 
-#include "../../drivers/gpio.h"
+#include "../../../drivers/gpio.h"
 
-#include "../../../lib/core.h"
-#include "../../lib/ipcmailbox.h"
-#include "../../../lib/fwlist.h"
-#include "../../../lib/preipherals/stimer.h"
-#include "../../lib/softwarelock.h"
+#include "../../../../lib/core.h"
+#include "../../../lib/ipcmailbox.h"
+#include "../../../../lib/fwlist.h"
+#include "../../../../lib/preipherals/stimer.h"
+#include "../../../lib/softwarelock.h"
 
 extern volatile tfwlist_header_t *timer_requestes_queues;
 extern volatile timer_request_t *global_timer_requests_bank;
