@@ -190,7 +190,7 @@ u64_t tfw_idx(volatile struct tfwlist_header_t *header, u64_t id)
 
     while (1)
     {
-        if (temp_req->id == id)
+        if (temp_req->task_id == id)
             return idx; // if found, return idx.
         idx++;
         if (temp_req->next == NULL)
