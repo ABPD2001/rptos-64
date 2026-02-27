@@ -1,16 +1,18 @@
-#include "./lib/fwlist.h"
-#include "./structure/task.h"
-#include "./structure/muart.h"
 #include "./lib/core.h"
+#include "./lib/fwlist.h"
 #include "./lib/math.h"
-#include "../drivers/gtimer.h"
-#include "../drivers/muart.h"
+
+#include "../structure/gic400.h"
 #include "../structure/gpio.h"
 #include "../structure/ipcmailbox.h"
-#include "../structure/gic400.h"
-#include "../drivers/gic400.h"
 #include "../structure/irq.h"
+#include "./structure/muart.h"
 #include "../structure/panic.h"
+#include "./structure/task.h"
+
+#include "../drivers/gic400.h"
+#include "../drivers/gtimer.h"
+#include "../drivers/muart.h"
 
 volatile struct pcb_t *global_pcb_bank = NULL;             // limit of 64 tasks.
 volatile struct gpio_ownership_t *global_gpio_bank = NULL; // limit of 64 ownerships.
