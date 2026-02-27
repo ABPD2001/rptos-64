@@ -8,7 +8,7 @@
 
 #include "../../../drivers/gpio.h"
 
-#include "../../../../lib/core.h"
+#include "../../../lib/core.h"
 #include "../../../lib/ipcmailbox.h"
 #include "../../../lib/fwlist.h"
 #include "../../../lib/preipherals/stimer.h"
