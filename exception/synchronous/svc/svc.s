@@ -40,7 +40,8 @@ svc_muart_alloc_free_ctxswitch:
 
     mov x5,#0 @ clear register (just in case).
     add x5,x5,#32 @ skip stack table
-    mul x5,x4,#8 @ calculate relative address of task table.
+    mov x6,#8
+    mul x5,x4,x6 @ calculate relative address of task table.
 
     add x3,x3,x5 @ point into table.
     ldr x3,[x3] @ point to pcb (by pointing to it self).
@@ -114,7 +115,8 @@ svc_muart_alloc:
     and x2,x2,#0xFF @ get core 0 id (first 8-bits).
     
     add x2,x2,#32 @ skip stack table.
-    mul x2,x2,#8 @ calculate relative address of core task table.
+    mov x3,#8
+    mul x2,x2,x3 @ calculate relative address of core task table.
     
     ldr x1,[x1,x2] @ load current running task id of this core.
     ldr x1,[x1] @ point to current running task pcb of this core.

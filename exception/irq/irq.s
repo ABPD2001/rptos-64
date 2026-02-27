@@ -22,7 +22,8 @@ core_generic_timer: @ generic timer of core gonna used for task schaduling...
     ldr x0,=__core_info_table__
     add x0,#32 @ skip stacks table.
 
-    mul x1,x1,#8 @ calculate relative address of cores task table.
+    mov x2,#8
+    mul x1,x1,x2 @ calculate relative address of cores task table.
     add x1,x1,x0 @ calculate PCB address of this core.
 
     add sp,sp,#16 @ skip ELR_EL1 + padding, becuase there is no return to task.
@@ -91,7 +92,8 @@ aux_main_routine_end:
     mrs x1,MPIDR_EL1 @ read core id.
     and x1,x1,#0xFF @ mask core id.
 
-    mul x1,x1,#2 @ calculate realtive address of base.
+    mov x2,#2
+    mul x1,x1,x2 @ calculate realtive address of base.
     add x0,x0,x1 @ calculate absolute address of base.
 
     ldr x1,[x0] @ read global statistic.
@@ -141,7 +143,8 @@ sgi_main_routine_end:
     mrs x1,MPIDR_EL1 @ read core id.
     and x1,x1,#0xFF @ mask core id.
 
-    mul x1,x1,#2 @ calculate realtive address of base.
+    mov x2,#2
+    mul x1,x1,x2 @ calculate realtive address of base.
     add x0,x0,x1 @ calculate absolute address of base.
 
     ldr x1,[x0,#8] @ read oop_sgis_count

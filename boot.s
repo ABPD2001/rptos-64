@@ -43,7 +43,8 @@ cinit:
     and x0,x0,#0xFF @ get core 0 id (first 8-bits).
     
     ldr x1,=__core_info_table__ @ load core stack table base.
-    mul x2,x0,#8 @ calculate relative address of core stack table.
+    mov x3,#8
+    mul x2,x0,x3 @ calculate relative address of core stack table.
     add x1,x1,x2
     ldr sp,[x1] @ load core stack pointer.
 
@@ -197,7 +198,8 @@ vector_table:
     bl determine_id
 
     ldr x19,=__sync_same_el_table_start__
-    mul x20,x20,#4 @ calculate callback relative address of table.
+    mov x21,#4
+    mul x20,x20,x21 @ calculate callback relative address of table.
     add x19,x19,x20
 
     bl x19 # call the callback (c handler)
@@ -236,7 +238,8 @@ vector_table:
     bl determine_id
 
     ldr x19,=__sync_same_el_table_start__
-    mul x20,x20,#4 @ calculate callback relative address of table.
+    mov x21,#4
+    mul x20,x20,x21 @ calculate callback relative address of table.
     add x19,x19,x20
 
     bl x19 # call the callback (c handler)
@@ -265,7 +268,8 @@ vector_table:
     @ read GIC-400 for FIQ id.
 
     ldr x1,=__fiq_table__
-    mul x0,#4 @ calculate callback relative address of table.
+    mov x2,#4
+    mul x0,x0,x2 @ calculate callback relative address of table.
     add x1,x1,x0
     
     _exception_fiq_enable
@@ -341,7 +345,8 @@ irq_routine_router:
     cset x1,LE
     add x3,x3,x1
 
-    mul x3,x3,#4 @ calculate relative address
+    mov x5,#4
+    mul x3,x3,x5 @ calculate relative address
     ldr x4,=____irq_table__
     add x3,x3,x4 @ calculate absolute address
 
