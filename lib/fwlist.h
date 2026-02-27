@@ -3,6 +3,8 @@
 #include "../structure/task.h"
 #include "../structure/timer.h"
 
+struct pcb_t;
+
 // TASK
 typedef struct // 16 B
 {

@@ -145,16 +145,16 @@ u64_t svc_tsleep_ms(u32_t us)
 {
     const u8_t cid = core_id();
 
-    volatile struct tfwlist_header_t *timer_requests_queue = &timer_requestes_queues[cid];
+    volatile struct tfwlist_header_t *timer_requests_queue = timer_requestes_queues[cid];
     volatile struct pcb_t **current_running_task = core_tasks[cid];
 
     for (u64_t i = 0; i < 64; i++)
     {
-        if (!global_timer_requests_bank[i]->next && !global_timer_requests_bank[i]->task_id && !global_timer_requests_bank[i]->wake_ticks)
+        if (!global_timer_requests_bank[i].next && !global_timer_requests_bank[i].task_id && !global_timer_requests_bank[i].wake_ticks)
         {
 
-            global_timer_requests_bank[i]->wake_ticks = us + read_stimer_us();    // set wake ticks.
-            global_timer_requests_bank[i]->task_id = (*current_running_task)->id; // set task id.
+            global_timer_requests_bank[i].wake_ticks = us + read_stimer_us();    // set wake ticks.
+            global_timer_requests_bank[i].task_id = (*current_running_task)->id; // set task id.
             tfw_push_back(timer_requests_queue, &global_timer_requests_bank[i]);
 
             return 0;
@@ -182,9 +182,9 @@ u64_t svc_gpalloc(u64_t table, u8_t nth)
 
     for (u64_t i = 0; i < 64; i++)
     {
-        if (!global_gpio_bank[i].owner_task_id)
+        if (!global_gpio_bank[i].task_id)
         {
-            global_gpio_bank[i].owner_task_id = ctask->id; // set ownership id to current running task id.
+            global_gpio_bank[i].task_id = ctask->id; // set ownership id to current running task id.
             global_gpio_bank[i].table = table;
             global_gpio_bank[i].nth = (u64_t)nth;
         }
@@ -197,13 +197,13 @@ u64_t svc_gpfree(u64_t task_id, u64_t table, u8_t nth)
 {
     for (u64_t i = 0; i < 64; i++)
     {
-        if (global_gpio_bank[i].owner_task_id == task_id)
+        if (global_gpio_bank[i].task_id == task_id)
         {
             if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
             {
-                global_gpio_bank[i].owner_task_id = 0; // clear task id.
-                global_gpio_bank[i].table = 0;         // clear table.
-                global_gpio_bank[i].nth = 0;           // clear nth.
+                global_gpio_bank[i].task_id = 0; // clear task id.
+                global_gpio_bank[i].table = 0;   // clear table.
+                global_gpio_bank[i].nth = 0;     // clear nth.
 
                 return 0; // done.
             }
@@ -220,7 +220,7 @@ u64_t svc_gpfunction(u64_t table, u8_t nth, u8_t function)
 
     for (u64_t i = 0; i < 64; i++)
     {
-        if (ctask->id == global_gpio_bank[i].owner_task_id)
+        if (ctask->id == global_gpio_bank[i].task_id)
         {
             if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
             {
@@ -240,7 +240,7 @@ u64_t svc_gpset(u64_t table, u8_t nth)
 
     for (u64_t i = 0; i < 64; i++)
     {
-        if (ctask->id == global_gpio_bank[i].owner_task_id)
+        if (ctask->id == global_gpio_bank[i].task_id)
         {
             if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
             {
@@ -260,7 +260,7 @@ u64_t svc_gpclear(u64_t table, u8_t nth)
 
     for (u64_t i = 0; i < 64; i++)
     {
-        if (ctask->id == global_gpio_bank[i].owner_task_id)
+        if (ctask->id == global_gpio_bank[i].task_id)
         {
             if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
             {
@@ -279,7 +279,7 @@ u64_t svc_gpvalue(u64_t table, u8_t nth, u8_t value)
 
     for (u64_t i = 0; i < 64; i++)
     {
-        if (ctask->id == global_gpio_bank[i].owner_task_id)
+        if (ctask->id == global_gpio_bank[i].task_id)
         {
             if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
             {
