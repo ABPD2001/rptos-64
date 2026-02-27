@@ -3,14 +3,14 @@
 #include "./base.h"
 #include "./softwarelock.h"
 
-typedef struct uart_statistics_t // 24 Bytes.
+struct uart_statistics_t // 24 Bytes.
 {
     u64_t overrun_errors;
     u64_t parity_errors;
     u64_t break_errors;
 };
 
-typedef struct uart_settings_t // 48 Bytes.
+struct uart_settings_t // 48 Bytes.
 {
     u64_t tx_gptable;
     u64_t rx_gptable;
@@ -36,7 +36,7 @@ typedef struct uart_settings_t // 48 Bytes.
     u8_t reserved;               // padding (1 Byte)
 };
 
-typedef struct uart_metadata_t // 54 Bytes.
+struct uart_metadata_t // 54 Bytes.
 {
     struct uart_settings_t *settings;
     u64_t owner_task;

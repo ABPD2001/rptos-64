@@ -2,7 +2,7 @@
 #define TYPES_PANIC_H
 #include "./base.h"
 
-typedef struct system_panic_log_t // 120 Bytes.
+struct system_panic_log_t // 120 Bytes.
 {
     u64_t syndrome;      // ESR_EL1
     u64_t elr;           // ELR_EL1

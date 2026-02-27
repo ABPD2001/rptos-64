@@ -4,7 +4,7 @@
 #include "./softwarelock.h"
 
 // <--- BASE STRUCTURE --->
-typedef struct ipcmailbox_t // 56 Bytes.
+struct ipcmailbox_t // 56 Bytes.
 {
     u64_t task_owner;
     u64_t id;
@@ -28,7 +28,7 @@ typedef struct ipcmailbox_t // 56 Bytes.
 
 // <--- CONTENT MANAGEMENT --->
 
-typedef struct ipcmailbox_message_t
+struct ipcmailbox_message_t
 {
     u64_t author_task_id;   // 0 for host.
     u64_t receiver_task_id; // 0 for anyone.
@@ -37,7 +37,7 @@ typedef struct ipcmailbox_message_t
     u64_t done;             // set this 1 if is done.
 };
 
-typedef struct ipcmailbox_segment_t // 64 Bytes.
+struct ipcmailbox_segment_t // 64 Bytes.
 {
     mutex_t access_mutex; // a mutex, where task wants to write/read.
     u64_t mailbox_id;

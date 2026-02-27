@@ -5,7 +5,7 @@
 typedef u64_t semaphore_t;
 typedef u64_t mutex_t; // for more simplicy in usage and least cycles.
 
-typedef struct slcb_t
+struct slcb_t
 {
     u64_t owner_task;  // id of create by which task.
     u64_t gained_task; // id of gained by which task.

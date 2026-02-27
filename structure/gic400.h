@@ -3,7 +3,7 @@
 #include "./base.h"
 
 // 16 Bytes.
-typedef struct gic400_metadata_t // information of gic-400 interrupt controller (this struct is read-only after discovery process).
+struct gic400_metadata_t // information of gic-400 interrupt controller (this struct is read-only after discovery process).
 {
     u16_t implementer;          // general info.
     u8_t interrup_lines_number; // this used to calculate number of registers and bits.

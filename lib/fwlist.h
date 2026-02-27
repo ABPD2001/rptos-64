@@ -6,7 +6,7 @@
 struct pcb_t;
 
 // TASK
-typedef struct // 16 B
+struct // 16 B
 {
     volatile struct pcb_t *head;
     volatile struct pcb_t *tail;
@@ -20,7 +20,7 @@ u64_t fw_len(fwlist_header_t *header);
 
 // TIMER
 
-typedef struct // 16 B
+struct // 16 B
 {
     volatile struct timer_request_t *head;
     volatile struct timer_request_t *tail;

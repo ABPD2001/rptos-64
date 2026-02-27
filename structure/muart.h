@@ -3,7 +3,7 @@
 #include "./base.h"
 #include "./softwarelock.h"
 
-typedef struct
+struct
     muart_settings_t // 8 bytes.
 {
     u16_t baudrate;
@@ -12,7 +12,7 @@ typedef struct
     u8_t reserved[4]; // padding.
 };
 
-typedef struct muart_metadata_t // 54 bytes.
+struct muart_metadata_t // 54 bytes.
 {
     struct muart_settings_t *settings; // reminder: this is a pointer.
     u64_t owner_task;
@@ -27,7 +27,7 @@ typedef struct muart_metadata_t // 54 bytes.
     u64_t delimiter;      // a byte with padding.
 };
 
-typedef struct muart_statistics_t
+struct muart_statistics_t
 {
     u64_t receiver_overruns; // times of receiver overrun happens.
     u64_t wt_rejections;     // if buffer/write length isnt valid.

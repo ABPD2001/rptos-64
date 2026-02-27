@@ -2,7 +2,7 @@
 #define TYPES_GPIO_H
 #include "./base.h"
 
-typedef struct gpio_ownership_t // 24 Bytes.
+struct gpio_ownership_t // 24 Bytes.
 {
     u64_t task_id;
     u64_t table;
