@@ -9,7 +9,7 @@ SECTIONS {
     }
     
     .cores_info (NOLOAD) : {
-        .= ALIGN(8);
+        . = ALIGN(8);
         __core_info_table__ = .;
         . += 68; /* 10 dwords reserved. */
         /*
