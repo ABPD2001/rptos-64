@@ -105,49 +105,49 @@
 #define GIC_SGI_MODE_BROADCASR 0b01
 #define GIC_SGI_MODE_ME 0b10
 
-extern const unsigned long __global_timer_ticks__;
-extern const unsigned long __pcb_bank_base__;
-extern const unsigned long __pcb_queue_base__;
-extern const unsigned long __core_info_table__;
-extern const unsigned long __timer_request_bank_base__;
-extern const unsigned long __user_region_start__;
-extern const unsigned long __gpio_ownerships_bank_base__;
-extern const unsigned long __global_software_locks_bank_base__;
+extern unsigned long __global_timer_ticks__;
+extern unsigned long __pcb_bank_base__;
+extern unsigned long __pcb_queue_base__;
+extern unsigned long __core_info_table__;
+extern unsigned long __timer_request_bank_base__;
+extern unsigned long __user_region_start__;
+extern unsigned long __gpio_ownerships_bank_base__;
+extern unsigned long __global_software_locks_bank_base__;
 
-extern const unsigned long __global_ipcmailboxes_segments_bank_base__;
-extern const unsigned long __global_ipcmailbox_headers_bank_base__;
+extern unsigned long __global_ipcmailboxes_segments_bank_base__;
+extern unsigned long __global_ipcmailbox_headers_bank_base__;
 
-extern const unsigned long __global_muart_settings__;
-extern const unsigned long __global_muart_metadata__;
-extern const unsigned long __global_muart_statistics__;
+extern unsigned long __global_muart_settings__;
+extern unsigned long __global_muart_metadata__;
+extern unsigned long __global_muart_statistics__;
 
-extern const unsigned long __global_uart0_statistics__;
-extern const unsigned long __global_uart0_settings__;
-extern const unsigned long __global_uart0_metadata__;
+extern unsigned long __global_uart0_statistics__;
+extern unsigned long __global_uart0_settings__;
+extern unsigned long __global_uart0_metadata__;
 
-extern const unsigned long __global_uart2_statistics__;
-extern const unsigned long __global_uart2_settings__;
-extern const unsigned long __global_uart2_metadata__;
+extern unsigned long __global_uart2_statistics__;
+extern unsigned long __global_uart2_settings__;
+extern unsigned long __global_uart2_metadata__;
 
-extern const unsigned long __global_uart3_statistics__;
-extern const unsigned long __global_uart3_settings__;
-extern const unsigned long __global_uart3_metadata__;
+extern unsigned long __global_uart3_statistics__;
+extern unsigned long __global_uart3_settings__;
+extern unsigned long __global_uart3_metadata__;
 
-extern const unsigned long __global_uart4_statistics__;
-extern const unsigned long __global_uart4_settings__;
-extern const unsigned long __global_uart4_metadata__;
+extern unsigned long __global_uart4_statistics__;
+extern unsigned long __global_uart4_settings__;
+extern unsigned long __global_uart4_metadata__;
 
-extern const unsigned long __global_uart5_statistics__;
-extern const unsigned long __global_uart5_settings__;
-extern const unsigned long __global_uart5_metadata__;
+extern unsigned long __global_uart5_statistics__;
+extern unsigned long __global_uart5_settings__;
+extern unsigned long __global_uart5_metadata__;
 
-extern const unsigned long __global_gic400_metadata__;
+extern unsigned long __global_gic400_metadata__;
 
-extern const unsigned long __generic_base_irq_statistics__;
+extern unsigned long __generic_base_irq_statistics__;
 
-extern const unsigned long __system_panic_log__;
+extern unsigned long __system_panic_log__;
 
-typedef const unsigned long u64_t;
+typedef unsigned long u64_t;
 typedef signed long s64_t;
 
 typedef unsigned int u32_t;
