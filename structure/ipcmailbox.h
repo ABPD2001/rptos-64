@@ -1,7 +1,7 @@
 #ifndef TYPES_IPC_MAILBOX
 #define TYPES_IPC_MAILBOX
 #include "./base.h"
-#include "./semaphore.h"
+#include "./softwarelock.h"
 
 // <--- BASE STRUCTURE --->
 typedef struct ipcmailbox_t // 56 Bytes.
