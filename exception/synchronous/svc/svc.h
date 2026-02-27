@@ -10,8 +10,8 @@
 
 #include "../../../../lib/core.h"
 #include "../../../lib/ipcmailbox.h"
-#include "../../../../lib/fwlist.h"
-#include "../../../../lib/preipherals/stimer.h"
+#include "../../../lib/fwlist.h"
+#include "../../../lib/preipherals/stimer.h"
 #include "../../../lib/softwarelock.h"
 
 extern volatile tfwlist_header_t *timer_requestes_queues;
