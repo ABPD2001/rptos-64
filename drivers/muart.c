@@ -107,7 +107,7 @@ u64_t muart_settings(u16_t baudrate, u8_t data_bits, u8_t enablation)
 
 void initialize_muart()
 {
-    volatile muart_settings_t *muart_settings = __global_muart_settings__;
+    volatile struct muart_settings_t *muart_settings = __global_muart_settings__;
     volatile u32_t *aux_en = AUX_ENABLES_REG;
     *aux_en |= 0x1; // enable uart on aux_enable register.
 
