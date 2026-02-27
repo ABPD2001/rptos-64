@@ -61,6 +61,10 @@ core_generic_timer: @ generic timer of core gonna used for task schaduling...
     
     ldp x2,x3,[sp],#16 @ load x0 and x1 into temp registers.
     stp x2,x3,[x1],#16 @ store it on pcb (this line completes the whole context save).
+    
+    mrs x0,SP_EL0 @ read stack pointer of task.
+    str x0,[x1],#8 @ store sp on pcb.
+    
     mov x0,x1 @ pass pcb address to first paramter.
 
     bl task_schaduler   

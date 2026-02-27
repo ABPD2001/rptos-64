@@ -133,7 +133,21 @@ core_spinlock:
 .endm
 
 .macro _serror_panic
-@handle
+    mrs x0,ESR_EL1
+    mrs x1,ELR_EL1
+    mrs x2,SPSR_EL1
+    mrs x3,FAR_EL1
+    mrs x4,MPIDR_EL1
+    mrs x5,SCTLR_EL1
+    mrs x6,daif
+    
+    ldr x7,=__system_panic_log__
+    stp x0,x1,[x7,#16]!
+    stp x29,x30,[x7,#16]!
+    mov x0,sp
+    stp x0,x2,[x7,#16]!
+    stp x3,x4,[x7,#16]!
+    stp x5,x6,[x7,#16]!
 .endm
 
 vector_table:

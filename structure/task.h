@@ -2,7 +2,7 @@
 #define TYPES_TASK_H
 #include "./base.h"
 
-typedef struct pcb_t // 360 B
+typedef struct pcb_t // 368  B
 {
     // its recommended to apply simd registers later...
     u64_t spsr;
@@ -37,6 +37,7 @@ typedef struct pcb_t // 360 B
     u64_t x2;
     u64_t x1;
     u64_t x0;
+    u64_t sp;
     u64_t id;
     u64_t status;   // 0: created, 1:ready, 2:running, 3:terminated, 4:waiting, 5:sleeping
     u64_t priority; // 0~7: 0 is least and 7 is most.

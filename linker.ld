@@ -191,7 +191,7 @@ SECTIONS {
     .log(NOLOAD):{
         ALIGN(8)
         __system_panic_log__ = .;
-        .+=88; /* reserve 88 bytes for struct of panic log. */
+        .+=120; /* reserve 120 bytes for struct of panic log. */
     }
 
     __user_region_start__ = .;
