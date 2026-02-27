@@ -1,6 +1,6 @@
 #include "./fwlist.h"
 
-void fw_push_back(fwlist_header_t *header, volatile struct pcb_t *task)
+void fw_push_back(volatile struct fwlist_header_t *header, volatile struct pcb_t *task)
 {
     if (header->head == NULL && header->tail == NULL)
     {
@@ -13,7 +13,7 @@ void fw_push_back(fwlist_header_t *header, volatile struct pcb_t *task)
     header->tail = task;       // set new tail for header.
 }
 
-void fw_push_front(fwlist_header_t *header, volatile struct pcb_t *task)
+void fw_push_front(volatile struct fwlist_header_t *header, volatile struct pcb_t *task)
 {
     if (header->head == NULL && header->tail == NULL)
     {
@@ -25,7 +25,7 @@ void fw_push_front(fwlist_header_t *header, volatile struct pcb_t *task)
     header->head = task;       // set new head for header.
 }
 
-u64_t fw_rm(fwlist_header_t *header, u64_t idx)
+u64_t fw_rm(volatile struct fwlist_header_t *header, u64_t idx)
 {
     volatile struct pcb_t *pointed_task = header->head;
     volatile struct pcb_t *prev_task = NULL;
@@ -69,7 +69,7 @@ u64_t fw_rm(fwlist_header_t *header, u64_t idx)
     return 0;
 }
 
-volatile struct pcb_t *fw_at(fwlist_header_t *header, u64_t idx)
+volatile struct pcb_t *fw_at(volatile struct fwlist_header_t *header, u64_t idx)
 {
     volatile struct pcb_t *target_task = header->head;
     idx--;
@@ -90,7 +90,7 @@ volatile struct pcb_t *fw_at(fwlist_header_t *header, u64_t idx)
     return target_task;
 }
 
-u64_t fw_len(fwlist_header_t *header)
+u64_t fw_len(volatile struct fwlist_header_t *header)
 {
     if (header->head == NULL && header->tail == NULL)
         return 0;
@@ -183,9 +183,9 @@ u64_t tfw_rm(volatile struct tfwlist_header_t *header, u64_t idx)
     return 0;
 }
 
-u64_t tfw_idx(tfwlist_header_t *header, u64_t id)
+u64_t tfw_idx(volatile struct tfwlist_header_t *header, u64_t id)
 {
-    timer_request_t *temp_req = header->head;
+    volatile struct timer_request_t *temp_req = header->head;
     u64_t idx = 0;
 
     while (1)
