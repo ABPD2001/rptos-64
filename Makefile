@@ -1,21 +1,33 @@
-compile:
-	aarch64-none-elf-gcc -fno-builtin -fno-stack-protector -ffreestanding -mgeneral-regs-only -mcpu=cortex-a72 -c *.c ./*.s ./*/*.c ./*/*/*.c -o compile.o
+# تعریف متغیرها برای تغییر راحت در آینده
+CC = aarch64-linux-gnu-gcc
+LD = aarch64-linux-gnu-ld
+OBJCOPY = aarch64-linux-gnu-objcopy
 
-assemble:
-	aarch64-none-elf-gcc -c *.s ./*.s ./*/*.s ./*/*/*.s -o assemble.o
+# فلگ‌های کامپایلر مخصوص Cortex-A72 (RPi4)
+CFLAGS = -fno-builtin -fno-stack-protector -ffreestanding -mgeneral-regs-only -mcpu=cortex-a72 -Wall -O2
 
-link:
-	aarch64-none-elf-ld -T linker.ld assemble.o compile.o -o kernel8.elf
+# پیدا کردن تمام فایل‌های سورس در زیرپوشه‌ها
+C_SOURCES = $(shell find . -name "*.c")
+S_SOURCES = $(shell find . -name "*.s")
+# تبدیل نام سورس‌ها به نام فایل‌های آبجکت (.o)
+OBJECTS = $(C_SOURCES:.c=.o) $(S_SOURCES:.s=.o)
 
-build:
-	aarch64-none-elf-gcc -fno-builtin -fno-stack-protector -ffreestanding -mgeneral-regs-only -mcpu=cortex-a72 -c *.c ./*.s ./*/*.c ./*/*/*.c -o compile.o
-	echo "compile complete."
-	aarch64-none-elf-gcc -c *.s ./*.s ./*/*.s ./*/*/*.s -o assemble.o
-	echo "assemble complete."
-	aarch64-none-elf-ld -T linker.ld assemble.o compile.o -o kernel8.elf
-	echo "linking complete."
+build: $(OBJECTS)
+	@echo "Linking..."
+	$(LD) -T linker.ld $(OBJECTS) -o kernel8.elf
+	@echo "Creating kernel8.img..."
+	$(OBJCOPY) -O binary kernel8.elf kernel8.img
+	@echo "Build complete! kernel8.img is ready."
+
+# قانون برای کامپایل فایل‌های C
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# قانون برای اسمبل فایل‌های S
+%.o: %.s
+	$(CC) -c $< -o $@
 
 clean:
-	echo "removing every output file..."
-	rm -rf *.o ./*.o ./*/*.o ./*/*/*.o kernel8.elf
-	echo "done."
+	@echo "Cleaning up..."
+	rm -f $(shell find . -name "*.o") kernel8.elf kernel8.img
+	@echo "Done."
