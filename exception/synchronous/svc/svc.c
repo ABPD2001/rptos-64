@@ -145,8 +145,8 @@ u64_t svc_tsleep_ms(u32_t us)
 {
     const u8_t cid = core_id();
 
-    volatile tfwlist_header_t *timer_requests_queue = &timer_requestes_queues[cid];
-    volatile pcb_t **current_running_task = core_tasks[cid];
+    volatile struct tfwlist_header_t *timer_requests_queue = &timer_requestes_queues[cid];
+    volatile struct pcb_t **current_running_task = core_tasks[cid];
 
     for (u64_t i = 0; i < 64; i++)
     {
@@ -166,7 +166,7 @@ u64_t svc_tsleep_ms(u32_t us)
 u64_t svc_termination_request()
 {
     const u8_t cid = core_id();
-    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
     ctask->status = 3; // set status to terminated.
 
     set_gtimer(1); // allow generic timer to work for a ms on a loop.
@@ -178,7 +178,7 @@ u64_t svc_termination_request()
 u64_t svc_gpalloc(u64_t table, u8_t nth)
 {
     const u8_t cid = core_id();
-    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
 
     for (u64_t i = 0; i < 64; i++)
     {
@@ -216,7 +216,7 @@ u64_t svc_gpfree(u64_t task_id, u64_t table, u8_t nth)
 u64_t svc_gpfunction(u64_t table, u8_t nth, u8_t function)
 {
     const u8_t cid = core_id();
-    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
 
     for (u64_t i = 0; i < 64; i++)
     {
@@ -236,7 +236,7 @@ u64_t svc_gpfunction(u64_t table, u8_t nth, u8_t function)
 u64_t svc_gpset(u64_t table, u8_t nth)
 {
     const u8_t cid = core_id();
-    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
 
     for (u64_t i = 0; i < 64; i++)
     {
@@ -256,7 +256,7 @@ u64_t svc_gpset(u64_t table, u8_t nth)
 u64_t svc_gpclear(u64_t table, u8_t nth)
 {
     const u8_t cid = core_id();
-    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
 
     for (u64_t i = 0; i < 64; i++)
     {
@@ -275,7 +275,7 @@ u64_t svc_gpclear(u64_t table, u8_t nth)
 u64_t svc_gpvalue(u64_t table, u8_t nth, u8_t value)
 {
     const u8_t cid = core_id();
-    volatile pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
 
     for (u64_t i = 0; i < 64; i++)
     {
