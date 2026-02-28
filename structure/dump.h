@@ -10,6 +10,7 @@ struct task_dump_t // 56 Bytes.
     u64_t fault_code;
     u64_t fault_dump;
     u64_t flags;
+    u64_t stime;
 };
 
 #endif
