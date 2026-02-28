@@ -44,7 +44,7 @@ struct pcb_t // 368  B
     u64_t stack_start;
     u64_t stack_end;
     u64_t fault_code;  // 1: stack alignment fault ,2: pc alignment fault
-    u64_t preipherals; // using this to free all allocated preipherals by this task when this task is terminating. --> each 4 bits is a preipheral id. (0000 --> mini uart, 0001 --> uart-0, 0010 --> uart-2, 0011 --> uart-3, 0100 --> uart-4, 0101 --> timer request, 0110 --> gpio ownership, 0111 --> software lock gained, 1000 --> ipc mailbox owned)
+    u64_t preipherals; // using this to free all allocated preipherals by this task when this task is terminating. --> each 4 bits is a preipheral id. (0000 --> mini uart, 0001 --> uart-0, 0010 --> uart-2, 0011 --> uart-3, 0100 --> uart-4, 0101 --> uart-5, 0110 --> timer request, 0111 --> gpio ownership, 1000 --> software lock gained, 1001 --> ipc mailbox owned)
     u64_t preipherals_count;
     u64_t parent;
     u64_t *childs;

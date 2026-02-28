@@ -51,8 +51,51 @@ void __free_locks(u64_t task_id)
     }
 }
 
-void __free_ipcmailboxes(u64_t task_id) {}   //
-void __free_timer_requests(u64_t task_id) {} //
+void __free_ipcmailboxes(u64_t task_id)
+{
+    volatile struct ipcmailbox_t *nav_header = global_ipcmailbox_bank;
+
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (nav_header->task_owner == task_id)
+        {
+            nav_header->access_mutex = 1;          // release mutex.
+            nav_header->task_owner = 0;            // clear ownership.
+            nav_header->blacklist_tasks_id = NULL; // clear blacklist_tasks_id.
+            nav_header->whitelist_tasks_id = NULL; // clear whitelist_tasks_id.
+            nav_header->accessibility = 0;         // clear accessibility.
+            nav_header->maximum_length = 0;        // clear maximum length.
+            nav_header->metadata = 0;              // clear metadata.
+        }
+
+        nav_header++; // go to next ipc mailbox header.
+    }
+}
+
+void __free_timer_requests(u64_t task_id)
+{
+    volatile struct tfwlist_header_t *nav_header = timer_requestes_queues[core_id()];
+    volatile struct timer_request_t *nav_req = nav_header->head;
+
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (nav_req->task_id == task_id)
+        {
+            nav_req->task_id = 0;    // clear ownership.
+            nav_req->wake_ticks = 0; // clear wake_ticks.
+            fw_rm(nav_header, i);    // remove item from queue.
+        }
+        if (!nav_req->task_id)
+            break;
+        nav_req = nav_req->next; // go to next request.
+    }
+}
+
+void __free_void(u64_t task_id)
+{
+    volatile struct schaduler_statistics_t *shcaduler_statistics = __generic_base_schaduler_statistics__;
+    shcaduler_statistics->void_terminate_counts++; // incremenet void terminate counts.
+}
 
 void __free_muart(u64_t task_id)
 {
@@ -70,10 +113,12 @@ void __free_muart(u64_t task_id)
 
 void terminate_context(volatile struct pcb_t *task)
 {
-    u64_t task_id = task->id;
-    u64_t preipherals = task->preipherals;
-    u64_t fault_code = task->fault_code;
-    u64_t fault_dump = task->fault_dump;
+    const u64_t task_id = task->id;
+    const u64_t preipherals = task->preipherals;
+    const u64_t fault_code = task->fault_code;
+    const u64_t fault_dump = task->fault_dump;
+    const u64_t preipherals_count = task->preipherals_count;
+    const u64_t flags = task->flags;
 
     for (u64_t i = 0; i < 43; i++)
     { // clearing struct of pcb.
@@ -82,7 +127,7 @@ void terminate_context(volatile struct pcb_t *task)
     }
     task->id = task_id; // id is always same.
 
-    __built_in_free_preipheral_t *free_preipheral_functions[4] = {&__free_muart}; // this must be filled.
+    __built_in_free_preipheral_t *free_preipheral_functions[10] = {&__free_muart, &__free_void, &__free_void, &__free_void, &__free_void, &__free_void, &__free_timer_requests, &__free_gpios, &__free_locks, &__free_ipcmailboxes}; // this must be filled.
 
     // free preipherals here.
     for (u64_t i = 0; i < task->preipherals_count; i++)
@@ -90,5 +135,46 @@ void terminate_context(volatile struct pcb_t *task)
         u8_t preipheral_id = (task->preipherals >> task->preipherals_count * 4) & (0xF); // calculate preipheral id.
         free_preipheral_functions[preipheral_id](task_id);                               // call release routine.
     }
-    // save dump of task somewhere.
+
+    for (u64_t i = 0; i < 32; i++)
+    {
+        if (!global_tasks_dump_bank[i]->task_id)
+        {
+            // save dump to structure where is empty.
+            global_tasks_dump_bank[i]->task_id = task_id;
+            global_tasks_dump_bank[i]->preipherals = preipherals;
+            global_tasks_dump_bank[i]->preipherals_count = preipherals_count;
+            global_tasks_dump_bank[i]->fault_code = fault_code;
+            global_tasks_dump_bank[i]->fault_dump = fault_dump;
+            global_tasks_dump_bank[i]->flags = flags;
+            global_tasks_dump_bank[i]->stime = read_stimer_us();
+            break;
+        }
+        if (i == 31)
+        {
+            for (u64_t i = 0; i < 32; i++)
+            {
+                u64_t least_time = global_tasks_dump_bank[i]->stime;
+                s64_t idx = -1;
+
+                if (least_time > global_tasks_dump_bank[i]->stime)
+                {
+                    least_time = global_tasks_dump_bank[i]->stime; // set least time.
+                    idx = i;                                       // set idx.
+                }
+                if (i == 31)
+                {
+                    // save dump to structure where it is oldest.
+                    global_tasks_dump_bank[idx]->task_id = task_id;
+                    global_tasks_dump_bank[idx]->preipherals = preipherals;
+                    global_tasks_dump_bank[idx]->preipherals_count = preipherals_count;
+                    global_tasks_dump_bank[idx]->fault_code = fault_code;
+                    global_tasks_dump_bank[idx]->fault_dump = fault_dump;
+                    global_tasks_dump_bank[idx]->flags = flags;
+                    global_tasks_dump_bank[idx]->stime = read_stimer_us();
+                    break;
+                }
+            }
+        }
+    }
 }

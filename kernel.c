@@ -2,6 +2,7 @@
 #include "./lib/fwlist.h"
 #include "./lib/math.h"
 
+#include "./structure/dump.h"
 #include "./structure/gic400.h"
 #include "./structure/gpio.h"
 #include "./structure/ipcmailbox.h"
@@ -26,6 +27,8 @@ volatile u64_t *global_system_ticks = NULL;
 volatile struct muart_settings_t *global_mini_uart_settings = NULL;
 volatile struct muart_metadata_t *global_mini_uart_metadata = NULL;
 volatile struct muart_statistics_t *global_mini_uart_statistics = NULL;
+
+volatile struct task_dump_t *global_tasks_dump_bank = NULL;
 
 volatile struct irq_statistic_t *generic_irq_statistics_base = NULL;
 
@@ -72,6 +75,7 @@ void kernel()
     global_gic400_metadata = __global_gic400_metadata__;
     global_mini_uart_statistics = __global_muart_statistics__;
     system_panic_log = __system_panic_log__;
+    global_tasks_dump_bank = __global_tasks_dump_bank_base__;
     core_tasks = __core_info_table__ + 16;
 
     // initialize pcb queues.
@@ -259,7 +263,7 @@ void wakeup_service()
 {
     const u8_t cid = core_id(); // get core id.
 
-    volatile struct tfwlist_header_t *timer_request_queue = &timer_requestes_queues[cid];
+    volatile struct tfwlist_header_t *timer_request_queue = timer_requestes_queues[cid];
 
     volatile struct fwlist_header_t *sleeping_queue = sleeping_queues[cid];
     volatile struct fwlist_header_t *pri0_ready_queue = pri0_ready_queues[cid];

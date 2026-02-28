@@ -131,7 +131,10 @@ SECTIONS {
         . += 24; /* reserve 24 bytes for global struct of muart statistics. */
 
         __generic_base_irq_statistics__ = .;
-        . += 64; /* reserve (16*4) shorts for generic. */
+        . += 64; /* reserve (16*4) bytes for generic irq handlation statistics. */
+
+        __generic_base_schaduler_statistics__ = .;
+        .+=24; /* reserve (3*8) bytes for generic schaduler statistics. */
 
         __global_uart0_statistics__ = .;
         . += 24; /* reserve 24 bytes for uart0 statistics. */
@@ -165,6 +168,9 @@ SECTIONS {
 
         __timer_request_bank_base__ = .;
         . += 1536; /* Reserve 64 struct of timer request. (24*64) Bytes. */
+    
+        __global_tasks_dump_bank_base__ = .;
+        .+=1792; /* Reserve 32 struct of task dump. (32*56) */
     }
     
     .pcb_queues (NOLOAD) : {

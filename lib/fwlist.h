@@ -21,8 +21,7 @@ u64_t fw_len(volatile struct fwlist_header_t *header);
 
 // TIMER
 
-struct // 16 B
-    tfwlist_header_t
+struct tfwlist_header_t // 16 B
 {
     volatile struct timer_request_t *head;
     volatile struct timer_request_t *tail;

@@ -147,6 +147,10 @@ extern unsigned long __generic_base_irq_statistics__;
 
 extern unsigned long __system_panic_log__;
 
+extern unsigned long __generic_base_schaduler_statistics__;
+
+extern unsigned long __global_tasks_dump_bank_base__;
+
 typedef unsigned long u64_t;
 typedef signed long s64_t;
 
