@@ -1,10 +1,9 @@
 #ifndef GIC400_H
 #define GIC400_H
 #include "../structure/base.h"
+#include "../structure/extern.h"
 #include "../structure/gic400.h"
 #include "../lib/math.h"
-
-extern volatile struct gic400_metadata_t *global_gic400_metadata;
 
 // note: ID 30 is for generic timer (PPI).
 

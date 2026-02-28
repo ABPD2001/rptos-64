@@ -1,10 +1,8 @@
 #ifndef LIB_IPC_MAILBOX_H
 #define LIB_IPC_MAILBOX_H
 #include "../structure/base.h"
+#include "../structure/extern.h"
 #include "../structure/ipcmailbox.h"
-
-volatile struct ipcmailbox_t *global_ipcmailbox_bank;                  // limit of 64 headers.
-volatile struct ipcmailbox_segment_t *global_ipcmailbox_segments_bank; // limit of 512 segments.
 
 struct ipcmailbox_t *alloc_ipcmailbox();
 struct ipcmailbox_segment_t *alloc_ipcmailboxsegment();
