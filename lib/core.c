@@ -12,7 +12,7 @@ u8_t core_id()
     return id & (0xFF);
 };
 
-void __free_gpios(u64_t task_id)
+void __free_gpio(u64_t task_id)
 {
     for (u64_t i = 0; i < 64; i++)
     {
@@ -21,12 +21,13 @@ void __free_gpios(u64_t task_id)
             global_gpio_bank->task_id = 0;
             global_gpio_bank->nth = 0;
             global_gpio_bank->table = 0;
+            break;
         } // clear ownership
         global_gpio_bank++; // go to next gpio ownership.
     }
 }
 
-void __free_locks(u64_t task_id)
+void __free_lock(u64_t task_id)
 {
     for (u64_t i = 0; i < 128; i++)
     {
@@ -37,6 +38,7 @@ void __free_locks(u64_t task_id)
             global_software_locks_bank->owner_task = 0;
             global_software_locks_bank->lock = NULL;
             global_software_locks_bank->type = 0;
+            break;
         }
         else if (global_software_locks_bank->gained_task == task_id)
         {
@@ -46,12 +48,13 @@ void __free_locks(u64_t task_id)
                 release_mutex(global_software_locks_bank->lock);
             else if (global_software_locks_bank->type)
                 release_semaphore(global_software_locks_bank->lock);
+            break;
         }
         global_software_locks_bank++; // go next software lock structure.
     }
 }
 
-void __free_ipcmailboxes(u64_t task_id)
+void __free_ipcmailbox(u64_t task_id)
 {
     volatile struct ipcmailbox_t *nav_header = global_ipcmailbox_bank;
 
@@ -66,13 +69,14 @@ void __free_ipcmailboxes(u64_t task_id)
             nav_header->accessibility = 0;         // clear accessibility.
             nav_header->maximum_length = 0;        // clear maximum length.
             nav_header->metadata = 0;              // clear metadata.
+            break;
         }
 
         nav_header++; // go to next ipc mailbox header.
     }
 }
 
-void __free_timer_requests(u64_t task_id)
+void __free_timer_request(u64_t task_id)
 {
     volatile struct tfwlist_header_t *nav_header = timer_requestes_queues[core_id()];
     volatile struct timer_request_t *nav_req = nav_header->head;
@@ -84,6 +88,7 @@ void __free_timer_requests(u64_t task_id)
             nav_req->task_id = 0;    // clear ownership.
             nav_req->wake_ticks = 0; // clear wake_ticks.
             fw_rm(nav_header, i);    // remove item from queue.
+            break;
         }
         if (!nav_req->task_id)
             break;
@@ -127,7 +132,7 @@ void terminate_context(volatile struct pcb_t *task)
     }
     task->id = task_id; // id is always same.
 
-    __built_in_free_preipheral_t *free_preipheral_functions[10] = {&__free_muart, &__free_void, &__free_void, &__free_void, &__free_void, &__free_void, &__free_timer_requests, &__free_gpios, &__free_locks, &__free_ipcmailboxes}; // this must be filled.
+    __built_in_free_preipheral_t *free_preipheral_functions[10] = {&__free_muart, &__free_void, &__free_void, &__free_void, &__free_void, &__free_void, &__free_timer_request, &__free_gpio, &__free_lock, &__free_ipcmailbox}; // this must be filled.
 
     // free preipherals here.
     for (u64_t i = 0; i < task->preipherals_count; i++)

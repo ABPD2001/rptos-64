@@ -1,6 +1,33 @@
 __attribute__((section(".svc_handlers")));
 #include "./svc.h"
 
+u64_t free_flag_preiph(u8_t flag)
+{
+
+    volatile struct pcb_t *ctask = __core_info_table__ + 32 + core_id() * 8;
+
+    for (u64_t i = 0; i < 16; i++)
+    {
+        if ((ctask->preipherals >> i * 4) & 0xF == flag & 0xF)
+        {
+            ctask->preipherals &= ~(ctask->preipherals >> i * 4); // clear flag.
+
+            u64_t mask = 0;
+
+            for (u64_t j = 0; j < i; j++)
+            {
+                mask |= 1 << j;
+            }
+
+            u64_t pt1 = ctask->preipherals & mask;                   // mask first part.
+            u64_t pt2 = (ctask->preipherals & ~mask) << (i - 1) * 4; // mask seconds part.
+
+            ctask->preipherals |= pt1; // set part 1.
+            ctask->preipherals |= pt2; // set part 2.
+        }
+    }
+}
+
 u64_t svc_muart_write(u8_t *buffer, u64_t length)
 {
     const u8_t cid = core_id();
@@ -180,16 +207,7 @@ u64_t svc_gpalloc(u64_t table, u8_t nth)
     const u8_t cid = core_id();
     volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
 
-    for (u64_t i = 0; i < 64; i++)
-    {
-        if (!global_gpio_bank[i].task_id)
-        {
-            global_gpio_bank[i].task_id = ctask->id; // set ownership id to current running task id.
-            global_gpio_bank[i].table = table;
-            global_gpio_bank[i].nth = (u64_t)nth;
-        }
-        return 0; // done.
-    }
+    free_flag_preiph(PREIPH_GPIO_FLAG);
     return 1; // out of space.
 }
 
@@ -201,9 +219,32 @@ u64_t svc_gpfree(u64_t task_id, u64_t table, u8_t nth)
         {
             if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
             {
+                volatile struct pcb_t *ctask = __core_info_table__ + 32 + core_id() * 8;
+
                 global_gpio_bank[i].task_id = 0; // clear task id.
                 global_gpio_bank[i].table = 0;   // clear table.
                 global_gpio_bank[i].nth = 0;     // clear nth.
+
+                for (u64_t i = 0; i < 16; i++)
+                {
+                    if ((ctask->preipherals >> i * 4) & 0xF == PREIPH_GPIO_FLAG)
+                    {
+                        ctask->preipherals &= ~(ctask->preipherals >> i * 4); // clear flag.
+
+                        u64_t mask = 0;
+
+                        for (u64_t j = 0; j < i; j++)
+                        {
+                            mask |= 1 << j;
+                        }
+
+                        u64_t pt1 = ctask->preipherals & mask;                   // mask first part.
+                        u64_t pt2 = (ctask->preipherals & ~mask) << (i - 1) * 4; // mask seconds part.
+
+                        ctask->preipherals |= pt1; // set part 1.
+                        ctask->preipherals |= pt2; // set part 2.
+                    }
+                }
 
                 return 0; // done.
             }
@@ -366,8 +407,8 @@ u64_t svc_mutex_gain(u64_t *mutex)
         if (ctask->preipherals_count >= 16)
             return 2;
 
-        ctask->preipherals |= (0b1000) << ctask->preipherals_count * 4; // insert flag of "software lock gain".
-        ctask->preipherals_count++;                                     // increment preipherals count.
+        ctask->preipherals |= (PREIPH_IPCMAILBOX_FLAG) << ctask->preipherals_count * 4; // insert flag of "software lock gain".
+        ctask->preipherals_count++;                                                     // increment preipherals count.
 
         return res;
     }
@@ -387,8 +428,8 @@ u64_t svc_semaphore_gain(u64_t *semaphore)
         if (ctask->preipherals_count >= 16)
             return 2;
 
-        ctask->preipherals |= (0b1000) << ctask->preipherals_count * 4; // insert flag of "software lock gain".
-        ctask->preipherals_count++;                                     // increment preipherals count.
+        ctask->preipherals |= (PREIPH_IPCMAILBOX_FLAG) << ctask->preipherals_count * 4; // insert flag of "software lock gain".
+        ctask->preipherals_count++;                                                     // increment preipherals count.
 
         return res;
     }

@@ -26,6 +26,7 @@
 
 .section .svc_handlers
 .global svc_muart_alloc,svc_muart_free
+.equiv PREIPH_MUART_FLAG,0b0000
 
 svc_muart_alloc_free_ret:
     ldp x29,x30, [sp],#16 @ restore frame pointer and return address.
@@ -159,6 +160,8 @@ svc_muart_free:
     mov x2,#1 @ set to 1 for gaining mutex.
     
     bl svc_muart_alloc_free_gainmutex @ start gaining mutex loop.
+    mov x0,#PREIPH_MUART_FLAG
+    bl free_flag_preiph @ clear mini uart preipheral flag.
 
     mov x1,#0 @ clear x0, (for loop).
     bl svc_muart_free_loop @ do a loop for clearing metadata.
