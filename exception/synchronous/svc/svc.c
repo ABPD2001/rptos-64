@@ -355,3 +355,45 @@ u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailb
     *message = read_ipcmailbox(mailbox, receiver_task_id);
     return 0;
 }
+
+u64_t svc_mutex_gain(u64_t *mutex)
+{
+    const u64_t res = gain_mutex(mutex);
+    if (!res)
+    {
+        volatile struct pcb_t *ctask = __core_info_table__ + 32 + 4 * core_id();
+
+        if (ctask->preipherals_count >= 16)
+            return 2;
+
+        ctask->preipherals |= (0b1000) << ctask->preipherals_count * 4; // insert flag of "software lock gain".
+        ctask->preipherals_count++;                                     // increment preipherals count.
+
+        return res;
+    }
+}
+u64_t svc_mutex_release(u64_t *mutex)
+{
+    return release_mutex(mutex); // release mutex.
+}
+
+u64_t svc_semaphore_gain(u64_t *semaphore)
+{
+    const u64_t res = gain_semaphore(semaphore);
+    if (!res)
+    {
+        volatile struct pcb_t *ctask = __core_info_table__ + 32 + 4 * core_id();
+
+        if (ctask->preipherals_count >= 16)
+            return 2;
+
+        ctask->preipherals |= (0b1000) << ctask->preipherals_count * 4; // insert flag of "software lock gain".
+        ctask->preipherals_count++;                                     // increment preipherals count.
+
+        return res;
+    }
+}
+u64_t svc_semaphore_release(u64_t *semaphore)
+{
+    return release_semaphore(semaphore); // release semaphore.
+}

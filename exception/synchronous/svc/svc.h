@@ -12,6 +12,7 @@
 #include "../../../lib/core.h"
 #include "../../../lib/ipcmailbox.h"
 #include "../../../lib/fwlist.h"
+#include "../../../lib/softwarelock.h"
 #include "../../../drivers/stimer.h"
 #include "../../../lib/softwarelock.h"
 
@@ -36,4 +37,9 @@ u64_t svc_gpvalue(u64_t table, u8_t nth, u8_t value);
 u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t *whitelist_tasks_id, u64_t *blacklist_tasks_id, u8_t type, u32_t maximum_length);
 u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t done, u64_t receiver_task_id);
 u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_message_t *message, u64_t *content_pt1, u64_t *content_pt2, u64_t receiver_task_id);
+
+u64_t svc_mutex_gain(u64_t *mutex);
+u64_t svc_mutex_release(u64_t *mutex);
+u64_t svc_semaphore_gain(u64_t *semaphore);
+u64_t svc_semaphore_release(u64_t *semaphore);
 #endif

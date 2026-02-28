@@ -18,6 +18,10 @@
 .org 0x40, b svc_create_ipcmailbox
 .org 0x44, b svc_write_ipcmailbox
 .org 0x48, b svc_read_ipcmailbox
+.org 0x4C, b svc_mutex_gain
+.org 0x50, b svc_mutex_release
+.org 0x54, b svc_semaphore_gain
+.org 0x58, b svc_semaphore_release
 .ltorg
 
 .section .svc_handlers
