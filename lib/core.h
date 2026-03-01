@@ -1,8 +1,10 @@
 #ifndef __LIB_CORE_H__
 #define __LIB_CORE_H__
 #include "../drivers/stimer.h"
+#include "../structure/dump.h"
 #include "../structure/base.h"
 #include "../structure/extern.h"
+#include "../structure/ipcmailbox.h"
 #include "../structure/gpio.h"
 #include "../structure/muart.h"
 #include "../structure/schaduler.h"

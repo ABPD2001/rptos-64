@@ -143,40 +143,40 @@ void terminate_context(volatile struct pcb_t *task)
 
     for (u64_t i = 0; i < 32; i++)
     {
-        if (!global_tasks_dump_bank[i]->task_id)
+        if (!global_tasks_dump_bank[i].task_id)
         {
             // save dump to structure where is empty.
-            global_tasks_dump_bank[i]->task_id = task_id;
-            global_tasks_dump_bank[i]->preipherals = preipherals;
-            global_tasks_dump_bank[i]->preipherals_count = preipherals_count;
-            global_tasks_dump_bank[i]->fault_code = fault_code;
-            global_tasks_dump_bank[i]->fault_dump = fault_dump;
-            global_tasks_dump_bank[i]->flags = flags;
-            global_tasks_dump_bank[i]->stime = read_stimer_us();
+            global_tasks_dump_bank[i].task_id = task_id;
+            global_tasks_dump_bank[i].preipherals = preipherals;
+            global_tasks_dump_bank[i].preipherals_count = preipherals_count;
+            global_tasks_dump_bank[i].fault_code = fault_code;
+            global_tasks_dump_bank[i].fault_dump = fault_dump;
+            global_tasks_dump_bank[i].flags = flags;
+            global_tasks_dump_bank[i].stime = read_stimer_us();
             break;
         }
         if (i == 31)
         {
             for (u64_t i = 0; i < 32; i++)
             {
-                u64_t least_time = global_tasks_dump_bank[i]->stime;
+                u64_t least_time = global_tasks_dump_bank[i].stime;
                 s64_t idx = -1;
 
-                if (least_time > global_tasks_dump_bank[i]->stime)
+                if (least_time > global_tasks_dump_bank[i].stime)
                 {
-                    least_time = global_tasks_dump_bank[i]->stime; // set least time.
-                    idx = i;                                       // set idx.
+                    least_time = global_tasks_dump_bank[i].stime; // set least time.
+                    idx = i;                                      // set idx.
                 }
                 if (i == 31)
                 {
                     // save dump to structure where it is oldest.
-                    global_tasks_dump_bank[idx]->task_id = task_id;
-                    global_tasks_dump_bank[idx]->preipherals = preipherals;
-                    global_tasks_dump_bank[idx]->preipherals_count = preipherals_count;
-                    global_tasks_dump_bank[idx]->fault_code = fault_code;
-                    global_tasks_dump_bank[idx]->fault_dump = fault_dump;
-                    global_tasks_dump_bank[idx]->flags = flags;
-                    global_tasks_dump_bank[idx]->stime = read_stimer_us();
+                    global_tasks_dump_bank[idx].task_id = task_id;
+                    global_tasks_dump_bank[idx].preipherals = preipherals;
+                    global_tasks_dump_bank[idx].preipherals_count = preipherals_count;
+                    global_tasks_dump_bank[idx].fault_code = fault_code;
+                    global_tasks_dump_bank[idx].fault_dump = fault_dump;
+                    global_tasks_dump_bank[idx].flags = flags;
+                    global_tasks_dump_bank[idx].stime = read_stimer_us();
                     break;
                 }
             }
