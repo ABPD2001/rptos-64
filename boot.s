@@ -1,5 +1,5 @@
 .section .init
-.global core_spinlock,cinit
+.global core_spinlock,cinit,minit
 
 minit:
     msr daifset,#0xF @ disable irq, fiq, serror and debug.

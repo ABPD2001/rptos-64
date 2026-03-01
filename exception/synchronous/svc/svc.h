@@ -7,13 +7,13 @@
 #include "../../../structure/muart.h"
 #include "../../../structure/timer.h"
 
+#include "../../../drivers/stimer.h"
 #include "../../../drivers/gpio.h"
 
 #include "../../../lib/core.h"
 #include "../../../lib/ipcmailbox.h"
 #include "../../../lib/fwlist.h"
 #include "../../../lib/softwarelock.h"
-#include "../../../drivers/stimer.h"
 #include "../../../lib/softwarelock.h"
 
 u64_t svc_muart_write(u8_t *buffer, u64_t length);

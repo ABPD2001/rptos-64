@@ -54,11 +54,14 @@ SECTIONS {
     /* HANDLERS & INSTRUCTIONS */
 
     .vector_table_handlers ALIGN(8) : {
-        *(vector_table_handlers)
+        *(.vector_table_handlers)
     }
     
     .sync_lower_el_handlers ALIGN(8) : {
-        *(sync_lower_el_handlers)
+        *(.sync_lower_el_handlers)
+    }
+    .svc_handlers ALIGN(4) : {
+        *(.svc_handlers)
     }
 
     .bss ALIGN(16) : {
