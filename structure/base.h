@@ -116,6 +116,12 @@
 #define GIC_SGI_MODE_BROADCASR 0b01
 #define GIC_SGI_MODE_ME 0b10
 
+#define SYSTEM_TIMER_BASE 0x7E003000
+#define SYSTEM_TIMER_CS 0x00
+#define SYSTEM_TIMER_CLO 0x04
+#define SYSTEM_TIMER_CHI 0x08
+#define SYSTEM_TIMER_C1 0x10
+
 extern unsigned long __global_timer_ticks__;
 extern unsigned long __pcb_bank_base__;
 extern unsigned long __pcb_queue_base__;
@@ -161,6 +167,8 @@ extern unsigned long __system_panic_log__;
 extern unsigned long __generic_base_schaduler_statistics__;
 
 extern unsigned long __global_tasks_dump_bank_base__;
+
+extern unsigned long __generic_base_system_exception_statistics__;
 
 typedef unsigned long u64_t;
 typedef signed long s64_t;

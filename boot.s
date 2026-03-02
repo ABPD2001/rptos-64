@@ -65,7 +65,7 @@ cinit:
     ldr x0,=__bss_start__
     ldr x1,=__bss_end__
 
-    cmp x0,#0 @ compare if core is zero.
+    cmp x0,#0 @ compare if core id was zero.
 
     b.eq clear_bss_loop @ clear bss section.
     b.ne kernel @ load kernel (core n>0).
@@ -171,7 +171,12 @@ core_spinlock:
     bl panic_read_stack_loop
 
     @ loop and wait for watchdog to exceeds its limit. 
+    b panic_void_loop
 .endm
+
+panic_void_loop:
+    wfe
+    b panic_void_loop
 
 vector_table:
     .balign 128

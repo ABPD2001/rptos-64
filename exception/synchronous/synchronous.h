@@ -11,4 +11,6 @@ void lower_el_wfi_wfe_handler();
 void lower_el_unkown_handler();
 void lower_el_sp_alignment_handler();
 void lower_el_pc_alignment_handler();
+void lower_el_simd_fp_err_handler();
+void lower_el_fp_err_handler();
 #endif

@@ -21,6 +21,8 @@ extern volatile struct gic400_metadata_t *global_gic400_metadata;
 
 extern volatile struct system_panic_log_t *system_panic_log;
 
+extern volatile struct system_exceptions_statistics_t *generic_system_exception_statistics_base;
+
 extern volatile struct fwlist_header_t **created_queues;
 extern volatile struct fwlist_header_t **pri0_ready_queues;
 extern volatile struct fwlist_header_t **pri1_ready_queues;

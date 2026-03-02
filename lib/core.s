@@ -1,7 +1,11 @@
 .section .text
 .balign 4
 
-.global multi_core_enable,restore_context,enable_irq,enable_fiq,disable_irq,disable_fiq,enable_daif,disable_daif
+.global multi_core_enable,restore_context,enable_irq,enable_fiq,disable_irq,disable_fiq,enable_daif,disable_daif,system_panic,void_event_loop
+.equiv SYSTEM_TIMER_BASE,0x7E003000
+.equiv SYSTEM_TIMER_CLO,0x04
+.equiv SYSTEM_TIMER_CHI,0x08
+
 
 multi_core_enable:
     stp x29,x30,[sp,#-16]!
@@ -109,4 +113,61 @@ enable_fiq:
     ldp x29,x30,[sp],#16
     mov sp,x29
     ret
+
+system_panic_ksp_loop:
+    cmp x0,#128 @ compare to 128.
+    b.ge x30 @ back if it was equal/greater
+
+    ldrb x1,[sp,x0] @ read a byte from stack
+    strb x1,[x11,#1]! @ store a byte info panic log.
+
+    add x0,x0,#1 @ increment. 
+    b system_panic_ksp_loop @ circle back.
+
+system_panic_void_loop:
+    wfe
+    b system_panic_void_loop
+
+system_panic:
+    @ Read important registers.
+    mrs x0,ESR_EL1
+    mrs x1,ELR_EL1
+    mov x2,sp
+    mrs x3,SPSR_EL1
+    mrs x4,FAR_EL1
+    mrs x5,MPIDR_EL1
+    mrs x6,SCTLR_EL1
+    mrs x7,daif
+    ldr x8,=GICC_BASE @ get GIC Interface base address (mmio).
+    ldr x9,[x8,#GICC_IAR]
+    ldr x8,[x8,#GICC_HPPIR]
+
+    ldr x10,=SYSTEM_TIMER_BASE @ get timer base address (mmio).
+
+    ldr w11,[x10,#SYSTEM_TIMER_CHI] @ read upper 32-bit of timer.
+    lsl w11,#32 @ shift to left.
+    ldr w11,[x10,#SYSTEM_TIMER_CLO] @ read lower 32-bit of timer.
+
+    mov x10,x11
+    ldr x11,=__system_panic_log__
+
+    @ store important registers.
+
+    stp x0,x1,[x11,#16]!
+    stp x29,x30,[x11,#16]!
+    stp x2,x3,[x11,#16]!
+    stp x4,x5,[x11,#16]!
+    stp x6,x7,[x11,#16]!
+    stp x8,x9,[x11,#16]!
+    str x10,[x11,#8]!
+
+    mov x0,#0 @ set x0 to zero for label.
+    bl system_panic_ksp_loop @ start loop.
+
+    @ loop and wait for watchdog.
+    b void_event_loop
+
+void_event_loop:
+    wfe
+    b void_event_loop
 .ltorg

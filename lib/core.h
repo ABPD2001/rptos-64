@@ -18,6 +18,9 @@ typedef void *(__built_in_free_preipheral_t)(u64_t);
 u8_t core_id();
 void terminate_context(volatile struct pcb_t *task);
 
+extern void system_panic();
+
+extern void void_event_loop();
 extern void multi_core_enable();
 extern void restore_context(struct pcb_t *task);
 

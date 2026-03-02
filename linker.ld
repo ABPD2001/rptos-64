@@ -142,6 +142,9 @@ SECTIONS {
         __generic_base_schaduler_statistics__ = .;
         . += 24; /* reserve (3*8) bytes for generic schaduler statistics. */
 
+        __generic_base_system_exception_statistics__ = .;
+        . += 64; /* reserve (16*4) bytes for generic statistics of exceptions. */
+
         __global_uart0_statistics__ = .;
         . += 24; /* reserve 24 bytes for uart0 statistics. */
         __global_uart2_statistics__ = .;
