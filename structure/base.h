@@ -74,7 +74,7 @@
 #define UART_ITOP 0x88
 #define UART_TDR 0x8C
 
-#define GICC_BASE 0xFF841000 // GIC CPU Interface
+#define GICC_BASE 0xFF842000 // GIC CPU Interface
 
 #define GICC_CTLR 0x0000
 #define GICC_PMR 0x0004

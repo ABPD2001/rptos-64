@@ -7,7 +7,7 @@ minit:
 
     ldr x1,=(1<<31) @ Enable 64-bit EL1.
     orr x0,x0,x1
-    bic x0,x0,#0x18 @ disable IMO and FMO.
+    bic x0,x0,#0x18 @ disable IMO and FMO. (4&5 bits)
     bic x0,x0,#(1<<27) @ disable tge.
     msr HCR_EL2,x0 @ apply changes.
 

@@ -9,6 +9,9 @@
 
 .section .irq_handlers
 .balign 4
+.equiv GICD_BASE,0xFF841000
+.equiv GICD_SGIR,0xF00
+
 .equiv AUX_BASE,0x7e215000
 .equiv AUX_LSR_REG,0x54
 .equiv AUX_IRQ,0x00
@@ -77,7 +80,12 @@ system_timer1: @ handler by core 0 only.
     add x0,x0,#1 @ increment.
     str x0,=__global_timer_ticks__ @ store.
     @ send each a broadcast to all cores. (sgi).
-    b wakeup_service
+
+    ldr x0,=GICD_BASE @ load GICD base address.
+    ldr w1,=0b000000010000000010000000000010000 @ set value.
+    str w1,[x0,#GICD_SGIR] @ store (signal on mmio).
+
+    b wakeup_service @ start wakeup service.
     ret @ done.
 
 aux_main_routine_end:
