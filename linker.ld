@@ -60,8 +60,11 @@ SECTIONS {
     .sync_lower_el_handlers ALIGN(8) : {
         *(.sync_lower_el_handlers)
     }
-    .svc_handlers ALIGN(4) : {
+    .svc_handlers ALIGN(8) : {
         *(.svc_handlers)
+    }
+    .irq_handler ALIGN(8) : {
+        *(.irq_handlers)
     }
 
     .bss ALIGN(16) : {
