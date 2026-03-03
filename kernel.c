@@ -34,6 +34,8 @@ volatile struct irq_statistic_t *generic_irq_statistics_base = NULL;
 
 volatile struct system_exceptions_statistics_t *generic_system_exception_statistics_base = NULL;
 
+volatile struct system_breakpoint_t *generic_system_breakpoints_base = NULL;
+
 volatile struct gic400_metadata_t *global_gic400_metadata = NULL;
 
 volatile struct system_panic_log_t *system_panic_log = NULL;
@@ -79,6 +81,7 @@ void kernel()
     system_panic_log = __system_panic_log__;
     global_tasks_dump_bank = __global_tasks_dump_bank_base__;
     generic_system_exception_statistics_base = __generic_base_system_exception_statistics__;
+    generic_system_breakpoints_base = __system_debug_log__;
     core_tasks = __core_info_table__ + 16;
 
     // initialize pcb queues.

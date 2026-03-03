@@ -143,7 +143,7 @@ SECTIONS {
         . += 24; /* reserve (3*8) bytes for generic schaduler statistics. */
 
         __generic_base_system_exception_statistics__ = .;
-        . += 64; /* reserve (16*4) bytes for generic statistics of exceptions. */
+        . += 128; /* reserve (32*4) bytes for generic statistics of exceptions. */
 
         __global_uart0_statistics__ = .;
         . += 24; /* reserve 24 bytes for uart0 statistics. */
@@ -195,6 +195,9 @@ SECTIONS {
         . = ALIGN(8);
         __system_panic_log__ = .;
         . += 120; /* reserve 120 bytes for struct of panic log. */
+
+        __system_debug_log__ = .;
+        . += 1216; /* reserve (4*2*152) bytes for structs of breakpoint. */
     }
 
     __user_region_start__ = .;

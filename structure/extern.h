@@ -40,6 +40,8 @@ extern volatile struct tfwlist_header_t **timer_requestes_queues;
 
 extern volatile struct task_dump_t *global_tasks_dump_bank;
 
+extern volatile struct system_breakpoint_t *generic_system_breakpoints_base;
+
 extern volatile u64_t **core_tasks;
 
 extern volatile u32_t *pri_map;
