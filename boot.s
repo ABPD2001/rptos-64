@@ -194,6 +194,12 @@ vector_table:
     @ <--- CURRENT EXECUTION LEVEL with SPx --->
     @ synchronous exception
     .balign 128
+    str x0,[sp,#-8]!
+    mrs x0,ELR_El1 @ read elr.
+    add x0,x0,#4 @ calculate next instruction.
+    msr ELR_EL1,x0 @ apply.
+    ldr x0,[sp],#8
+
     _exception_entry
     mrs x1,ESR_EL1 @ read ESR_EL1
 
@@ -234,6 +240,12 @@ vector_table:
     @ <--- LOWER EXECUTION LEVEL with SPx (Aarch64) --->
     @ synchronous exception
     .balign 128
+    str x0,[sp,#-8]!
+    mrs x0,ELR_El1 @ read elr.
+    add x0,x0,#4 @ calculate next instruction.
+    msr ELR_EL1,x0 @ apply.
+    ldr x0,[sp],#8
+
     _exception_entry
     mrs x1,ESR_EL1 @ read ESR_EL1
 
