@@ -191,7 +191,7 @@ SECTIONS {
 
     /* system memory-based logs */
 
-    .log (NOLOAD) : {
+    .logs (NOLOAD) : {
         . = ALIGN(8);
         __system_panic_log__ = .;
         . += 120; /* reserve 120 bytes for struct of panic log. */
