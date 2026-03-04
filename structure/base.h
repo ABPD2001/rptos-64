@@ -122,6 +122,22 @@
 #define SYSTEM_TIMER_CHI 0x08
 #define SYSTEM_TIMER_C1 0x10
 
+#define MMU_GRANUEL_SIZE_4KB 0b00
+#define MMU_GRANUEL_SIZE_16KB 0b01
+#define MMU_GRANUEL_SIZE_64KB 0b11
+
+#define MMU_IPA_SIZE_30BITS 0b000
+#define MMU_IPA_SIZE_48BITS 0b101
+
+#define MMU_IORGN_NON_CACHABLE 0b00
+#define MMU_IORGN_WB_WA 0b01
+#define MMU_IORGN_WT 0b10
+#define MMU_IORGN_WB 0b11
+
+#define MMU_SH_NON_SHARABLE 0b00
+#define MMU_SH_OUTER_SHARABLE 0b10
+#define MMU_SH_INNER_SHARABLE 0b11
+
 extern unsigned long __global_timer_ticks__;
 extern unsigned long __pcb_bank_base__;
 extern unsigned long __pcb_queue_base__;

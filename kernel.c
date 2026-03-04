@@ -124,6 +124,17 @@ void kernel()
         muart_write(buffer, 16);
     }
 
+    // configure system control register.
+    u32_t sctlr;
+    asm volatile(
+        "mrs %0,SCTLR_EL1"
+        : "=r"(sctlr)
+        :
+        :);
+
+    sctlr |= 0x3000079;    // set Alignment check, stack alignment check, c15 barrier, Endiannmass of data access in EL0, Exception endiannmass.
+    sctlr &= ~(0x3000079); // clear anything else.
+
     // at last, configure gic-400.
 
     gic400_interfacectl(true, true); // enable EOIModeNS and Group 1.
