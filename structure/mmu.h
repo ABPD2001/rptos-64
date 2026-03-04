@@ -13,7 +13,9 @@ struct mmu_settings_t // 16 Bytes
     u8_t outer_cachablity_kernel;
     u8_t sharablity_user;
     u8_t sharablity_kernel;
-    u8_t reserved[7]; // 7 Bytes padding.
+    u8_t ttrnb_user;   // all 1 or 0.
+    u8_t ttrnb_kernel; // all 1 or 0.
+    u8_t reserved[5];  // 5 Bytes padding.
 };
 
 #endif
