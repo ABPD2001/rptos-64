@@ -43,6 +43,9 @@ lower_el_svc_handler:
 
     add x19,sp,#288 @ set x19 to start of saved context.
     ldr x20,=__svc_table__
+    
+    mul x0,x0,#4 @ calculate relative address of table.
+    add x0,x0,x20 @ calculate absolute address of table.
 
     ldp x0,x1,[x19,#-16]!
     ldp x2,x3,[x19,#-16]!
@@ -53,9 +56,6 @@ lower_el_svc_handler:
     ldp x12,x13,[x19,#-16]!
     ldp x14,x15,[x19,#-16]!
     ldp x16,x17,[x19,#-16]! @ restore arguements of task.
-
-    mul x0,x0,#4 @ calculate relative address of table.
-    add x0,x0,x20 @ calculate absolute address of table.
 
     stp x19,x19,[sp,#-16] @ save start of saved context into stack.
 
