@@ -16,7 +16,12 @@ SECTIONS {
         (table in bytes)
         0-7: core 0 stack.
         8-15: core 1 stack.
-        ...
+        16-23: core 2 stack.
+        24-31: core 3 stack.
+        32-39: core 0 task.
+        40-47: core 1 task.
+        48-55: core 2 task.
+        56-63: core 3 task.
         */
     }
 

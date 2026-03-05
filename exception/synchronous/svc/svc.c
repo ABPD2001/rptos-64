@@ -4,7 +4,7 @@ __attribute__((section(".svc_handlers")));
 u64_t free_flag_preiph(u8_t flag)
 {
 
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + core_id() * 8;
+    volatile struct pcb_t *ctask = core_tasks[core_id()];
 
     for (u64_t i = 0; i < 16; i++)
     {
@@ -31,7 +31,7 @@ u64_t free_flag_preiph(u8_t flag)
 u64_t svc_muart_write(u8_t *buffer, u64_t length)
 {
     const u8_t cid = core_id();
-    const u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
+    const u64_t *ctask = core_tasks[cid];
     volatile struct muart_metadata_t *muart = __global_muart_metadata__;
 
     if (muart->owner_task != *ctask)
@@ -45,7 +45,7 @@ u64_t svc_muart_write(u8_t *buffer, u64_t length)
 u64_t svc_muart_read(u8_t *buffer, u64_t maximum_length)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
+    const volatile u64_t *ctask = core_tasks[cid];
     volatile struct muart_metadata_t *muart = __global_muart_metadata__;
 
     if (muart->owner_task != *ctask)
@@ -58,7 +58,7 @@ u64_t svc_muart_read(u8_t *buffer, u64_t maximum_length)
 u64_t svc_muart_write_char(u8_t ch)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
+    const volatile u64_t *ctask = core_tasks[cid];
     volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u8_t *mu_io = AUX_MU_IO_REG;
 
@@ -76,7 +76,7 @@ u64_t svc_muart_write_char(u8_t ch)
 u64_t svc_muart_read_char(u8_t *ch)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
+    const volatile u64_t *ctask = core_tasks[cid];
     volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u8_t *mu_io = AUX_MU_IO_REG;
 
@@ -116,7 +116,7 @@ u8_t svc_muart_availablity()
 u64_t svc_get_task_id()
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
+    const volatile u64_t *ctask = core_tasks[cid];
 
     return *ctask;
 }
@@ -124,7 +124,7 @@ u64_t svc_get_task_id()
 u64_t svc_muart_settings(u16_t baudrate, u8_t data_bits, u8_t enablation)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = ((__core_info_table__ + 32) + cid * 8);
+    const volatile u64_t *ctask = core_tasks[cid];
     volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u32_t *baudrate_reg = AUX_MU_BAUD_REG;
     volatile u32_t *cntl = AUX_MU_CNTL_REG;
@@ -193,7 +193,7 @@ u64_t svc_tsleep_ms(u32_t us)
 u64_t svc_termination_request()
 {
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
     ctask->status = 3; // set status to terminated.
 
     set_gtimer(1); // allow generic timer to work for a ms on a loop.
@@ -205,7 +205,7 @@ u64_t svc_termination_request()
 u64_t svc_gpalloc(u64_t table, u8_t nth)
 {
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     free_flag_preiph(PREIPH_GPIO_FLAG);
     return 1; // out of space.
@@ -219,7 +219,7 @@ u64_t svc_gpfree(u64_t task_id, u64_t table, u8_t nth)
         {
             if (table == global_gpio_bank[i].table && nth == global_gpio_bank[i].nth)
             {
-                volatile struct pcb_t *ctask = __core_info_table__ + 32 + core_id() * 8;
+                volatile struct pcb_t *ctask = core_tasks[core_id()];
 
                 global_gpio_bank[i].task_id = 0; // clear task id.
                 global_gpio_bank[i].table = 0;   // clear table.
@@ -257,7 +257,7 @@ u64_t svc_gpfree(u64_t task_id, u64_t table, u8_t nth)
 u64_t svc_gpfunction(u64_t table, u8_t nth, u8_t function)
 {
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     for (u64_t i = 0; i < 64; i++)
     {
@@ -277,7 +277,7 @@ u64_t svc_gpfunction(u64_t table, u8_t nth, u8_t function)
 u64_t svc_gpset(u64_t table, u8_t nth)
 {
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     for (u64_t i = 0; i < 64; i++)
     {
@@ -297,7 +297,7 @@ u64_t svc_gpset(u64_t table, u8_t nth)
 u64_t svc_gpclear(u64_t table, u8_t nth)
 {
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     for (u64_t i = 0; i < 64; i++)
     {
@@ -316,7 +316,7 @@ u64_t svc_gpclear(u64_t table, u8_t nth)
 u64_t svc_gpvalue(u64_t table, u8_t nth, u8_t value)
 {
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     for (u64_t i = 0; i < 64; i++)
     {
@@ -340,7 +340,7 @@ u64_t svc_gpvalue(u64_t table, u8_t nth, u8_t value)
 u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t *whitelist_tasks_id, u64_t *blacklist_tasks_id, u8_t type, u32_t maximum_length)
 {
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
     volatile struct ipcmailbox_t *mailbox = alloc_ipcmailbox();
 
     if (!mailbox)
@@ -365,7 +365,7 @@ u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t *whitelist_tasks_id, u64_t 
 u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t done, u64_t receiver_task_id)
 {
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     if (mailbox->blacklist_tasks_id && mailbox->whitelist_tasks_id)
         return 2; // invalid input.
@@ -382,7 +382,7 @@ u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_
 u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_message_t *message, u64_t *content_pt1, u64_t *content_pt2, u64_t receiver_task_id)
 {
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     if (mailbox->blacklist_tasks_id && mailbox->whitelist_tasks_id)
         return 2; // invalid input.
@@ -402,7 +402,7 @@ u64_t svc_mutex_gain(u64_t *mutex)
     const u64_t res = gain_mutex(mutex);
     if (!res)
     {
-        volatile struct pcb_t *ctask = __core_info_table__ + 32 + 4 * core_id();
+        volatile struct pcb_t *ctask = core_tasks[core_id()];
 
         if (ctask->preipherals_count >= 16)
             return 2;
@@ -423,7 +423,7 @@ u64_t svc_semaphore_gain(u64_t *semaphore)
     const u64_t res = gain_semaphore(semaphore);
     if (!res)
     {
-        volatile struct pcb_t *ctask = __core_info_table__ + 32 + 4 * core_id();
+        volatile struct pcb_t *ctask = core_tasks[core_id()];
 
         if (ctask->preipherals_count >= 16)
             return 2;

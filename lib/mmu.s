@@ -39,7 +39,7 @@ mmu_configuration:
     msr TTBR0_EL1,x0 @ set Translation Table Base Register 0.
     msr TTBR1_EL1,x1 @ set Translation Table Base Register 1.
     msr SCTLR_EL1,x3 @ apply mmu enablation.
-    isb sy @ wait until everything synchronizes.
+    isb ish @ wait until inner shareable synchronizes. 
 
     ret @ return.
 

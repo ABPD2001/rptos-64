@@ -4,7 +4,7 @@ __attribute__((section(".sync_lower_el_handlers")));
 void lower_el_wfi_wfe_handler()
 {
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;     // set status to terminated, because direct access to wfi and wfe not granted in EL0.
     ctask->fault_code = 4; // set fault code to security breach (wfi/wfe).
@@ -21,7 +21,7 @@ void lower_el_unkown_handler()
                  :);
 
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;                        // set status to terminated.
     ctask->fault_code = 3;                    // set fault code to unkown instruction.
@@ -42,7 +42,7 @@ void lower_el_sp_alignment_handler()
         :);
 
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;       // set status to terminated.
     ctask->fault_code = 1;   // set fault code to stack alignment fault.
@@ -62,7 +62,7 @@ void lower_el_pc_alignment_handler()
         :);
 
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;       // set status to terminated.
     ctask->fault_code = 2;   // set fault code to pc alignment fault.
@@ -82,7 +82,7 @@ void lower_el_simd_fp_err_handler()
         :);
 
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;       // set status to terminated.
     ctask->fault_code = 3;   // set fault code to simd/fp fault.
@@ -102,7 +102,7 @@ void lower_el_fp_err_handler()
         :);
 
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;       // set status to terminated.
     ctask->fault_code = 5;   // set fault code to instruction abort fault.
@@ -122,7 +122,7 @@ void lower_el_d_abort_lower_handler()
         :);
 
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;       // set status to terminated.
     ctask->fault_code = 5;   // set fault code to data abort fault.
@@ -142,7 +142,7 @@ void lower_el_i_abort_lower_handler()
         :);
 
     const u8_t cid = core_id();
-    volatile struct pcb_t *ctask = __core_info_table__ + 32 + cid * 8;
+    volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;       // set status to terminated.
     ctask->fault_code = 4;   // set fault code to pc alignment fault.

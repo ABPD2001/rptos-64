@@ -64,8 +64,9 @@ volatile struct memory_paging_settings_t *memory_paging_settings = NULL;
 volatile u32_t *pri_map = NULL;
 volatile u32_t *sch_ticks = NULL;
 
-void task_dispatcher();
-void task_schaduler();
+void task_dispatcher(); // third stage.
+void load_balancer();   // second stage.
+void task_schaduler();  // first stage.
 void wakeup_service();
 
 void kernel()
@@ -86,7 +87,7 @@ void kernel()
     global_tasks_dump_bank = __global_tasks_dump_bank_base__;
     generic_system_exception_statistics_base = __generic_base_system_exception_statistics__;
     generic_system_breakpoints_base = __system_debug_log__;
-    core_tasks = __core_info_table__ + 16;
+    core_tasks = __core_info_table__ + 32;
 
     // initialize pcb queues.
 
@@ -138,8 +139,7 @@ void kernel()
         :
         :);
 
-    sctlr |= 0x3000079;    // set Alignment check, stack alignment check, c15 barrier, Endiannmass of data access in EL0, Exception endiannmass.
-    sctlr &= ~(0x3000079); // clear anything else.
+    sctlr = 0x3000079; // set Alignment check, stack alignment check, c15 barrier, Endiannmass of data access in EL0, Exception endiannmass.
 
     // memory paging configuration and initialization.
     if (!core_id())
@@ -286,6 +286,12 @@ void task_schaduler()
             break;
         temp_task = next_ptr; // seek to next pcb in queue.
     }
+}
+
+void load_balancer()
+{
+    const u8_t cid = core_id();
+    // develop...
 }
 
 void task_dispatcher()
