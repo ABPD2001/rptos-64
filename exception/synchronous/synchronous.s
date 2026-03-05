@@ -39,23 +39,43 @@ lower_el_svc_handler:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
 
+    stp x19,x20,[sp,#-16]!
+
     add x19,sp,#288 @ set x19 to start of saved context.
+    ldr x20,=__svc_table__
+
     ldp x0,x1,[x19,#-16]!
     ldp x2,x3,[x19,#-16]!
     ldp x4,x5,[x19,#-16]!
-    ldp x6,x7,[x19,#-16]! @ restore arguements of task.
+    ldp x6,x7,[x19,#-16]! 
+    ldp x8,x9,[x19,#-16]!
+    ldp x10,x11,[x19,#-16]!
+    ldp x12,x13,[x19,#-16]!
+    ldp x14,x15,[x19,#-16]!
+    ldp x16,x17,[x19,#-16]! @ restore arguements of task.
+
+    mul x0,x0,#4 @ calculate relative address of table.
+    add x0,x0,x20 @ calculate absolute address of table.
 
     stp x19,x19,[sp,#-16] @ save start of saved context into stack.
 
-    bl x1 @ call the svc handler from table.
+    bl x20 @ call the svc handler from table.
 
     ldp x19,x19,[sp],#16 @ read start of saved context info stack.
-    stp x6,x7,[x19,#-16]!
-    stp x4,x5,[x19,#-16]!
-    stp x2,x3,[x19,#-16]!
-    stp x0,x1,[x19,#-16]! @ save params and result into context.
+    
+    stp x16,x17,[x19],#16
+    stp x14,x15,[x19],#16
+    stp x12,x13,[x19],#16
+    stp x10,x11,[x19],#16
+    stp x8,x9,[x19],#16
+    stp x6,x7,[x19],#16
+    stp x4,x5,[x19],#16
+    stp x2,x3,[x19],#16
+    stp x0,x1,[x19],#16 @ save params and result into context.
 
+    ldp x19,x20,[sp],#16
     mov sp,x29
     ldp x29,x30,[sp],#16
+    
     ret
 .ltorg
