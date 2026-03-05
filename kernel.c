@@ -152,7 +152,7 @@ void kernel()
                                                                                                                                  : 65536);
         const u8_t page_size = memory_paging_settings->page_sizing;
 
-        memory_paging_settings->pages_count = (3.5 * 1073741824) / pages_numeric_size; // calculate count of pages by page size.
+        memory_paging_settings->pages_count = (3.5 * (1073741824 /* 1 GB*/)) / pages_numeric_size; // calculate count of pages by page size.
 
         volatile struct memframe_t *frame = memory_frames;
         u64_t raw_address = __user_region_start__;
@@ -163,22 +163,20 @@ void kernel()
             memory_frames->frame_id = i;                // set index (id).
             memory_frames->owner_task_id = 0;           // clear owner task.
             memory_frames->size = page_size;            // set size.
-            memory_frames->start_address = raw_address; // set raw address =.
+            memory_frames->start_address = raw_address; // set raw address.
             raw_address += pages_numeric_size;          // increment to next frame.
         }
     }
 
     // at last, configure gic-400.
-    if (!core_id())
-        gic400_interfacectl(true, true); // enable EOIModeNS and Group 1.
+    gic400_interfacectl(true, true); // enable EOIModeNS and Group 1.
+    gic400_priorityirq(125, 0x80);   // AUX
+    gic400_priorityirq(89, 0x90);    // UART
+    gic400_priorityirq(30, 0xA0);    // generic timer
+    gic400_priorityirq(97, 0xB0);    // system timer
+    enable_daif();                   // enable IRQ, FIQ, SError, Debug
 
-    gic400_priorityirq(125, 0x80); // AUX
-    gic400_priorityirq(89, 0x90);  // UART
-    gic400_priorityirq(30, 0xA0);  // generic timer
-    gic400_priorityirq(97, 0xB0);  // system timer
-    enable_daif();                 // enable IRQ, FIQ, SError, Debug
-
-    // start a task.
+    // run a task.
 
     task_schaduler();
     task_dispatcher();

@@ -162,7 +162,7 @@ SECTIONS {
     .banks (NOLOAD) : {
         . = ALIGN(8);
         __pcb_bank_base__ = .;
-        . += 23552; /* Reserve 64 struct of pcb. (368*64) Bytes. */
+        . += 23808; /* Reserve 64 struct of pcb. (372*64) Bytes. */
         
         __gpio_ownerships_bank_base__ = .;
         . += 1536; /* Reserve 64 struct of ownership. (24*64) Bytes. */
@@ -200,8 +200,8 @@ SECTIONS {
         . += 1216; /* reserve (4*2*152) bytes for structs of breakpoint. */
     }
 
-    /* memory frames */
-    .memory_frames (NOLOAD) : {
+    /* memory frames (MMU) */
+    .mmu (NOLOAD) : {
         . = ALIGN(8);
         __system_memory_frame_bank_base__ = .;
         . += 29360128; /* reserve 28 MB for memory frames metadata. */
