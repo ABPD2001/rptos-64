@@ -126,7 +126,7 @@ void lower_el_d_abort_lower_handler()
 
     ctask->status = 3;       // set status to terminated.
     ctask->fault_code = 5;   // set fault code to data abort fault.
-    ctask->fault_dump = elr; // set fault dump to address of cause instruction.
+    ctask->fault_dump = far; // set fault dump to address of cause instruction.
 
     task_schaduler();
     task_dispatcher(); // ignore task and do new schaduling (because of saftey reasons).

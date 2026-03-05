@@ -127,7 +127,7 @@ core_spinlock:
     
     stp x30,x0,[sp,#-16]
     stp x1,x1,[sp,#-16] @ save ELR with padding
-    dmb ish @ data memory barrier.
+    dmb ish @ data memory barrier (inner shareable).
 .endm
 
 .macro _exception_irq_enable
@@ -225,7 +225,6 @@ vector_table:
     ldr x0,[x0,#GICC_AIR] @ ackhowledge interrupt.
     stp x0,x0,[sp,#-16]! @ store ackhowledge interrupt value. 
 
-    _exception_irq_enable
     bl irq_routine_router
     
     ldp x1,x1,[sp,#-16]! @ restore ackhowledge interrupt value. 
@@ -233,7 +232,22 @@ vector_table:
     str w1,[x0,#GICC_EOI] @ end of interrupt.
 
     b RETURN_TO_TASK
-    @ SError/vSError exception (reentrant)
+
+    
+    @ FIQ/vFIQ exception
+    .balign 128
+    _exception_entry
+
+    ldr x0,=GICC_BASE
+    ldr x0,[x0,#GICC_AIR] @ ackhowledge interrupt.
+    str x0,[x0,#GICC_EOIR] @ end of interrupt.
+    str x0,[x0,#GICC_DIR] @ deactivation.
+
+    _exception_fiq_enable
+
+    bl RETURN_TO_TASK
+
+    @ SError/vSError exception
     .balign 128
     _serror_panic
 
@@ -270,7 +284,6 @@ vector_table:
     ldr x0,[x0,#GICC_AIR] @ ackhowledge interrupt.
     stp x0,x0,[sp,#-16]! @ store ackhowledge interrupt value. 
 
-    _exception_irq_enable
     bl irq_routine_router
     
     ldp x1,x1,[sp,#-16]! @ restore ackhowledge interrupt value. 
@@ -282,13 +295,12 @@ vector_table:
     @ FIQ/vFIQ exception
     .balign 128
     _exception_entry
-    @ read GIC-400 for FIQ id.
 
-    ldr x1,=__fiq_table__
-    mov x2,#4
-    mul x0,x0,x2 @ calculate callback relative address of table.
-    add x1,x1,x0
-    
+    ldr x0,=GICC_BASE
+    ldr x0,[x0,#GICC_AIR] @ ackhowledge interrupt.
+    str x0,[x0,#GICC_EOIR] @ end of interrupt.
+    str x0,[x0,#GICC_DIR] @ deactivation.
+
     _exception_fiq_enable
 
     bl RETURN_TO_TASK
@@ -331,6 +343,7 @@ RETURN_TO_TASK:
     ldp x4,x5,[sp],#16    
     ldp x2,x3,[sp],#16        
     ldp x0,x1,[sp],#16 @ restore context.
+    dmb ish @ data memory barrier (inner shareable).
 
     eret @ return.
 
@@ -367,6 +380,7 @@ irq_routine_router:
     ldr x4,=____irq_table__
     add x3,x3,x4 @ calculate absolute address
 
+    _exception_irq_enable @ enable irqs
     bl x3 @ call irq main routine. 
 
     ldp x30,x30,[sp],#16 @ restore link register.

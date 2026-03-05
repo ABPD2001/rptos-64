@@ -9,18 +9,20 @@
 
 multi_core_enable:
     stp x29,x30,[sp,#-16]!
+    mov x29,sp
 
     mov x19,#0x80000
     str x19,[xzr,#0xd8]
     str x19,[xzr,#0xe0]
     str x19,[xzr,#0xe8]
 
-    dsb sy @ memory barrier. 
+    dsb sy @ data synchronuzation barrier (outer shareable). 
     
-    sev @ send event to other cores.
+    mov sp,x29
+    sev @ send event to all cores.
 
     ldp x29,x30,[sp],#16
-    ret
+    ret @ return.
 
 restore_context:
     @ in this function, we deceive processor core to we are in a exception, and we return to task with "eret".

@@ -7,6 +7,7 @@ enable_mmu:
     mrs x0,SCTLR_EL1 @ read system control register.
     orr x0,#0x1 @ set first bit. (mmu enable)
     msr SCTLR_EL1,x0 @ apply.
+    isb sy @ wait until apply.
 
     ret @ return.
 
@@ -14,16 +15,18 @@ disable_mmu:
     mrs x0,SCTLR_EL1 @ read system control register.
     bic x0,#0x1 @ clear first bit. (mmu enable)
     msr SCTLR_EL1,x0 @ apply.
+    isb sy @ wait until apply.
 
     ret @ return.
 
 set_ttbr0:
     msr TTBR0_EL1,x0 @ set Translation Table Base Register 0.
+    isb sy @ wait until apply.
     ret @ return.
 
 set_ttbr1:
     msr TTBR1_EL1,x0 @ set Translation Table Base Register 1.
-    isb @ wait until apply.
+    isb sy @ wait until apply.
     ret @ return.
 
 mmu_configuration:
@@ -36,7 +39,7 @@ mmu_configuration:
     msr TTBR0_EL1,x0 @ set Translation Table Base Register 0.
     msr TTBR1_EL1,x1 @ set Translation Table Base Register 1.
     msr SCTLR_EL1,x3 @ apply mmu enablation.
-    isb @ wait until everything synchronizes.
+    isb sy @ wait until everything synchronizes.
 
     ret @ return.
 
@@ -52,6 +55,7 @@ mmu_settings:
     ldr x9,[x0],#1 @ read "shareablity of kernel".
     ldr x10,[x0],#1 @ read "TTBNR_EL1, N = 0/1 of user".
     ldr x11,[x0],#1 @ read "TTBNR_EL1, N = 0/1 of kernel".
+    dmb ish @ data memory barrier (inner shareable).
 
     lsl x1,#29 @ shift to left.
     lsl x2,#13 @ shift to left.
@@ -82,6 +86,7 @@ mmu_settings:
 
     @ apply to special register.
     msr TCR_EL1,x1
+    isb sy @ wait until everything synchronizes.
 
     ret @ return.
 
