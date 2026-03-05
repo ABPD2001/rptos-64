@@ -7,6 +7,7 @@
 #include "./structure/gpio.h"
 #include "./structure/ipcmailbox.h"
 #include "./structure/irq.h"
+#include "./structure/mmu.h"
 #include "./structure/muart.h"
 #include "./structure/panic.h"
 #include "./structure/task.h"
@@ -57,11 +58,14 @@ volatile struct tfwlist_header_t **timer_requestes_queues = NULL;
 
 volatile u64_t **core_tasks = NULL;
 
+volatile struct memframe_t *memory_frames = NULL;
+volatile struct memory_paging_settings_t *memory_paging_settings = NULL;
+
 volatile u32_t *pri_map = NULL;
 volatile u32_t *sch_ticks = NULL;
 
 void task_dispatcher();
-void task_schaduler(struct pcb_t *current_running_task);
+void task_schaduler();
 void wakeup_service();
 
 void kernel()
@@ -100,6 +104,8 @@ void kernel()
     sleeping_queues = __pcb_queue_base__ + 44 * 16;
 
     timer_requestes_queues = __pcb_queue_base__ + 48 * 16;
+    memory_frames = __system_memory_frame_bank_base__; // set frame bank base.
+    memory_paging_settings = __memory_paging_settings_base__;
 
     pri_map = __pcb_queue_base__ + 704;
     *pri_map = 0x07070707; // set highest priority at first. (7 is most and 0 is least).
@@ -135,19 +141,53 @@ void kernel()
     sctlr |= 0x3000079;    // set Alignment check, stack alignment check, c15 barrier, Endiannmass of data access in EL0, Exception endiannmass.
     sctlr &= ~(0x3000079); // clear anything else.
 
-    // at last, configure gic-400.
+    // memory paging configuration and initialization.
+    if (!core_id())
+    {
+        memory_paging_settings->initial_pages = 1;      // set initial pages count to 1.
+        memory_paging_settings->page_sizing = 0;        // set page sizing to 4KB.
+        memory_paging_settings->eviction_threshold = 6; // set eviction threshold to 1 MB.
 
-    gic400_interfacectl(true, true); // enable EOIModeNS and Group 1.
-    gic400_priorityirq(125, 0x80);   // AUX
-    gic400_priorityirq(89, 0x90);    // UART
-    gic400_priorityirq(30, 0xA0);    // generic timer
-    gic400_priorityirq(97, 0xB0);    // system timer
-    enable_daif();                   // enable IRQ, FIQ, SError, Debug
+        const u32_t pages_numeric_size = (!memory_paging_settings->page_sizing ? 4096 : memory_paging_settings->page_sizing == 1 ? 16384
+                                                                                                                                 : 65536);
+        const u8_t page_size = memory_paging_settings->page_sizing;
+
+        memory_paging_settings->pages_count = (3.5 * 1073741824) / pages_numeric_size; // calculate count of pages by page size.
+
+        volatile struct memframe_t *frame = memory_frames;
+        u64_t raw_address = __user_region_start__;
+        const u32_t pages_count = memory_paging_settings->pages_count;
+
+        for (u64_t i = 0; i < pages_count; i++)
+        {
+            memory_frames->frame_id = i;                // set index (id).
+            memory_frames->owner_task_id = 0;           // clear owner task.
+            memory_frames->size = page_size;            // set size.
+            memory_frames->start_address = raw_address; // set raw address =.
+            raw_address += pages_numeric_size;          // increment to next frame.
+        }
+    }
+
+    // at last, configure gic-400.
+    if (!core_id())
+        gic400_interfacectl(true, true); // enable EOIModeNS and Group 1.
+
+    gic400_priorityirq(125, 0x80); // AUX
+    gic400_priorityirq(89, 0x90);  // UART
+    gic400_priorityirq(30, 0xA0);  // generic timer
+    gic400_priorityirq(97, 0xB0);  // system timer
+    enable_daif();                 // enable IRQ, FIQ, SError, Debug
+
+    // start a task.
+
+    task_schaduler();
+    task_dispatcher();
 }
 
-void task_schaduler(struct pcb_t *current_running_task)
+void task_schaduler()
 {
     const u8_t cid = core_id(); // read the core id (for calculation of queues).
+    volatile struct pcb_t *current_running_task = core_tasks[cid];
 
     // calculating queues for each state.
     volatile struct fwlist_header_t *created_queue = created_queues[cid];

@@ -44,6 +44,9 @@ extern volatile struct system_breakpoint_t *generic_system_breakpoints_base;
 
 extern volatile u64_t **core_tasks;
 
+extern volatile struct memframe_t *memory_frames;
+extern volatile struct memory_paging_settings_t *memory_paging_settings;
+
 extern volatile u32_t *pri_map;
 extern volatile u32_t *sch_ticks;
 #endif

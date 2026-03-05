@@ -1,8 +1,9 @@
 #ifndef TYPES_TASK_H
 #define TYPES_TASK_H
 #include "./base.h"
+#include "./mmu.h"
 
-struct pcb_t // 368  B
+struct pcb_t // 368 Bytes
 {
     // its recommended to apply simd registers later...
     u64_t spsr;
@@ -39,18 +40,18 @@ struct pcb_t // 368  B
     u64_t x0;
     u64_t sp;
     u64_t id;
-    u64_t status;   // 0: created, 1:ready, 2:running, 3:terminated, 4:waiting, 5:sleeping
-    u64_t priority; // 0~7: 0 is least and 7 is most.
-    u64_t stack_start;
-    u64_t stack_end;
-    u64_t fault_code;  // 1: stack alignment fault ,2: pc alignment fault
-    u64_t preipherals; // using this to free all allocated preipherals by this task when this task is terminating. --> each 4 bits is a preipheral id. (0000 --> mini uart, 0001 --> uart-0, 0010 --> uart-2, 0011 --> uart-3, 0100 --> uart-4, 0101 --> uart-5, 0110 --> timer request, 0111 --> gpio ownership, 1000 --> software lock gained, 1001 --> ipc mailbox owned)
+    u64_t status;                             // 0: created, 1:ready, 2:running, 3:terminated, 4:waiting, 5:sleeping
+    u64_t priority;                           // 0~7: 0 is least and 7 is most.
+    volatile struct memframes_header_t pages; // pointer to memory pages.
+    u64_t fault_code;                         // 1: stack alignment fault ,2: pc alignment fault
+    u64_t preipherals;                        // using this to free all allocated preipherals by this task when this task is terminating. --> each 4 bits is a preipheral id. (0000 --> mini uart, 0001 --> uart-0, 0010 --> uart-2, 0011 --> uart-3, 0100 --> uart-4, 0101 --> uart-5, 0110 --> timer request, 0111 --> gpio ownership, 1000 --> software lock gained, 1001 --> ipc mailbox owned)
     u64_t preipherals_count;
     u64_t parent;
     u64_t *childs;
     u64_t fault_dump;
     u64_t flags; // 0-1: dedicated core, 2: ready flag.
     u64_t pc;    // program counter.
+    u64_t ttbr;  // TTBR.
     volatile struct pcb_t *next;
 };
 

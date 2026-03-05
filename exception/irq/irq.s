@@ -30,6 +30,13 @@ core_generic_timer: @ generic timer of core gonna used for task schaduling...
     add x1,x1,x0 @ calculate PCB address of this core.
 
     add sp,sp,#16 @ skip ELR_EL1 + padding, becuase there is no return to task.
+    
+    ldp x0,x0,[sp],#16 @ read ELR_EL1.
+    str x0,[x1,#344] @ store task pc.
+    
+    mrs x0,TTBR0_EL1 @ read ttbr0.
+    str x0,[x1,#348] @ store ttbr of task.
+
     ldp x30,x0,[sp],#16
 
     stp x0,x30,[x1],#16 @ save SPSR_EL1 and x30 into pcb.

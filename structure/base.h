@@ -188,6 +188,9 @@ extern unsigned long __global_tasks_dump_bank_base__;
 
 extern unsigned long __generic_base_system_exception_statistics__;
 
+extern unsigned long __system_memory_frame_bank_base__;
+extern unsigned long __memory_paging_settings_base__;
+
 typedef unsigned long u64_t;
 typedef signed long s64_t;
 

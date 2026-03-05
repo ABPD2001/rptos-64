@@ -200,5 +200,15 @@ SECTIONS {
         . += 1216; /* reserve (4*2*152) bytes for structs of breakpoint. */
     }
 
+    /* memory frames */
+    .memory_frames (NOLOAD) : {
+        . = ALIGN(8);
+        __system_memory_frame_bank_base__ = .;
+        . += 29360128; /* reserve 28 MB for memory frames metadata. */
+        __memory_paging_settings_base__ = .;
+        . += 8; /* reserve 8 bytes for struct of memory paging settings. */
+    }
+
+    . = 536870912; /* Set user start point at 512 MB. */
     __user_region_start__ = .;
 }

@@ -141,6 +141,27 @@ void terminate_context(volatile struct pcb_t *task)
         free_preipheral_functions[preipheral_id](task_id);                               // call release routine.
     }
 
+    volatile struct memframe_t *tmppage = NULL;
+    const u32_t pages_numeric_size = (!memory_paging_settings->page_sizing ? 4096 : memory_paging_settings->page_sizing == 1 ? 16384
+                                                                                                                             : 65536);
+    tmppage = task->pages.head; // set temporal page to head.
+
+    // clear memory pages...
+    while (1)
+    {
+        tmppage->owner_task_id = 0; // clear owner task (free).
+        volatile u64_t *raw_mem = tmppage->start_address;
+
+        for (u64_t i = 0; i < pages_numeric_size; i++)
+        {
+            *raw_mem = 0; // clear.
+            raw_mem++;    // increment to next 4 bytes.
+        }
+
+        if (tmppage == task->pages.tail)
+            break;
+    }
+
     for (u64_t i = 0; i < 32; i++)
     {
         if (!global_tasks_dump_bank[i].task_id)
