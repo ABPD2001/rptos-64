@@ -22,6 +22,8 @@
 .org 0x50, b svc_mutex_release
 .org 0x54, b svc_semaphore_gain
 .org 0x58, b svc_semaphore_release
+.org 0x5C, b svc_core_id
+.org 0x60, b svc_cluster_id
 .ltorg
 
 .section .svc_handlers
@@ -165,5 +167,28 @@ svc_muart_free:
 
     mov x1,#0 @ clear x0, (for loop).
     bl svc_muart_free_loop @ do a loop for clearing metadata.
+
+svc_core_id:
+    stp x29,x30,[sp,#-16]!
+    mov x29,sp
+
+    mrs x0,MPIDR_EL1
+    and x0,x0,#0xFF @ mask only first byte.
+
+    mov sp,x29
+    ldp x29,x30,[sp],#16
+    ret @ return.
+
+svc_cluster_id:
+    stp x29,x30,[sp,#-16]!
+    mov x29,sp
+
+    mrs x0,MPIDR_EL1
+    and x0,x0,#0xFF00 @ mask only second byte.
+    lsr x0,#8 @ shift to right.
+
+    mov sp,x29
+    ldp x29,x30,[sp],#16
+    ret @ return.
 
 .ltorg

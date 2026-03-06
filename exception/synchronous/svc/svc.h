@@ -16,6 +16,8 @@
 #include "../../../lib/softwarelock.h"
 #include "../../../lib/softwarelock.h"
 
+// Serial
+
 u64_t svc_muart_write(u8_t *buffer, u64_t length);
 u64_t svc_muart_read(u8_t *buffer, u64_t maximum_length);
 u64_t svc_muart_write_char(u8_t ch);
@@ -24,9 +26,13 @@ u8_t svc_muart_availablity();
 extern u64_t svc_muart_alloc();
 extern u64_t svc_muart_free();
 
+// Task
+
 u64_t svc_get_task_id();
 u64_t svc_termination_request();
 u64_t svc_tsleep_ms(u32_t us);
+
+// GPIO
 
 u64_t svc_gpalloc(u64_t table, u8_t nth);
 u64_t svc_gpfree(u64_t task_id, u64_t table, u8_t nth);
@@ -34,12 +40,21 @@ u64_t svc_gpset(u64_t table, u8_t nth);
 u64_t svc_gpclear(u64_t table, u8_t nth);
 u64_t svc_gpvalue(u64_t table, u8_t nth, u8_t value);
 
+// Inter-Process-Communication Mailboxes
+
 u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t *whitelist_tasks_id, u64_t *blacklist_tasks_id, u8_t type, u32_t maximum_length);
 u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t done, u64_t receiver_task_id);
 u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_message_t *message, u64_t *content_pt1, u64_t *content_pt2, u64_t receiver_task_id);
+
+// Software locks.
 
 u64_t svc_mutex_gain(u64_t *mutex);
 u64_t svc_mutex_release(u64_t *mutex);
 u64_t svc_semaphore_gain(u64_t *semaphore);
 u64_t svc_semaphore_release(u64_t *semaphore);
+
+// Multi-core
+
+extern u8_t svc_core_id();
+extern u8_t svc_cluster_id();
 #endif

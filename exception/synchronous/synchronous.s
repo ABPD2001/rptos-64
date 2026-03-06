@@ -44,6 +44,9 @@ lower_el_svc_handler:
     add x19,sp,#288 @ set x19 to start of saved context.
     ldr x20,=__svc_table__
     
+    msr ELR_EL1,x0 @ apply.
+    ldr x1,=0x3FFFFFF
+    and x0,x0,x1 @ mask 0:24 bits.
     mul x0,x0,#4 @ calculate relative address of table.
     add x0,x0,x20 @ calculate absolute address of table.
 
