@@ -303,7 +303,6 @@ void task_schaduler()
 void load_balancer()
 {
     const u8_t cid = core_id();
-    // develop...
 }
 
 void task_dispatcher()
