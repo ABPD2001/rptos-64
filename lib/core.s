@@ -68,7 +68,7 @@ disable_daif:
 
 enable_daif:
     stp x29,x30,[sp,#-16]!
-    mov x29,sp
+    mov x29,spc
 
     msr daifclr,#0xF
 
@@ -172,4 +172,76 @@ system_panic:
 void_event_loop:
     wfe
     b void_event_loop
+
+psci_cpu_off:
+    ldr w0,=0x84000002 @ set function id.
+    smc #0 @ secure monitor-call.
+    ret @ return.
+
+psci_cpu_on:
+    @ save paramaters at other registers.
+    mov x3,x0
+    mov x4,x1
+    mov x5,x2
+    
+    ldr w0,=0xC4000003 @ set function id.
+    mrs x2,MPIDR_EL1
+    
+    and x1,x2,#0xFFFF00 @ mask AFF1, AFF2
+    and x2,x2,#0xF00000000 @ mask AFF3
+    orr x1,x1,x2 @ merge.
+    and x3,x3,#0xFF @ mask only first byte of parameter.
+    orr x1,x1,x3 @ merge.
+    
+    mov x2,x4
+    mov x3,x5
+
+    smc #0 @ secure monitor-call.
+
+    ret @ return.
+
+psci_system_reset:
+    ldr w0,=0x84000008 @ set function id.
+    smc #0 @ secure monitor-call.
+    ret @ return.
+
+psci_system_off:
+    ldr w0,=0x84000009 @ set function id.
+    smc #0 @ secure monitor-call.
+    ret @ return.
+
+psci_cpu_suspend:
+    mov x4,x2
+    mov x3,x1
+    mov x2,x0
+    
+    ldr w0,=0xC4000001 @ set functio id.
+    
+    mov x1,#0 @ just in case.
+    and x2,x2,#0xFFFF @ mask only first half-word.
+    orr x1,x1,x2 @ merge.
+    
+    cmp x3,#0 @ compare state type.
+    cset x2,EQ @ set bool value.
+    lsl x2,#16 @ shift to left.
+
+    orr x1,x1,x2 @ merge.
+
+    and x4,x4,#0x3 @ only first two bit is required.
+    lsl x4,#24 @ shift to left.
+
+    orr x1,x1,x4 @ merge.
+
+    smc #0 @ secure monitor-call.
+    
+    ret @ return.
+    
+cpu_standby_wfe:
+    wfe 
+    ret @ return.
+
+cpu_standby_wfi:
+    wfi
+    ret @ return.
+
 .ltorg

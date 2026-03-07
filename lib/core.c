@@ -204,3 +204,13 @@ void terminate_context(volatile struct pcb_t *task)
         }
     }
 }
+
+s64_t psci_cpu_powerdown()
+{
+    psci_cpu_suspend(NULL, PSCI_CPU_SUSPEND_POWERDOWN_STATETYPE, PSCI_CPU_SUSPEND_CORES_POWER_LEVEL);
+}
+
+s64_t psci_cpu_standby()
+{
+    psci_cpu_suspend(NULL, PSCI_CPU_SUSPEND_STANDBY_STATETYPE, PSCI_CPU_SUSPEND_CORES_POWER_LEVEL);
+}

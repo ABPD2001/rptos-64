@@ -138,6 +138,13 @@
 #define MMU_SH_OUTER_SHARABLE 0b10
 #define MMU_SH_INNER_SHARABLE 0b11
 
+#define PSCI_CPU_SUSPEND_CORES_POWER_LEVEL 0b00
+#define PSCI_CPU_SUSPEND_CLUSTERS_POWER_LEVEL 0b01
+#define PSCI_CPU_SUSPEND_SYSTEM_POWER_LEVEL 0b10
+
+#define PSCI_CPU_SUSPEND_STANDBY_STATETYPE 0b0
+#define PSCI_CPU_SUSPEND_POWERDOWN_STATETYPE 0b1
+
 extern unsigned long __global_timer_ticks__;
 extern unsigned long __pcb_bank_base__;
 extern unsigned long __pcb_queue_base__;
