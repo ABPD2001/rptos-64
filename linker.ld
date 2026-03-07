@@ -45,12 +45,12 @@ SECTIONS {
         __irq_table__ = .;
         *(.irq_table)
     }
-    
+/*     
     .fiq_table ALIGN(4) : {
         __fiq_table__ = .;
         *(.fiq_table)
     }
-    
+     */
     .svc_table ALIGN(4) : {
         __svc_table__ = .;
         *(.svc_table)
