@@ -166,6 +166,9 @@ SECTIONS {
 
     .banks (NOLOAD) : {
         . = ALIGN(8);
+        __cccb_bank_base__ = .;
+        . += 384; /* Reserve (96*4) bytes for struct of cccb. (for 4 cores) */
+
         __pcb_bank_base__ = .;
         . += 23808; /* Reserve 64 struct of pcb. (372*64) Bytes. */
         

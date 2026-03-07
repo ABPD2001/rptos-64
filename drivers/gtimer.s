@@ -22,8 +22,8 @@ set_gtimer:
     mrs x1,CNTFRQ_EL1       @ read generic-timer frequency.
     mov x2,#1000
     udiv x1,x1,x2           @ frequency/1000 
-    mul x1,x1,x0            @ (frequency/1000)*ms = genereic-timer counts.
-    msr x1,CNTP_TVAL_EL1    @ set generic-timer counts.
+    mul w1,w1,x0            @ (frequency/1000)*ms = genereic-timer counts.
+    msr w1,CNTP_TVAL_EL1    @ set generic-timer counts.
     
     ldp x29,x30,[sp],#16
     mov sp,x29

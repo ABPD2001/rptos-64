@@ -24,28 +24,89 @@ multi_core_enable:
     ldp x29,x30,[sp],#16
     ret @ return.
 
+restore_core_context:
+    ldr x0,[x0] @ point to it self (actual pcb).
+    str xzr,[x0,#8]! @ clear vaild property. 
+
+    @ restore from struct.
+
+    ldp x1,x2,[x0,#16]! @ TTBR0, TTBR1
+    ldp x3,x4,[x0,#16]! @ TCR, SCTLR
+    ldp x5,x6,[x0,#16]! @ FAR, SPSR
+    ldp x7,x8,[x0,#16]! @ CNTP_CTL, CNTFRQ
+    ldp x9,x10,[x0,#16]! @ CNTP_TVAL, CNTPCT
+
+    @ restore into registers.
+
+    msr TTBR0_EL1,x1
+    msr TTBR1_EL1,x2
+    msr TCR_EL1,x3
+    msr SCTLR_EL1,x4
+    msr FAR_EL1,x5
+    msr SPSR_EL1,x6
+    msr CNTP_CTL_EL1,x7
+    msr CNTFRQ_EL1,x8
+    msr CNTP_TVAL_EL1,x9
+    msr CNTPCT_EL1,x10
+    isb sy @ wait until everything synchronizes.
+
+    ret @ return.
+
+save_core_context:
+    mrs x0,MPIDR_EL1 @ read MPIDR_EL1.
+    and x0,x0,#0xFF @ mask first byte.
+
+    ldr x1,=__cccb_bank_base__ @ read context table base address.
+    mul x0,x0,#96 @ calculate relative address to context table.
+    add x0,x0,x1 @ calculate absolute address to context table.
+
+    @ read context.
+    mrs x1,TTBR0_EL1
+    mrs x2,TTBR1_EL1
+    mrs x3,TCR_EL1
+    mrs x4,SCTLR_EL1
+    mrs x5,FAR_EL1
+    mrs x6,SPSR_EL1
+    mrs x7,CNTP_CTL_EL1
+    mrs x8,CNTPFRQ_EL1
+    mrs x9,CNTP_TVAL_EL1
+    mrs x10,CNTPCT_EL1
+
+    @ set valid property.
+    mov x11,#1
+    ldr x11,[x0,#8]!
+
+    @ store context.
+    ldp x1,x2,[x0,#16]!
+    ldp x3,x4,[x0,#16]!
+    ldp x5,x6,[x0,#16]!
+    ldp x7,x8,[x0,#16]!
+    ldp x9,x10,[x0,#16]!
+
+    ret @ return.
+    
 restore_context:
     @ in this function, we deceive processor core to we are in a exception, and we return to task with "eret".
     @ we use x0 as register pointer and x1 as temporary register.
     ldr x0,[x0] @ point to it self.
 
-    ldp x1,x30,[x0,#-16]!
-    ldp x28,x29,[x0,#-16]!
-    ldp x26,x27,[x0,#-16]!
-    ldp x24,x25,[x0,#-16]!
-    ldp x22,x23,[x0,#-16]!
-    ldp x20,x21,[x0,#-16]!
-    ldp x18,x19,[x0,#-16]!
-    ldp x16,x17,[x0,#-16]!
-    ldp x14,x15,[x0,#-16]!
-    ldp x12,x13,[x0,#-16]!
-    ldp x10,x11,[x0,#-16]!
-    ldp x8,x9,[x0,#-16]!
-    ldp x6,x7,[x0,#-16]!
-    ldp x4,x5,[x0,#-16]!
-    ldp x2,x3,[x0,#-16]!
+    ldp x1,x30,[x0,#16]!
+    ldp x28,x29,[x0,#16]!
+    ldp x26,x27,[x0,#16]!
+    ldp x24,x25,[x0,#16]!
+    ldp x22,x23,[x0,#16]!
+    ldp x20,x21,[x0,#16]!
+    ldp x18,x19,[x0,#16]!
+    ldp x16,x17,[x0,#16]!
+    ldp x14,x15,[x0,#16]!
+    ldp x12,x13,[x0,#16]!
+    ldp x10,x11,[x0,#16]!
+    ldp x8,x9,[x0,#16]!
+    ldp x6,x7,[x0,#16]!
+    ldp x4,x5,[x0,#16]!
+    ldp x2,x3,[x0,#16]!
     
-    ldr x1,[x0,#-16]
+    ldr x1,[x0,#16]
     mov sp,x1 @ restore stack pointer.
 
     msr SPSR_EL1,x1 @ apply spsr.
@@ -68,7 +129,7 @@ disable_daif:
 
 enable_daif:
     stp x29,x30,[sp,#-16]!
-    mov x29,spc
+    mov x29,sp
 
     msr daifclr,#0xF
 

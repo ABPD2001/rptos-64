@@ -2,6 +2,7 @@
 #include "./lib/fwlist.h"
 #include "./lib/math.h"
 
+#include "./structure/core.h"
 #include "./structure/dump.h"
 #include "./structure/gic400.h"
 #include "./structure/gpio.h"
@@ -58,6 +59,8 @@ volatile struct tfwlist_header_t **timer_requestes_queues = NULL;
 
 volatile u64_t **core_tasks = NULL;
 
+volatile struct cccb_t **core_contexts = NULL;
+
 volatile struct memframe_t *memory_frames = NULL;
 volatile struct memory_paging_settings_t *memory_paging_settings = NULL;
 
@@ -71,6 +74,8 @@ void wakeup_service();
 
 void kernel()
 {
+    const u8_t cid = core_id();
+
     // first, we set address of global pointers (.bss variables)
     global_system_ticks = __global_timer_ticks__;
     global_pcb_bank = __pcb_bank_base__;                      // reminder: it has limit of 64 tasks.
@@ -87,6 +92,7 @@ void kernel()
     global_tasks_dump_bank = __global_tasks_dump_bank_base__;
     generic_system_exception_statistics_base = __generic_base_system_exception_statistics__;
     generic_system_breakpoints_base = __system_debug_log__;
+    core_contexts = __pcb_bank_base__;
     core_tasks = __core_info_table__ + 32;
 
     // initialize pcb queues.
@@ -113,58 +119,64 @@ void kernel()
     sch_ticks = __pcb_queue_base__ + 708;
     *sch_ticks = 0; // just in case... (to prevent from unkown behavior).
 
-    turn_on_gtimer(); // turn on generic timer of current core.
-
-    // then, if core id was zero, enabling multi-core mode and waiting until all cores acknowledged core zero.
-    if (!core_id())
+    if (core_contexts[cid]->valid)                // if context was valid.
+        restore_core_context(core_contexts[cid]); // restore core context.
+    else                                          // else initialize.
     {
-        initialize_muart();                         // initialize mini-uart.
-        gic400_setGrp1_distributor(true);           // enable group 1 interrupt.
-        multi_core_enable();                        // wake up other cores.
-        u32_t *counts = (__core_info_table__ + 64); // set pointer to counts.
-        while (1)                                   // wait until all cores are ready.
-            if (*counts == 4)
-                break;
 
-        char buffer[16] = "rptos-64 is up.";
-        buffer[15] = '\0';
-        muart_write(buffer, 16);
-    }
+        turn_on_gtimer(); // turn on generic timer of current core.
 
-    // configure system control register.
-    u32_t sctlr;
-    asm volatile(
-        "mrs %0,SCTLR_EL1"
-        : "=r"(sctlr)
-        :
-        :);
-
-    sctlr = 0x3000079; // set Alignment check, stack alignment check, c15 barrier, Endiannmass of data access in EL0, Exception endiannmass.
-
-    // memory paging configuration and initialization.
-    if (!core_id())
-    {
-        memory_paging_settings->initial_pages = 1;      // set initial pages count to 1.
-        memory_paging_settings->page_sizing = 0;        // set page sizing to 4KB.
-        memory_paging_settings->eviction_threshold = 6; // set eviction threshold to 1 MB.
-
-        const u32_t pages_numeric_size = (!memory_paging_settings->page_sizing ? 4096 : memory_paging_settings->page_sizing == 1 ? 16384
-                                                                                                                                 : 65536);
-        const u8_t page_size = memory_paging_settings->page_sizing;
-
-        memory_paging_settings->pages_count = (3.5 * (1073741824 /* 1 GB*/)) / pages_numeric_size; // calculate count of pages by page size.
-
-        volatile struct memframe_t *frame = memory_frames;
-        u64_t raw_address = __user_region_start__;
-        const u32_t pages_count = memory_paging_settings->pages_count;
-
-        for (u64_t i = 0; i < pages_count; i++)
+        // then, if core id was zero, enabling multi-core mode and waiting until all cores acknowledged core zero.
+        if (!cid)
         {
-            memory_frames->frame_id = i;                // set index (id).
-            memory_frames->owner_task_id = 0;           // clear owner task.
-            memory_frames->size = page_size;            // set size.
-            memory_frames->start_address = raw_address; // set raw address.
-            raw_address += pages_numeric_size;          // increment to next frame.
+            initialize_muart();                         // initialize mini-uart.
+            gic400_setGrp1_distributor(true);           // enable group 1 interrupt.
+            multi_core_enable();                        // wake up other cores.
+            u32_t *counts = (__core_info_table__ + 64); // set pointer to counts.
+            while (1)                                   // wait until all cores are ready.
+                if (*counts == 4)
+                    break;
+
+            char buffer[16] = "rptos-64 is up.";
+            buffer[15] = '\0';
+            muart_write(buffer, 16);
+        }
+
+        // configure system control register.
+        u32_t sctlr;
+        asm volatile(
+            "mrs %0,SCTLR_EL1"
+            : "=r"(sctlr)
+            :
+            :);
+
+        sctlr = 0x3000079; // set Alignment check, stack alignment check, c15 barrier, Endiannmass of data access in EL0, Exception endiannmass.
+
+        // memory paging configuration and initialization.
+        if (!cid)
+        {
+            memory_paging_settings->initial_pages = 1;      // set initial pages count to 1.
+            memory_paging_settings->page_sizing = 0;        // set page sizing to 4KB.
+            memory_paging_settings->eviction_threshold = 6; // set eviction threshold to 1 MB.
+
+            const u32_t pages_numeric_size = (!memory_paging_settings->page_sizing ? 4096 : memory_paging_settings->page_sizing == 1 ? 16384
+                                                                                                                                     : 65536);
+            const u8_t page_size = memory_paging_settings->page_sizing;
+
+            memory_paging_settings->pages_count = (3.5 * (1073741824 /* 1 GB*/)) / pages_numeric_size; // calculate count of pages by page size.
+
+            volatile struct memframe_t *frame = memory_frames;
+            u64_t raw_address = __user_region_start__;
+            const u32_t pages_count = memory_paging_settings->pages_count;
+
+            for (u64_t i = 0; i < pages_count; i++)
+            {
+                memory_frames->frame_id = i;                // set index (id).
+                memory_frames->owner_task_id = 0;           // clear owner task.
+                memory_frames->size = page_size;            // set size.
+                memory_frames->start_address = raw_address; // set raw address.
+                raw_address += pages_numeric_size;          // increment to next frame.
+            }
         }
     }
 

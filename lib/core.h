@@ -1,6 +1,7 @@
 #ifndef __LIB_CORE_H__
 #define __LIB_CORE_H__
 #include "../drivers/stimer.h"
+#include "../structure/core.h"
 #include "../structure/dump.h"
 #include "../structure/base.h"
 #include "../structure/extern.h"
@@ -21,6 +22,9 @@ u8_t core_id();
 extern void system_panic();
 extern void void_event_loop();
 extern void multi_core_enable();
+
+extern void restore_core_context(volatile struct cccb_t *core_context);
+extern void save_core_context();
 
 // Context.
 
