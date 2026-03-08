@@ -58,7 +58,7 @@ cinit:
     msr CPACR_EL1,x0 @ apply settings.
 
     dsb sy @ memory barrier.
-    isb @ flush pipeline.
+    isb sy @ synchronize eveything.
 
     bl retry_to_count @ increment core count. 
     

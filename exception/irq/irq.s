@@ -170,14 +170,18 @@ sgi_main_routine_end:
 
     ret @ return to main handler.
 
+
 sgi_main_routine:
     stp x30,x30,[sp,#-16]! @ store link register to main handler.
     
-    cmp x0,#7
-    b.ne sgi_main_routine_end
-
     adr x30,. @ set link register.
-    b.eq wakeup_service 
+    cmp x0,#7
+    b.eq wakeup_service @ wake-up service.
+
+    cmp x0,#8
+    b.eq core_terminate @ system termination.
+
+    b.ne sgi_main_routine_end
 
     ldp x30,x30,[sp,#-16]! @ restore link register to main handler.
     ret @ return to main handler.

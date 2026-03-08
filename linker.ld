@@ -11,7 +11,7 @@ SECTIONS {
     .cores_info (NOLOAD) : {
         . = ALIGN(8);
         __core_info_table__ = .;
-        . += 68; /* 10 dwords reserved. */
+        . += 72; /* 9 dwords reserved. */
         /*
         (table in bytes)
         0-7: core 0 stack.
@@ -22,6 +22,7 @@ SECTIONS {
         40-47: core 1 task.
         48-55: core 2 task.
         56-63: core 3 task.
+        64-71: cores signal (each byte is for a core).
         */
     }
 

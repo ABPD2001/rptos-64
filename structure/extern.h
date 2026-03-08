@@ -43,6 +43,7 @@ extern volatile struct task_dump_t *global_tasks_dump_bank;
 extern volatile struct system_breakpoint_t *generic_system_breakpoints_base;
 
 extern volatile u64_t **core_tasks;
+extern volatile struct cccb_t **core_contexts;
 
 extern volatile struct memframe_t *memory_frames;
 extern volatile struct memory_paging_settings_t *memory_paging_settings;

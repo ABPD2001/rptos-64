@@ -438,3 +438,47 @@ u64_t svc_semaphore_release(u64_t *semaphore)
 {
     return release_semaphore(semaphore); // release semaphore.
 }
+
+u64_t svc_system_shutdown()
+{
+    volatile u64_t *cores_signal = __core_info_table__ + 64;
+
+    core_terminate();                            // terminate current core.
+    gic400_sgi(8, GIC_SGI_MODE_BROADCASR, NULL); // send a sgi to cores with id of '8'.
+
+    while (1)
+    {
+        u64_t signaled_cores_count = 0;
+        for (u64_t i = 0; i < 4; i++)
+        {
+            if ((*cores_signal & (0xFF << i * 8)) == 2)
+                signaled_cores_count++; // increment if a core was signaled correctly.
+        }
+        if (signaled_cores_count == 4)
+            break; // check even itself signalled.
+    }
+
+    return psci_system_off(); // shutdown.
+}
+
+u64_t svc_system_reboot()
+{
+    volatile u64_t *cores_signal = __core_info_table__ + 64;
+
+    core_terminate();                            // terminate current core.
+    gic400_sgi(8, GIC_SGI_MODE_BROADCASR, NULL); // send a sgi to cores with id of '8'.
+
+    while (1)
+    {
+        u64_t signaled_cores_count = 0;
+        for (u64_t i = 0; i < 4; i++)
+        {
+            if ((*cores_signal & (0xFF << i * 8)) == 3)
+                signaled_cores_count++; // increment if a core was signaled correctly.
+        }
+        if (signaled_cores_count == 4)
+            break; // check even itself signalled.
+    }
+
+    return psci_system_reset(); // reboot.
+}

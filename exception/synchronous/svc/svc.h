@@ -7,13 +7,14 @@
 #include "../../../structure/muart.h"
 #include "../../../structure/timer.h"
 
+#include "../../../drivers/muart.h"
 #include "../../../drivers/stimer.h"
+#include "../../../drivers/gic400.h"
 #include "../../../drivers/gpio.h"
 
 #include "../../../lib/core.h"
 #include "../../../lib/ipcmailbox.h"
 #include "../../../lib/fwlist.h"
-#include "../../../lib/softwarelock.h"
 #include "../../../lib/softwarelock.h"
 
 // Serial
@@ -57,4 +58,9 @@ u64_t svc_semaphore_release(u64_t *semaphore);
 
 extern u8_t svc_core_id();
 extern u8_t svc_cluster_id();
+
+// System
+
+u64_t svc_system_shutdown();
+u64_t svc_system_reboot();
 #endif

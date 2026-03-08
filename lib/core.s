@@ -11,16 +11,16 @@ multi_core_enable:
     stp x29,x30,[sp,#-16]!
     mov x29,sp
 
-    mov x19,#0x80000
-    str x19,[xzr,#0xd8]
-    str x19,[xzr,#0xe0]
-    str x19,[xzr,#0xe8]
+    ldr x19,=__init_start__
+    str x19,[xzr,#0xd8] @ set core 1 entry point (for firmware).
+    str x19,[xzr,#0xe0] @ set core 2 entry point (for firmware).
+    str x19,[xzr,#0xe8] @ set core 3 entry point (for firmware).
 
     dsb sy @ data synchronuzation barrier (outer shareable). 
     
-    mov sp,x29
     sev @ send event to all cores.
 
+    mov sp,x29
     ldp x29,x30,[sp],#16
     ret @ return.
 

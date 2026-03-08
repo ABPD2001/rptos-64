@@ -145,6 +145,9 @@
 #define PSCI_CPU_SUSPEND_STANDBY_STATETYPE 0b0
 #define PSCI_CPU_SUSPEND_POWERDOWN_STATETYPE 0b1
 
+#define SGI_WAKEUP_SERVICE_ID 7
+#define SGI_SYSTEM_TERMINATION_ID 8
+
 extern unsigned long __global_timer_ticks__;
 extern unsigned long __pcb_bank_base__;
 extern unsigned long __pcb_queue_base__;

@@ -26,10 +26,13 @@ extern void multi_core_enable();
 extern void restore_core_context(volatile struct cccb_t *core_context);
 extern void save_core_context();
 
+void core_event_number(u8_t number);
+
 // Context.
 
 extern void restore_context(volatile struct pcb_t *task);
 void terminate_context(volatile struct pcb_t *task);
+void core_terminate();
 
 // DAIF
 

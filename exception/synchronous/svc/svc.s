@@ -24,6 +24,8 @@
 .org 0x58, b svc_semaphore_release
 .org 0x5C, b svc_core_id
 .org 0x60, b svc_cluster_id
+.org 0x64, b svc_system_shutdown
+.org 0x68, b svc_system_reboot
 .ltorg
 
 .section .svc_handlers

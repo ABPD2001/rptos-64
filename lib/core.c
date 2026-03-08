@@ -205,6 +205,29 @@ void terminate_context(volatile struct pcb_t *task)
     }
 }
 
+void core_terminate()
+{
+    const u8_t cid = core_id();
+    volatile struct pcb_t *ctask = core_tasks[cid];
+    volatile struct cccb_t *ccontext = core_contexts[cid];
+    volatile u64_t *core_signals = __core_info_table__ + 64;
+
+    *core_signals &= ~(0xFF << cid * 8); // clear current event number.
+    *core_signals |= (0x2 << cid * 8);   // set event number of '2'.
+
+    ccontext->valid = 0;      // invalidate.
+    terminate_context(ctask); // terminate current task.
+}
+
+void core_event_number(u8_t number)
+{
+    volatile u64_t *cores_signal = __core_info_table__ + 64;
+    const u8_t cid = core_id();
+
+    *cores_signal &= (0xFF << cid * 8);   // clear event number.
+    *cores_signal |= (number << cid * 8); // set event number.
+}
+
 s64_t psci_cpu_powerdown()
 {
     psci_cpu_suspend(NULL, PSCI_CPU_SUSPEND_POWERDOWN_STATETYPE, PSCI_CPU_SUSPEND_CORES_POWER_LEVEL);

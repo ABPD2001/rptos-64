@@ -127,14 +127,20 @@ void kernel()
         turn_on_gtimer(); // turn on generic timer of current core.
 
         // then, if core id was zero, enabling multi-core mode and waiting until all cores acknowledged core zero.
+        if (cid)
+        {
+            volatile u64_t *cores_signal = (__core_info_table__ + 64); // set pointer to counts.
+            *cores_signal &= ~(0xFF << cid * 8);                       // clear current core event number.
+            *cores_signal |= (0x1 << cid * 8);                         // set current core event number.
+        }
         if (!cid)
         {
-            initialize_muart();                         // initialize mini-uart.
-            gic400_setGrp1_distributor(true);           // enable group 1 interrupt.
-            multi_core_enable();                        // wake up other cores.
-            u32_t *counts = (__core_info_table__ + 64); // set pointer to counts.
-            while (1)                                   // wait until all cores are ready.
-                if (*counts == 4)
+            initialize_muart();                                                                             // initialize mini-uart.
+            gic400_setGrp1_distributor(true);                                                               // enable group 1 interrupt.
+            multi_core_enable();                                                                            // wake up other cores.
+            volatile u64_t *cores_signal = (__core_info_table__ + 64);                                      // set pointer to counts.
+            while (1)                                                                                       // wait until all cores are ready.
+                if ((*cores_signal & 0xFF00) && (*cores_signal & 0xFF0000) && (*cores_signal & 0xFF000000)) // if first and second and third bytes was signaled.
                     break;
 
             char buffer[16] = "rptos-64 is up.";
