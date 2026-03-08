@@ -47,7 +47,8 @@ lower_el_svc_handler:
     msr ELR_EL1,x0 @ apply.
     ldr x1,=0x3FFFFFF
     and x0,x0,x1 @ mask 0:24 bits.
-    mul x0,x0,#4 @ calculate relative address of table.
+    mov x2,#4
+    mul x0,x0,x2 @ calculate relative address of table.
     add x0,x0,x20 @ calculate absolute address of table.
 
     ldp x0,x1,[x19,#-16]!

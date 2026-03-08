@@ -57,7 +57,8 @@ save_core_context:
     and x0,x0,#0xFF @ mask first byte.
 
     ldr x1,=__cccb_bank_base__ @ read context table base address.
-    mul x0,x0,#96 @ calculate relative address to context table.
+    mov x2,#96
+    mul x0,x0,x2 @ calculate relative address to context table.
     add x0,x0,x1 @ calculate absolute address to context table.
 
     @ read context.
