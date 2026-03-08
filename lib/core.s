@@ -107,13 +107,17 @@ restore_context:
     ldp x4,x5,[x0,#16]!
     ldp x2,x3,[x0,#16]!
     
-    ldr x1,[x0,#16]
+    ldr x1,[x0,#8]!
     mov sp,x1 @ restore stack pointer.
 
     msr SPSR_EL1,x1 @ apply spsr.
-    ldr x1,[x0,#-112] @ restore ELR_EL1.
+    add x0,x0,#80 @ skip 10 properties.
+    
+    ldr x1,[x0,#8]!
+    msr ELR_EL1,x1 @ apply pc (into exception link register).
+    ldr x1,[x0,#8]!
+    msr TTBR0_EL1,x1 @ apply ttbr.
 
-    msr ELR_EL1,x1 @ apply ELR_EL1 (exception link register).
     ldp x0,x1,[x0,#-16]! @ all context is restored.
 
     eret @ return to task.
