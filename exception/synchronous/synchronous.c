@@ -24,7 +24,7 @@ void lower_el_unkown_handler()
     volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;                        // set status to terminated.
-    ctask->fault_code = 3;                    // set fault code to unkown instruction.
+    ctask->fault_code = 9;                    // set fault code to unkown instruction.
     ctask->fault_dump = syndrome & 0x1FFFFFF; // masked 0:24 bits of syndrome.
 
     task_schaduler();
@@ -65,7 +65,7 @@ void lower_el_pc_alignment_handler()
     volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;       // set status to terminated.
-    ctask->fault_code = 2;   // set fault code to pc alignment fault.
+    ctask->fault_code = 0;   // set fault code to pc alignment fault.
     ctask->fault_dump = elr; // set fault dump to address of cause instruction.
 
     task_schaduler();
@@ -125,7 +125,7 @@ void lower_el_d_abort_lower_handler()
     volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;       // set status to terminated.
-    ctask->fault_code = 5;   // set fault code to data abort fault.
+    ctask->fault_code = 6;   // set fault code to data abort fault.
     ctask->fault_dump = far; // set fault dump to address of cause instruction.
 
     task_schaduler();
@@ -145,13 +145,12 @@ void lower_el_i_abort_lower_handler()
     volatile struct pcb_t *ctask = core_tasks[cid];
 
     ctask->status = 3;       // set status to terminated.
-    ctask->fault_code = 4;   // set fault code to pc alignment fault.
+    ctask->fault_code = 7;   // set fault code to i-abort fault.
     ctask->fault_dump = elr; // set fault dump to address of cause instruction.
 
     task_schaduler();
     task_dispatcher(); // ignore task and do new schaduling (because of saftey reasons).
 }
-void lower_el_d_abort_lower_handler();
 
 void same_el_wfi_wfe_handler()
 {

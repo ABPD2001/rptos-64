@@ -2,6 +2,7 @@
 #define SYNCHRONOUS_H
 #include "../../structure/base.h"
 #include "../../structure/task.h"
+#include "../../structure/exceptions.h"
 #include "../../lib/core.h"
 
 extern void task_dispatcher();

@@ -8,10 +8,12 @@ struct ipcmailbox_t // 56 Bytes.
 {
     u64_t task_owner;
     u64_t id;
-    mutex_t access_mutex;     // a mutex, where task wants to write.
-    u64_t blacklist_tasks_id; // this list cant access (if isnt NULL).
-    u64_t whitelist_tasks_id; // this list can access only (if isnt NULL).
-    u64_t accessibility;      // 0: write access, 1: read access, 2: management, 3-63: reserved.
+    mutex_t access_mutex;         // a mutex, where task wants to write.
+    u64_t blacklist_tasks_pt1_id; // this list cant access (if isnt NULL).
+    u64_t blacklist_tasks_pt2_id; // this list cant access (if isnt NULL).
+    u64_t whitelist_tasks_pt1_id; // this list can access only (if isnt NULL).
+    u64_t whitelist_tasks_pt2_id; // this list can access only (if isnt NULL).
+    u64_t accessibility;          // 0: write access, 1: read access, 2: management, 3-63: reserved.
     u32_t maximum_length;
     u32_t metadata; // 0-1: 0->universal, 1->oneline, 2->dual, 2-3: (0 -> empty, 1 -> filling, 2 -> fill, 3 -> reading), 4-31: reserved.
 };

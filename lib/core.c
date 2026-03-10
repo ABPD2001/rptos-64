@@ -62,13 +62,15 @@ void __free_ipcmailbox(u64_t task_id)
     {
         if (nav_header->task_owner == task_id)
         {
-            nav_header->access_mutex = 1;          // release mutex.
-            nav_header->task_owner = 0;            // clear ownership.
-            nav_header->blacklist_tasks_id = NULL; // clear blacklist_tasks_id.
-            nav_header->whitelist_tasks_id = NULL; // clear whitelist_tasks_id.
-            nav_header->accessibility = 0;         // clear accessibility.
-            nav_header->maximum_length = 0;        // clear maximum length.
-            nav_header->metadata = 0;              // clear metadata.
+            nav_header->access_mutex = 1;              // release mutex.
+            nav_header->task_owner = 0;                // clear ownership.
+            nav_header->blacklist_tasks_pt1_id = NULL; // clear blacklist_tasks_id.
+            nav_header->blacklist_tasks_pt2_id = NULL; // clear blacklist_tasks_id.
+            nav_header->whitelist_tasks_pt1_id = NULL; // clear whitelist_tasks_id.
+            nav_header->whitelist_tasks_pt2_id = NULL; // clear whitelist_tasks_id.
+            nav_header->accessibility = 0;             // clear accessibility.
+            nav_header->maximum_length = 0;            // clear maximum length.
+            nav_header->metadata = 0;                  // clear metadata.
             break;
         }
 

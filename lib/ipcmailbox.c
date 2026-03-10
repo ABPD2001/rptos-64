@@ -31,13 +31,15 @@ struct ipcmailbox_segment_t *alloc_ipcmailboxsegment()
 
 void free_ipcmailbox(volatile struct ipcmailbox_t *mailbox)
 {
-    mailbox->metadata &= ~(0x6);        // clear status flag in metadata.
-    mailbox->accessibility = NULL;      // clear accessiblity.
-    mailbox->blacklist_tasks_id = NULL; // clear blacklist.
-    mailbox->whitelist_tasks_id = NULL; // clear whitelist.
-    mailbox->task_owner = NULL;         // clear task owner.
-    mailbox->maximum_length = NULL;     // clear maximum length.
-    mailbox->access_mutex = NULL;       // clear mutex.
+    mailbox->metadata &= ~(0x6);            // clear status flag in metadata.
+    mailbox->accessibility = NULL;          // clear accessiblity.
+    mailbox->blacklist_tasks_pt1_id = NULL; // clear blacklist.
+    mailbox->blacklist_tasks_pt2_id = NULL; // clear blacklist.
+    mailbox->whitelist_tasks_pt1_id = NULL; // clear whitelist.
+    mailbox->whitelist_tasks_pt2_id = NULL; // clear whitelist.
+    mailbox->task_owner = NULL;             // clear task owner.
+    mailbox->maximum_length = NULL;         // clear maximum length.
+    mailbox->access_mutex = NULL;           // clear mutex.
 }
 
 void free_ipcmailboxsegment(volatile struct ipcmailbox_segment_t *segment)
@@ -57,7 +59,12 @@ u64_t write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1,
     if (!segment)
         return 1; // out of segment space.
 
-    // lock the mutex.
+    // gain the mutex.
+    while (!gain_mutex(segment->access_mutex))
+    {
+        spinwait_mutex(segment->access_mutex);
+    }
+
     segment->status = 1;                        // set status flag to 'filling'.
     segment->context.content_pt1 = content_pt1; // set first part of data.
     segment->context.content_pt2 = content_pt2; // set second part of data.
@@ -66,6 +73,8 @@ u64_t write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1,
     segment->context.receiver_task_id = receiver_task_id;
     segment->mailbox_type = mailbox->metadata & (0x3);
     segment->mailbox_type = 2; // set status to 'fill'.
+
+    release_mutex(segment->access_mutex); // free mutex.
 
     return 0; // done, no problem.
 }
@@ -105,3 +114,31 @@ struct ipcmailbox_message_t read_ipcmailbox(volatile struct ipcmailbox_t *mailbo
 
     return output_msg;
 }
+
+u64_t is_ipc_empty(volatile struct ipcmailbox_t *mailbox, u64_t receiver_task_id)
+{
+    volatile struct ipcmailbox_segment_t *nav_segment = global_ipcmailbox_segments_bank;
+
+    for (u64_t i = 0; i < 1024; i++)
+    {
+        if (nav_segment->context.receiver_task_id == receiver_task_id)
+            return false; // return its not empty.
+    }
+    return true; // return its emprt.
+}
+
+u64_t ipc_not_allowed_in_lists(volatile struct ipcmailbox_t *mailbox, u64_t task_id)
+{
+    if ((mailbox->blacklist_tasks_pt1_id || mailbox->blacklist_tasks_pt2_id) && (mailbox->whitelist_tasks_pt1_id || mailbox->whitelist_tasks_pt2_id))
+        return 1; // invalid input.
+    if (task_id < 63 && mailbox->blacklist_tasks_pt1_id && (mailbox->blacklist_tasks_pt1_id & (1 << task_id)))
+        return 2; // task included in blacklist.
+    else if (task_id > 63 && mailbox->blacklist_tasks_pt2_id && (mailbox->blacklist_tasks_pt2_id & (1 << task_id - 63)))
+        return 2; // task included in blacklist.
+    else if (task_id < 63 && mailbox->whitelist_tasks_pt1_id && !(mailbox->whitelist_tasks_pt1_id & (1 << task_id)))
+        return 3; // task does not included in whitelist.
+    else if (task_id > 63 && mailbox->whitelist_tasks_pt2_id && !(mailbox->whitelist_tasks_pt2_id & (1 << task_id - 63)))
+        return 3; // task does not included in whitelist.
+
+    return 0; // included
+};
