@@ -196,6 +196,6 @@ void kernel()
 
     // run a task.
 
-    task_schaduler();
-    task_dispatcher();
+    task_schaduler(); // schadule.
+    task_dispatcher() // dispatch.
 }

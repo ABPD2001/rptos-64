@@ -196,8 +196,9 @@ void task_dispatcher()
                 fw_rm(ready_queues[cpri], i); // remove from ready queue.
                 tmptask->next = NULL;         // just in case...
 
-                release_mutex(queues_lock); // release queue lock.
-                restore_context(tmptask);   // restore task context.
+                release_mutex(queues_lock);                                          // release queue lock.
+                set_gtimer(SCHADULING_QUANTUM_TIME * ((cpri + 1) >> core_id() * 8)); // set generic-timer.
+                restore_context(tmptask);                                            // restore task context.
             }
             else if (tmptask->flags & 0x3 == cid)
             {
@@ -207,8 +208,9 @@ void task_dispatcher()
                 fw_rm(ready_queues[cpri], i); // remove from ready queue.
                 tmptask->next = NULL;         // just in case...
 
-                release_mutex(queues_lock); // release queue lock.
-                restore_context(tmptask);   // restore task context.
+                release_mutex(queues_lock);                                          // release queue lock.
+                set_gtimer(SCHADULING_QUANTUM_TIME * ((cpri + 1) >> core_id() * 8)); // set generic-timer.
+                restore_context(tmptask);                                            // restore task context.
             }
         }
         else
@@ -224,7 +226,8 @@ void task_dispatcher()
             tmptask->next = NULL;         // just in case...
 
             release_mutex(queues_lock);
-            restore_context(tmptask); // restore task context.
+            set_gtimer(SCHADULING_QUANTUM_TIME * ((cpri + 1) >> core_id() * 8)); // set generic-timer.
+            restore_context(tmptask);                                            // restore task context.
         }
         tmptask = next; // go to next pcb.
     }

@@ -7,6 +7,8 @@
 #define U64FILL (~((u64_t)0))
 #define U32FILL (~((u32_t)0))
 
+#define SCHADULING_QUANTUM_TIME 25 // by milliseconds.
+
 #define PREIPH_MUART_FLAG 0b0000
 #define PREIPH_UART0_FLAG 0b0001
 #define PREIPH_UART2_FLAG 0b0010
