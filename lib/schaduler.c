@@ -236,7 +236,7 @@ void task_dispatcher()
 
 void wakeup_service()
 {
-    volatile struct fwlist_header_t *ready_multi_queues[8] = {pri0_ready_queue, pri1_ready_queue, pri2_ready_queue, pri3_ready_queue, pri4_ready_queue, pri5_ready_queue, pri6_ready_queue, pri7_ready_queue};
+    volatile struct fwlist_header_t *ready_queues[8] = {pri0_ready_queue, pri1_ready_queue, pri2_ready_queue, pri3_ready_queue, pri4_ready_queue, pri5_ready_queue, pri6_ready_queue, pri7_ready_queue};
     volatile struct pcb_t *temp_task = waiting_queue->head;
 
     // try to gain lock.
@@ -260,11 +260,12 @@ void wakeup_service()
                 {
                     fw_rm(global_timer_requests_queue, tfw_idx(global_timer_requests_queue, temp_task->id)); // remove from timer requests queue.
                     fw_rm(waiting_queue, i);                                                                 // remove from sleep queue.
-                    fw_push_back(ready_multi_queues[temp_task->priority], temp_task);                        // insert into its priority ready queue (in other words, wake up the task).
+                    fw_push_back(ready_queues[temp_task->priority], temp_task);                              // insert into its priority ready queue (in other words, wake up the task).
                 }
             }
             if (temp_task->next == NULL)
                 break;
             temp_task = next_task; // seek to next pcb in queue.
         }
+    release_mutex(queues_lock); // release queue lock.
 }
