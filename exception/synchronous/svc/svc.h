@@ -15,6 +15,7 @@
 #include "../../../lib/core.h"
 #include "../../../lib/ipcmailbox.h"
 #include "../../../lib/fwlist.h"
+#include "../../../lib/schaduler.h"
 #include "../../../lib/softwarelock.h"
 
 // Serial
@@ -32,6 +33,7 @@ extern u64_t svc_muart_free();
 u64_t svc_get_task_id();
 u64_t svc_termination_request();
 u64_t svc_tsleep_ms(u32_t us);
+u64_t svc_wait(u64_t instruction, u8_t type);
 
 // GPIO
 

@@ -50,11 +50,10 @@ void muart_valid_byte()
     {
         muart_metadata->read_buffer[muart_metadata->read_length] = *muart_mu_io; // read a byte.
         if (muart_metadata->read_buffer[muart_metadata->read_length] == muart_metadata->delimiter & 0xFF)
-        { // free ownership if it was delimiters character.
-            muart_metadata->read_buffer = NULL;
-            muart_metadata->owner_task = NULL;
-            muart_metadata->read_length = 0;
-            muart_metadata->read_maximum_length = 0;
+        {                                  // end to routine if it was delimiter.
+            muart_metadata->read_length++; // increment read length.
+            muart_metadata->read_maximum_length = muart_metadata->read_length;
+            break;
         }
         muart_metadata->read_length++; // increment read length.
     }

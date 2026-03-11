@@ -489,3 +489,18 @@ u64_t svc_system_reboot()
 
     return psci_system_reset(); // reboot.
 }
+
+u64_t svc_wait(u64_t instruction, u8_t type)
+{
+    const u8_t cid = core_id();
+    volatile struct pcb_t *ctask = core_tasks[cid];
+
+    ctask->wait_reason = type;                              // set reason.
+    ctask->wait_instruction = instruction;                  // set instruction.
+    ctask->status = 2;                                      // set status to waiting.
+    ctask->priority = built_in_max(0, ctask->priority - 1); // decrease priority (higher priority) as reward.
+
+    // restore another task.
+    task_schaduler();
+    task_dispatcher();
+}
