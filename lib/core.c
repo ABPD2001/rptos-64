@@ -80,16 +80,15 @@ void __free_ipcmailbox(u64_t task_id)
 
 void __free_timer_request(u64_t task_id)
 {
-    volatile struct tfwlist_header_t *nav_header = timer_requestes_queues[core_id()];
-    volatile struct timer_request_t *nav_req = nav_header->head;
+    volatile struct timer_request_t *nav_req = global_timer_requests_queue->head;
 
     for (u64_t i = 0; i < 64; i++)
     {
         if (nav_req->task_id == task_id)
         {
-            nav_req->task_id = 0;    // clear ownership.
-            nav_req->wake_ticks = 0; // clear wake_ticks.
-            fw_rm(nav_header, i);    // remove item from queue.
+            nav_req->task_id = 0;                  // clear ownership.
+            nav_req->wake_ticks = 0;               // clear wake_ticks.
+            fw_rm(global_timer_requests_queue, i); // remove item from queue.
             break;
         }
         if (!nav_req->task_id)
@@ -238,4 +237,41 @@ s64_t psci_cpu_powerdown()
 s64_t psci_cpu_standby()
 {
     psci_cpu_suspend(NULL, PSCI_CPU_SUSPEND_STANDBY_STATETYPE, PSCI_CPU_SUSPEND_CORES_POWER_LEVEL);
+}
+
+u64_t create_ktask(struct task_properties_t properties)
+{
+    for (u64_t i = 0; i < 128; i++)
+    {
+        if (!global_pcb_bank[i].valid)
+        {
+            u8_t flags = 0;
+
+            global_pcb_bank[i].valid = 1; // validate.
+
+            if (properties.core_dependency)
+            {
+                if (properties.core_dependency)
+                {
+                    flags |= 1 << 5;                          // enable core dependency.
+                    flags |= properties.dedicated_core & 0x3; // set dedicated core.
+                }
+                if (properties.ready_flag)
+                    flags |= 1 << 2; // enable ready statement.
+                if (properties.core_migration_enable)
+                    flags |= 1 << 3; // enable core migration.
+            }
+
+            global_pcb_bank[i].flags = flags;                                   // set task flags.
+            global_pcb_bank[i].priority = built_in_min(properties.priority, 7); // set priority.
+
+            for (u64_t j = 0; j < 3; j++)
+            {
+                global_pcb_bank[i].event_handlers[j] = properties.event_handlers[j]; // set event handler.
+            }
+
+            return global_pcb_bank + i; // return pcb of allocated pcb.
+        }
+        return 0; // return 0 as error if wasnt any pcb free.
+    }
 }

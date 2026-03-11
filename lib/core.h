@@ -12,9 +12,21 @@
 #include "../structure/softwarelock.h"
 #include "../structure/task.h"
 #include "../lib/fwlist.h"
+#include "../lib/math.h"
 #include "../lib/softwarelock.h"
 
 typedef void *(__built_in_free_preipheral_t)(u64_t);
+
+struct task_properties_t
+{
+    u64_t event_handlers[3];
+    u8_t priority;
+    u8_t dedicated_core;
+    u8_t ready_flag;
+    u8_t core_migration_enable;
+    u8_t core_dependency;
+    u8_t reserved[3]; // padding.
+};
 
 // Core.
 
@@ -34,6 +46,7 @@ extern void restore_context(volatile struct pcb_t *task);
 void terminate_context(volatile struct pcb_t *task);
 void core_terminate();
 
+volatile struct pcb_t *create_ktask(struct task_properties_t properties);
 // DAIF
 
 extern void enable_irq();
