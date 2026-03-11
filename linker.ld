@@ -171,31 +171,50 @@ SECTIONS {
         . += 384; /* Reserve (96*4) bytes for struct of cccb. (for 4 cores) */
 
         __pcb_bank_base__ = .;
-        . += 23808; /* Reserve 64 struct of pcb. (372*64) Bytes. */
+        . += 47104; /* Reserve 128 struct of pcb. (368*128) Bytes. */
         
         __gpio_ownerships_bank_base__ = .;
         . += 1536; /* Reserve 64 struct of ownership. (24*64) Bytes. */
         
         __global_ipcmailboxes_segments_bank_base__ = .;
-        . += 32768; /* Reserve 512 struct of ipcmailbox segment (512*64) Bytes. */
+        . += 65536; /* Reserve 1024 struct of ipcmailbox segment (1024*64) Bytes. */
+        
         __global_ipcmailbox_headers_bank_base__ = .;
         . += 3584; /* Reserve 64 struct of ipcmailbox header (16*56) Bytes. */
 
         __global_software_locks_bank_base__ = .;
-        . += 4096; /* Reserve 128 struct of software locks. (128*32) Bytes. */
+        . += 8192; /* Reserve 256 struct of software locks. (256*32) Bytes. */
 
         __timer_request_bank_base__ = .;
-        . += 1536; /* Reserve 64 struct of timer request. (24*64) Bytes. */
+        . += 8192; /* Reserve 128 struct of timer request. (24*64) Bytes. */
     
         __global_tasks_dump_bank_base__ = .;
         . += 1792; /* Reserve 32 struct of task dump. (32*56) */
     }
     
-    .pcb_queues (NOLOAD) : {
+    .queues (NOLOAD) : {
         . = ALIGN(16);
-        __pcb_queue_base__ = .;
-        . += 712; /* ... */
-        . += 64; /* Reserve 4 timer requests queues. */
+        
+        __pcb_ready_queues_base__ = .;
+        . += 128; /* multi-level queue header (ready state only), for 8 priority levels. */
+        
+        __pcb_waiting_queue_base__ = .;
+        . += 16; /* a queue header for waiting. */
+        
+        __pcb_terminated_queue_base__ = .;
+        . += 16; /* a queue header for terminated. */
+        
+        __pcb_created_queue_base__ = .;
+        . += 16; /* a queue header for created. */
+        
+        __timer_requests_queue_base__ = .;
+        . += 16; /* a queue header for timer requests. */
+
+        __pcb_queue_lock_base__ = .;
+        . += 8; /* reserve a mutex for queues. */
+    
+        __queues_temporary_base__ = .;
+        . += 8; /* reserve for 2 words.s */    
     }
 
     /* system memory-based logs */

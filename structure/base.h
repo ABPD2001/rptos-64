@@ -152,13 +152,20 @@
 
 extern unsigned long __global_timer_ticks__;
 extern unsigned long __pcb_bank_base__;
-extern unsigned long __pcb_queue_base__;
 extern unsigned long __core_info_table__;
 extern unsigned long __timer_request_bank_base__;
-extern unsigned long __user_region_start__;
 extern unsigned long __gpio_ownerships_bank_base__;
 extern unsigned long __global_software_locks_bank_base__;
 
+extern unsigned long __pcb_ready_queues_base__;
+extern unsigned long __pcb_waiting_queue_base__;
+extern unsigned long __pcb_terminated_queue_base__;
+extern unsigned long __pcb_created_queue_base__;
+extern unsigned long __timer_requests_queue_base__;
+extern unsigned long __pcb_queue_lock_base__;
+extern unsigned long __queues_temporary_base__;
+
+extern unsigned long __user_region_start__;
 extern unsigned long __global_ipcmailboxes_segments_bank_base__;
 extern unsigned long __global_ipcmailbox_headers_bank_base__;
 

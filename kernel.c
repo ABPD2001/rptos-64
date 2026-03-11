@@ -98,25 +98,25 @@ void kernel()
 
     // initialize pcb queues.
 
-    created_queue = __pcb_queue_base__;
-    pri0_ready_queue = __pcb_queue_base__ + 4 * 16;
-    pri1_ready_queue = __pcb_queue_base__ + 8 * 16;
-    pri2_ready_queue = __pcb_queue_base__ + 12 * 16;
-    pri3_ready_queue = __pcb_queue_base__ + 16 * 16;
-    pri4_ready_queue = __pcb_queue_base__ + 20 * 16;
-    pri5_ready_queue = __pcb_queue_base__ + 24 * 16;
-    pri6_ready_queue = __pcb_queue_base__ + 28 * 16;
-    pri7_ready_queue = __pcb_queue_base__ + 32 * 16;
-    waiting_queue = __pcb_queue_base__ + 36 * 16;
-    terminated_queue = __pcb_queue_base__ + 40 * 16;
+    created_queue = __pcb_created_queue_base__;
+    pri0_ready_queue = __pcb_ready_queues_base__;
+    pri1_ready_queue = __pcb_ready_queues_base__ + 16;
+    pri2_ready_queue = __pcb_ready_queues_base__ + 32;
+    pri3_ready_queue = __pcb_ready_queues_base__ + 48;
+    pri4_ready_queue = __pcb_ready_queues_base__ + 64;
+    pri5_ready_queue = __pcb_ready_queues_base__ + 80;
+    pri6_ready_queue = __pcb_ready_queues_base__ + 96;
+    pri7_ready_queue = __pcb_ready_queues_base__ + 112;
+    waiting_queue = __pcb_waiting_queue_base__;
+    terminated_queue = __pcb_terminated_queue_base__;
 
-    global_timer_requests_queue = __pcb_queue_base__ + 48 * 16;
+    global_timer_requests_queue = __timer_requests_queue_base__;
     memory_frames = __system_memory_frame_bank_base__; // set frame bank base.
     memory_paging_settings = __memory_paging_settings_base__;
 
-    pri_map = __pcb_queue_base__ + 704;
+    pri_map = __queues_temporary_base__;
     *pri_map = 0x07070707; // set highest priority at first. (7 is most and 0 is least).
-    sch_ticks = __pcb_queue_base__ + 708;
+    sch_ticks = __queues_temporary_base__ + 4;
     *sch_ticks = 0; // just in case... (to prevent from unkown behavior).
 
     if (core_contexts[cid]->valid)                // if context was valid.
@@ -196,6 +196,6 @@ void kernel()
 
     // run a task.
 
-    task_schaduler(); // schadule.
-    task_dispatcher() // dispatch.
+    task_schaduler();  // schadule.
+    task_dispatcher(); // dispatch.
 }

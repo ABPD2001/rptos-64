@@ -74,7 +74,7 @@ void task_schaduler()
 
     volatile struct pcb_t *ctask = core_tasks[cid];
     volatile struct fwlist_header_t *ready_queues[8] = {pri0_ready_queue, pri1_ready_queue, pri2_ready_queue, pri3_ready_queue, pri4_ready_queue, pri5_ready_queue, pri6_ready_queue, pri7_ready_queue};
-    volatile struct pcb_t *tmptask = created_queue->head;
+    volatile struct pcb_t *tmptask = NULL;
 
     // gain queue lock.
     while (!gain_mutex(queues_lock))
@@ -82,8 +82,22 @@ void task_schaduler()
         spinwait_mutex(queues_lock);
     }
 
-    ctask->status = 1;                                      // set current running task status to ready.
-    ctask->priority = built_in_max(ctask->priority + 1, 7); // increment priority (lower priority) as punishment.
+    tmptask = ready_queues[tmptask->priority]->head; // set task to header of ready queue.
+    for (u64_t i = 0; i < 128; i++)
+    {
+        if (tmptask->id == ctask->id)
+        {
+            const u64_t ctask_pri = ctask->priority;
+            ctask->status = 1;                                      // set current running task status to ready.
+            ctask->priority = built_in_max(ctask->priority + 1, 7); // increment priority (lower priority) as punishment.
+
+            fw_rm(ready_queues[ctask_pri], i);                  // remove item.
+            ctask->next = NULL;                                 // just in case...
+            fw_push_back(ready_queues[ctask->priority], ctask); // push back into new prioriy ready queue.
+        }
+    }
+
+    tmptask = created_queue->head; // set task to head of created queue.
 
     u8_t schadule_ticks = *sch_ticks & (0xFF << cid * 8); // mask schadule ticks.
     schadule_ticks++;                                     // increment schadule ticks.
