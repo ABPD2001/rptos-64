@@ -4,7 +4,7 @@
 .global serial_put
 
 serial_put:
-    svc #0 @ set a writing operation.
+    svc #0
     mov x0,#0 @ set wait reason for mini-uart (tx).
     mov x1,#0 @ clear instruction of wait.
     svc #27 @ wait.
@@ -20,13 +20,13 @@ serial_read:
     ret @ return.
 
 allocate_serial:
-    svc #7 @ try to allocate.
+    svc #7
     ret @ return.
 
 release_serial:
-    svc #6 @ try to allocate.
+    svc #6
     ret @ return.
 
 serial_available:
-    svc #5 @ try to allocate.
+    svc #5
     ret @ return.
