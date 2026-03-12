@@ -31,7 +31,7 @@ extern u64_t svc_muart_free();
 // Task
 
 u64_t svc_get_task_id();
-u64_t svc_termination_request();
+u64_t svc_termination_request(u64_t fault_code, u64_t fault_dump);
 u64_t svc_tsleep_ms(u32_t us);
 u64_t svc_wait(u64_t instruction, u8_t type);
 
@@ -46,9 +46,10 @@ u64_t svc_gpfunction(u64_t table, u8_t nth, u8_t function);
 
 // Inter-Process-Communication Mailboxes
 
-u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t *whitelist_tasks_id, u64_t *blacklist_tasks_id, u8_t type, u32_t maximum_length);
+u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t whitelist_tasks_pt1_id, u64_t whitelist_tasks_pt2_id, u64_t *blacklist_tasks_id, u8_t type, u32_t maximum_length);
 u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t done, u64_t receiver_task_id);
-u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_message_t *message, u64_t *content_pt1, u64_t *content_pt2, u64_t receiver_task_id);
+u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_message_t *message, u64_t receiver_task_id);
+u64_t svc_edit_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_settings_t *settings);
 
 // Software locks.
 
@@ -64,6 +65,6 @@ extern u8_t svc_cluster_id();
 
 // System
 
-u64_t svc_system_shutdown();
-u64_t svc_system_reboot();
+s64_t svc_system_shutdown();
+s64_t svc_system_reboot();
 #endif

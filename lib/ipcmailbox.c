@@ -115,6 +115,25 @@ struct ipcmailbox_message_t read_ipcmailbox(volatile struct ipcmailbox_t *mailbo
     return output_msg;
 }
 
+void edit_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_settings_t settings)
+{
+    // gain lock.
+    while (!gain_mutex(mailbox->access_mutex))
+    {
+        spinwait_mutex(mailbox->access_mutex);
+    }
+
+    mailbox->accessibility = settings.accessibility;
+    mailbox->blacklist_tasks_pt1_id = settings.blacklist_tasks_pt1_id;
+    mailbox->blacklist_tasks_pt2_id = settings.blacklist_tasks_pt2_id;
+    mailbox->whitelist_tasks_pt2_id = settings.whitelist_tasks_pt2_id;
+    mailbox->whitelist_tasks_pt2_id = settings.whitelist_tasks_pt2_id;
+    mailbox->maximum_length = settings.maximum_length;
+    mailbox->task_owner = settings.task_owner;
+    mailbox->metadata = settings.metadata;
+    release_mutex(mailbox->access_mutex); // release lock.
+}
+
 u64_t is_ipc_empty(volatile struct ipcmailbox_t *mailbox, u64_t receiver_task_id)
 {
     volatile struct ipcmailbox_segment_t *nav_segment = global_ipcmailbox_segments_bank;

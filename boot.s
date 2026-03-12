@@ -205,7 +205,6 @@ vector_table:
 
     bfc x1,xzr,#0,#26 @ seperate class of sync
     lsr x1,#26 
-    @ calculate x0 as description of sync.
 
     bl determine_id
 

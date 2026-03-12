@@ -100,7 +100,7 @@ u64_t muart_settings(u16_t baudrate, u8_t data_bits, u8_t enablation)
 
     muart->settings->baudrate = baudrate;
     muart->settings->enablation = enablation;
-    muart->settings->data_bits = data_bits; // update new settings of uart.
+    muart->settings->data_bits = data_bits; // update new settings of mini uart.
 
     return 0;
 }
@@ -111,8 +111,8 @@ void initialize_muart()
     volatile u32_t *aux_en = AUX_ENABLES_REG;
     *aux_en |= 0x1; // enable uart on aux_enable register.
 
-    gpfunction(GPIO_FSEL1, 1, GPIO_MUART); // set pin 14 functionality to "alternative function 5" or in other words, "uart functionality".
-    gpfunction(GPIO_FSEL1, 2, GPIO_MUART); // set pin 15 functionality to "alternative function 5" or in other words, "uart functionality".
+    gpfunction(GPIO_FSEL1, 1, GPIO_MUART); // set pin 14 functionality to "alternative function 5" or in other words, "mini uart functionality".
+    gpfunction(GPIO_FSEL1, 2, GPIO_MUART); // set pin 15 functionality to "alternative function 5" or in other words, "mini uart functionality".
 
     muart_settings->baudrate = MUART_DEFAULT_BAUD;         // set baudrate to default.
     muart_settings->data_bits = MUART_DEFAULT_DATABITS;    // set data bits to default.

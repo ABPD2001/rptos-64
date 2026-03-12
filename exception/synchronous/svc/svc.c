@@ -58,12 +58,12 @@ u64_t svc_muart_read(u8_t *buffer, u64_t maximum_length)
 u64_t svc_muart_write_char(u8_t ch)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = core_tasks[cid];
+    volatile struct pcb_t *ctask = core_tasks[cid];
     volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u8_t *mu_io = AUX_MU_IO_REG;
 
-    if (muart->owner_task != *ctask)
-        return 1; // not allocated to allowed by task.
+    if (muart->owner_task != ctask->id && !ctask->perimision_level) // if wasnt owner and was a user.
+        return 1;                                                   // not allocated to allowed by task.
 
     while (!(svc_muart_availablity() & 0x1))
     {
@@ -76,12 +76,12 @@ u64_t svc_muart_write_char(u8_t ch)
 u64_t svc_muart_read_char(u8_t *ch)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = core_tasks[cid];
+    volatile struct pcb_t *ctask = core_tasks[cid];
     volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u8_t *mu_io = AUX_MU_IO_REG;
 
-    if (muart->owner_task != *ctask)
-        return 1; // not allocated to allowed by task.
+    if (muart->owner_task != ctask->id && !ctask->perimision_level) // if wasnt owner and was a user.
+        return 1;                                                   // not allocated to allowed by task.
 
     while (!(svc_muart_availablity() & 0x2))
     {
@@ -109,6 +109,8 @@ u8_t svc_muart_availablity()
         output |= 0x2;
     if (muart_metadata->owner_task)
         output &= ~(0x4); // if owner task exist, clear free flag.
+    else
+        output |= (0x4);
 
     return output;
 }
@@ -124,14 +126,14 @@ u64_t svc_get_task_id()
 u64_t svc_muart_settings(u16_t baudrate, u8_t data_bits, u8_t enablation)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = core_tasks[cid];
+    volatile struct pcb_t *ctask = core_tasks[cid];
     volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u32_t *baudrate_reg = AUX_MU_BAUD_REG;
     volatile u32_t *cntl = AUX_MU_CNTL_REG;
     volatile u32_t *en = AUX_ENABLES_REG;
     volatile u32_t *ier = AUX_IER_REG;
 
-    if (muart->owner_task != *ctask)
+    if (muart->owner_task != ctask->id && ctask->perimision_level)
         return 1; // not allocated to allowed by task.
 
     if (data_bits)
@@ -189,10 +191,13 @@ u64_t svc_tsleep_ms(u32_t us)
     return 1;
 }
 
-u64_t svc_termination_request()
+u64_t svc_termination_request(u64_t fault_code, u64_t fault_dump)
 {
     const u8_t cid = core_id();
     volatile struct pcb_t *ctask = core_tasks[cid];
+
+    ctask->fault_code = fault_code;
+    ctask->fault_dump = fault_dump;
     ctask->status = 3; // set status to terminated.
 
     set_gtimer(1); // allow generic timer to work for a ms on a loop.
@@ -259,9 +264,9 @@ u64_t svc_gpfunction(u64_t pin, u8_t function)
 
     for (u64_t i = 0; i < 64; i++)
     {
-        if (ctask->id == global_gpio_bank[i].task_id)
+        if (ctask->id == global_gpio_bank[i].task_id || ctask->perimision_level)
         {
-            if (pin == global_gpio_bank[i].pin_number)
+            if (pin == global_gpio_bank[i].pin_number || ctask->perimision_level)
             {
                 gpfunction(table, nth, function); // set function.
                 return 0;                         // done.
@@ -285,9 +290,9 @@ u64_t svc_gpset(u64_t pin)
 
     for (u64_t i = 0; i < 64; i++)
     {
-        if (ctask->id == global_gpio_bank[i].task_id)
+        if (ctask->id == global_gpio_bank[i].task_id || ctask->perimision_level)
         {
-            if (pin == global_gpio_bank[i].pin_number)
+            if (pin == global_gpio_bank[i].pin_number || ctask->perimision_level)
             {
                 gpset(table, nth); // set pin.
                 return 0;          // done.
@@ -310,9 +315,9 @@ u64_t svc_gpclear(u64_t pin)
 
     for (u64_t i = 0; i < 64; i++)
     {
-        if (ctask->id == global_gpio_bank[i].task_id)
+        if (ctask->id == global_gpio_bank[i].task_id || ctask->perimision_level)
         {
-            if (pin == global_gpio_bank[i].pin_number)
+            if (pin == global_gpio_bank[i].pin_number || ctask->perimision_level)
             {
                 gpclear(table, nth); // clear pin.
                 return 0;            // done.
@@ -334,9 +339,9 @@ u64_t svc_gpvalue(u64_t pin, u8_t value)
 
     for (u64_t i = 0; i < 64; i++)
     {
-        if (ctask->id == global_gpio_bank[i].task_id)
+        if (ctask->id == global_gpio_bank[i].task_id || ctask->perimision_level)
         {
-            if (pin == global_gpio_bank[i].pin_number)
+            if (pin == global_gpio_bank[i].pin_number || ctask->perimision_level)
             {
                 if (value)
                     gpset(table, nth); // set pin.
@@ -351,17 +356,20 @@ u64_t svc_gpvalue(u64_t pin, u8_t value)
     return 2; // no ownership with this id.
 }
 
-u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t *whitelist_tasks_pt1_id, u64_t *whitelist_tasks_pt2_id, u64_t *blacklist_tasks_id, u8_t type, u32_t maximum_length)
+u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t whitelist_tasks_pt1_id, u64_t whitelist_tasks_pt2_id, u64_t *blacklist_tasks_id, u8_t type, u32_t maximum_length)
 {
     const u8_t cid = core_id();
     volatile struct pcb_t *ctask = core_tasks[cid];
     volatile struct ipcmailbox_t *mailbox = alloc_ipcmailbox();
 
     if (!mailbox)
-        return 1; // failed to allocate mailbox.
+        return 0; // failed to allocate mailbox.
 
     // -- wait for mutex to open befroe gain! --
-    gain_mutex(mailbox->access_mutex);
+    while (!gain_mutex(mailbox->access_mutex))
+    {
+        spinwait_mutex(mailbox->access_mutex);
+    }
     mailbox->metadata |= 0x4; // set status flag to 'filling'.
     mailbox->metadata |= (type & 0x3);
     mailbox->accessibility = accessblity;
@@ -373,7 +381,7 @@ u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t *whitelist_tasks_pt1_id, u6
     mailbox->metadata |= 0x8;             // set status flag to 'fill'.
     release_mutex(mailbox->access_mutex); // release mutex.
 
-    return 0; // done.
+    return mailbox; // done.
 }
 
 u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t done, u64_t receiver_task_id)
@@ -381,59 +389,75 @@ u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_
     const u8_t cid = core_id();
     volatile struct pcb_t *ctask = core_tasks[cid];
 
-    if ((mailbox->blacklist_tasks_pt1_id || mailbox->blacklist_tasks_pt2_id) && (mailbox->whitelist_tasks_pt1_id || mailbox->whitelist_tasks_pt2_id))
-        return 2; // invalid input.
-    if (ctask->id < 63 && mailbox->blacklist_tasks_pt1_id && (mailbox->blacklist_tasks_pt1_id & (1 << ctask->id)))
-        return 3; // task included in blacklist.
-    else if (ctask->id > 63 && mailbox->blacklist_tasks_pt2_id && (mailbox->blacklist_tasks_pt2_id & (1 << ctask->id - 63)))
-        return 3; // task included in blacklist.
-    else if (ctask->id < 63 && mailbox->whitelist_tasks_pt1_id && !(mailbox->whitelist_tasks_pt1_id & (1 << ctask->id)))
-        return 4; // task does not included in whitelist.
-    else if (ctask->id > 63 && mailbox->whitelist_tasks_pt2_id && !(mailbox->whitelist_tasks_pt2_id & (1 << ctask->id - 63)))
-        return 4; // task does not included in whitelist.
-    else if (!(mailbox->accessibility & 0x1))
-        return 5; // invalid access.
+    if (ctask->perimision_level != 2)
+    {
+        if ((mailbox->blacklist_tasks_pt1_id || mailbox->blacklist_tasks_pt2_id) && (mailbox->whitelist_tasks_pt1_id || mailbox->whitelist_tasks_pt2_id))
+            return 2; // invalid input.
+        if (ctask->id < 63 && mailbox->blacklist_tasks_pt1_id && (mailbox->blacklist_tasks_pt1_id & (1 << ctask->id)))
+            return 3; // task included in blacklist.
+        else if (ctask->id > 63 && mailbox->blacklist_tasks_pt2_id && (mailbox->blacklist_tasks_pt2_id & (1 << ctask->id - 63)))
+            return 3; // task included in blacklist.
+        else if (ctask->id < 63 && mailbox->whitelist_tasks_pt1_id && !(mailbox->whitelist_tasks_pt1_id & (1 << ctask->id)))
+            return 4; // task does not included in whitelist.
+        else if (ctask->id > 63 && mailbox->whitelist_tasks_pt2_id && !(mailbox->whitelist_tasks_pt2_id & (1 << ctask->id - 63)))
+            return 4; // task does not included in whitelist.
+        else if (!(mailbox->accessibility & 0x1))
+            return 5; // invalid access.
+    }
 
     return write_ipcmailbox(mailbox, content_pt1, content_pt2, ctask->id, receiver_task_id);
 }
 
-u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_message_t *message, u64_t *content_pt1, u64_t *content_pt2, u64_t receiver_task_id)
+u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_message_t *message, u64_t receiver_task_id)
 {
     const u8_t cid = core_id();
     volatile struct pcb_t *ctask = core_tasks[cid];
 
-    if ((mailbox->blacklist_tasks_pt1_id || mailbox->blacklist_tasks_pt2_id) && (mailbox->whitelist_tasks_pt1_id || mailbox->whitelist_tasks_pt2_id))
-        return 2; // invalid input.
-    if (ctask->id < 63 && mailbox->blacklist_tasks_pt1_id && (mailbox->blacklist_tasks_pt1_id & (1 << ctask->id)))
-        return 3; // task included in blacklist.
-    else if (ctask->id > 63 && mailbox->blacklist_tasks_pt2_id && (mailbox->blacklist_tasks_pt2_id & (1 << ctask->id - 63)))
-        return 3; // task included in blacklist.
-    else if (ctask->id < 63 && mailbox->whitelist_tasks_pt1_id && !(mailbox->whitelist_tasks_pt1_id & (1 << ctask->id)))
-        return 4; // task does not included in whitelist.
-    else if (ctask->id > 63 && mailbox->whitelist_tasks_pt2_id && !(mailbox->whitelist_tasks_pt2_id & (1 << ctask->id - 63)))
-        return 4; // task does not included in whitelist.
-    else if (!(mailbox->accessibility & 0x2))
-        return 5; // invalid access.
+    if (ctask->perimision_level != 2)
+    {
+        if ((mailbox->blacklist_tasks_pt1_id || mailbox->blacklist_tasks_pt2_id) && (mailbox->whitelist_tasks_pt1_id || mailbox->whitelist_tasks_pt2_id))
+            return 2; // invalid input.
+        if (ctask->id < 63 && mailbox->blacklist_tasks_pt1_id && (mailbox->blacklist_tasks_pt1_id & (1 << ctask->id)))
+            return 3; // task included in blacklist.
+        else if (ctask->id > 63 && mailbox->blacklist_tasks_pt2_id && (mailbox->blacklist_tasks_pt2_id & (1 << ctask->id - 63)))
+            return 3; // task included in blacklist.
+        else if (ctask->id < 63 && mailbox->whitelist_tasks_pt1_id && !(mailbox->whitelist_tasks_pt1_id & (1 << ctask->id)))
+            return 4; // task does not included in whitelist.
+        else if (ctask->id > 63 && mailbox->whitelist_tasks_pt2_id && !(mailbox->whitelist_tasks_pt2_id & (1 << ctask->id - 63)))
+            return 4; // task does not included in whitelist.
+        else if (!(mailbox->accessibility & 0x2))
+            return 5; // invalid access.
+    }
 
     *message = read_ipcmailbox(mailbox, receiver_task_id);
     return 0;
 }
 
+u64_t svc_edit_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_settings_t *settings)
+{
+    const u8_t cid = core_id();
+    volatile struct pcb_t *ctask = core_tasks[cid];
+
+    if (!(mailbox->accessibility & 0x4 || mailbox->task_owner == ctask->id) && ctask->perimision_level != 2)
+        return 1;                        // forbidden.
+    edit_ipcmailbox(mailbox, *settings); // edit.
+    return 0;                            // done.
+}
+
 u64_t svc_mutex_gain(u64_t *mutex)
 {
+    volatile struct pcb_t *ctask = core_tasks[core_id()];
+    if (ctask->preipherals_count >= 16)
+        return 2;
     const u64_t res = gain_mutex(mutex);
+
     if (!res)
     {
-        volatile struct pcb_t *ctask = core_tasks[core_id()];
-
-        if (ctask->preipherals_count >= 16)
-            return 2;
-
         ctask->preipherals |= (PREIPH_IPCMAILBOX_FLAG) << ctask->preipherals_count * 4; // insert flag of "software lock gain".
         ctask->preipherals_count++;                                                     // increment preipherals count.
-
-        return res;
     }
+
+    return res;
 }
 u64_t svc_mutex_release(u64_t *mutex)
 {
@@ -461,9 +485,14 @@ u64_t svc_semaphore_release(u64_t *semaphore)
     return release_semaphore(semaphore); // release semaphore.
 }
 
-u64_t svc_system_shutdown()
+s64_t svc_system_shutdown()
 {
+    const u8_t cid = core_id();
+    volatile struct pcb_t *ctask = core_tasks[cid];
     volatile u64_t *cores_signal = __core_info_table__ + 64;
+
+    if (ctask->perimision_level != 2)
+        return 1; // as forbidden access.
 
     core_terminate();                            // terminate current core.
     gic400_sgi(8, GIC_SGI_MODE_BROADCASR, NULL); // send a sgi to cores with id of '8'.
@@ -483,9 +512,14 @@ u64_t svc_system_shutdown()
     return psci_system_off(); // shutdown.
 }
 
-u64_t svc_system_reboot()
+s64_t svc_system_reboot()
 {
+    const u8_t cid = core_id();
+    volatile struct pcb_t *ctask = core_tasks[cid];
     volatile u64_t *cores_signal = __core_info_table__ + 64;
+
+    if (ctask->perimision_level != 2)
+        return 1; // as forbidden access.
 
     core_terminate();                            // terminate current core.
     gic400_sgi(8, GIC_SGI_MODE_BROADCASR, NULL); // send a sgi to cores with id of '8'.

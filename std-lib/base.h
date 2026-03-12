@@ -1,5 +1,22 @@
 #ifndef STDLIB_BASE_H
 #define STDLIB_BASE_H
+
+#define NULL ((void *)0) // Define NULL if not already defined
+#define true ((void *)1) // Define true if not already defined
+#define false 0          // Define false if not already defined
+#define U64FILL (~((u64_t)0))
+#define U32FILL (~((u32_t)0))
+
+#define WAIT_MUART_TX 0
+#define WAIT_MUART_RX 1
+#define WAIT_MUART_FREE 2
+#define WAIT_MUART_ALLOC 3
+#define WAIT_TIMER_REQUEST 4
+#define WAIT_TRUE_VALUE_ADDRESS 5
+#define WAIT_FALSE_VALUE_ADDRESS 6
+#define WAIT_IPC_MAILBOX_RECEIVE 7
+#define WAIT_EVENT 8
+
 typedef unsigned long u64_t;
 typedef signed long s64_t;
 
