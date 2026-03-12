@@ -2,11 +2,10 @@
 #define TYPES_GPIO_H
 #include "./base.h"
 
-struct gpio_ownership_t // 24 Bytes.
+struct gpio_ownership_t // 16 Bytes.
 {
     u64_t task_id;
-    u64_t table;
-    u64_t nth; // (with padding)
+    u64_t pin_number;
 };
 
 #endif

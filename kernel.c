@@ -79,12 +79,12 @@ void kernel()
 
     // first, we set address of global pointers (.bss variables)
     global_system_ticks = __global_timer_ticks__;
-    global_pcb_bank = __pcb_bank_base__;                      // reminder: it has limit of 64 tasks.
-    global_timer_requests_bank = __timer_request_bank_base__; // reminder: it has limit of 64 requests.
+    global_pcb_bank = __pcb_bank_base__;                      // reminder: it has limit of 128 tasks.
+    global_timer_requests_bank = __timer_request_bank_base__; // reminder: it has limit of 128 requests.
     global_mini_uart_settings = __global_muart_settings__;
     global_mini_uart_metadata = __global_muart_metadata__;
     global_gpio_bank = __gpio_ownerships_bank_base__;                 // reminder: it has limit of 64 ownerships.
-    global_software_locks_bank = __global_software_locks_bank_base__; // reminder: it has limit of 128 software locks.
+    global_software_locks_bank = __global_software_locks_bank_base__; // reminder: it has limit of 256 software locks.
     global_ipcmailbox_bank = __global_ipcmailbox_headers_bank_base__;
     global_ipcmailbox_segments_bank = __global_ipcmailboxes_segments_bank_base__;
     global_gic400_metadata = __global_gic400_metadata__;
@@ -115,7 +115,7 @@ void kernel()
     memory_paging_settings = __memory_paging_settings_base__;
 
     pri_map = __queues_temporary_base__;
-    *pri_map = 0x07070707; // set highest priority at first. (7 is most and 0 is least).
+    *pri_map = 0; // set highest priority at first. (0 is most and 7 is least).
     sch_ticks = __queues_temporary_base__ + 4;
     *sch_ticks = 0; // just in case... (to prevent from unkown behavior).
 
@@ -195,7 +195,6 @@ void kernel()
     enable_daif();                   // enable IRQ, FIQ, SError, Debug
 
     // run a task.
-
     task_schaduler();  // schadule.
     task_dispatcher(); // dispatch.
 }

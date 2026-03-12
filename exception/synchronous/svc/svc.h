@@ -42,6 +42,7 @@ u64_t svc_gpfree(u64_t task_id, u64_t table, u8_t nth);
 u64_t svc_gpset(u64_t table, u8_t nth);
 u64_t svc_gpclear(u64_t table, u8_t nth);
 u64_t svc_gpvalue(u64_t table, u8_t nth, u8_t value);
+u64_t svc_gpfunction(u64_t table, u8_t nth, u8_t function);
 
 // Inter-Process-Communication Mailboxes
 

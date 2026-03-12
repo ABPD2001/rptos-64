@@ -174,7 +174,7 @@ SECTIONS {
         . += 47104; /* Reserve 128 struct of pcb. (368*128) Bytes. */
         
         __gpio_ownerships_bank_base__ = .;
-        . += 1536; /* Reserve 64 struct of ownership. (24*64) Bytes. */
+        . += 1024; /* Reserve 64 struct of ownership. (16*64) Bytes. */
         
         __global_ipcmailboxes_segments_bank_base__ = .;
         . += 65536; /* Reserve 1024 struct of ipcmailbox segment (1024*64) Bytes. */
