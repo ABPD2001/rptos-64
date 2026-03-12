@@ -264,11 +264,7 @@ u64_t create_ktask(struct task_properties_t properties)
 
             global_pcb_bank[i].flags = flags;                                   // set task flags.
             global_pcb_bank[i].priority = built_in_min(properties.priority, 7); // set priority.
-
-            for (u64_t j = 0; j < 3; j++)
-            {
-                global_pcb_bank[i].event_handlers[j] = properties.event_handlers[j]; // set event handler.
-            }
+            global_pcb_bank[i].events_handler = properties.events_handler;
 
             return global_pcb_bank + i; // return pcb of allocated pcb.
         }

@@ -186,6 +186,56 @@ void kernel()
         }
     }
 
+    // initialize pcb blocks.
+
+    for (u64_t i = 0; i < 128; i++)
+    {
+        global_pcb_bank[i].id = i;    // set id.
+        global_pcb_bank[i].valid = 0; // invalidate.
+        global_pcb_bank[i].events_handler = NULL;
+        global_pcb_bank[i].event_number = 0;
+        global_pcb_bank[i].fault_code = 0;
+        global_pcb_bank[i].fault_dump = 0;
+        global_pcb_bank[i].flags = 0;
+        global_pcb_bank[i].next = NULL;
+        global_pcb_bank[i].pages.head = NULL;
+        global_pcb_bank[i].pages.tail = NULL;
+        global_pcb_bank[i].parent = NULL;
+        global_pcb_bank[i].pc = 0;
+        global_pcb_bank[i].perimision_level = 0;
+        global_pcb_bank[i].preipherals = 0;
+        global_pcb_bank[i].preipherals_count = 0;
+        global_pcb_bank[i].priority = 7; // lowest prioriy at initialize.
+        global_pcb_bank[i].wait_instruction = 0;
+        global_pcb_bank[i].wait_reason = 0;
+        global_pcb_bank[i].ttbr = 0;
+
+        // others will be changes at task schaduling or creation.
+    }
+
+    // initialize pre-build services.
+
+    struct task_properties_t props_serial;
+    struct task_properties_t props_power;
+
+    props_power.priority = 3; // middle priority at first.
+    props_power.core_dependency = true;
+    props_power.core_migration_enable = false;
+    props_power.ready_flag = true;
+    props_power.events_handler = NULL;
+
+    props_serial.priority = 3; // middle priority at first.
+    props_serial.core_dependency = true;
+    props_serial.core_migration_enable = false;
+    props_serial.ready_flag = true;
+    props_serial.events_handler = NULL;
+
+    volatile struct pcb_t *power_service = create_ktask(props_power);
+    volatile struct pcb_t *serial_service = create_ktask(props_serial);
+
+    power_service->perimision_level = 2;  // most kernel access for power service.
+    serial_service->perimision_level = 1; // law-based kernel access for power service.
+
     // at last, configure gic-400.
     gic400_interfacectl(true, true); // enable EOIModeNS and Group 1.
     gic400_priorityirq(125, 0x80);   // AUX

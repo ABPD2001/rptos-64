@@ -20,15 +20,15 @@
 #define PREIPH_SOFTLOCK_FLAG 0b1000
 #define PREIPH_IPCMAILBOX_FLAG 0b1001
 
-#define WAIT_MUART_TX 0
-#define WAIT_MUART_RX 1
-#define WAIT_MUART_FREE 2
-#define WAIT_MUART_ALLOC 3
-#define WAIT_TIMER_REQUEST 4
-#define WAIT_TRUE_VALUE_ADDRESS 5
-#define WAIT_FALSE_VALUE_ADDRESS 6
-#define WAIT_IPC_MAILBOX_RECEIVE 7
-#define WAIT_EVENT 8
+#define WAIT_MUART_TX 1
+#define WAIT_MUART_RX 2
+#define WAIT_MUART_FREE 3
+#define WAIT_MUART_ALLOC 4
+#define WAIT_TIMER_REQUEST 5
+#define WAIT_TRUE_VALUE_ADDRESS 6
+#define WAIT_FALSE_VALUE_ADDRESS 7
+#define WAIT_IPC_MAILBOX_RECEIVE 8
+#define WAIT_EVENT 9
 
 #define AUX_BASE 0x7e215000
 #define AUX_ENABLES_REG (AUX_BASE + 0x04)
@@ -221,6 +221,9 @@ extern unsigned long __system_memory_frame_bank_base__;
 extern unsigned long __memory_paging_settings_base__;
 
 extern unsigned long __cccb_bank_base__;
+
+extern unsigned long __kernel_service_power_base__;
+extern unsigned long __kernel_service_serial_base__;
 
 typedef unsigned long u64_t;
 typedef signed long s64_t;

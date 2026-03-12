@@ -51,14 +51,14 @@ struct pcb_t // 368 Bytes
     u64_t pc;                      // program counter.
     u64_t ttbr;                    // TTBR.
     volatile struct pcb_t *next;
-    u64_t event_handlers[3]; // for address for 4 handlers (for event betwen 1~3 and 0 is only kernel access).
-    u64_t wait_instruction;  // something like descritpion for wait statement.
-    u8_t wait_reason;        // 0: waiting for mini-uart (tx), 1: waiting for mini-uart (rx), 2: waiting for mini-uart to free, 3: waiting for mini-uart to allocate, 4: waiting for timer requests, 5: waiting for true value of address, 6: waiting for false value of address, 7: waiting for mailbox (receive), 8: waiting for event.
-    u8_t flags;              // 0-1: dedicated core, 2: ready flag, 3: core migration enable, 4: accessed before, 5: core dependency.
-    u8_t event_number;       // 0: no event, 1: termination (force), 2: termination (soft), 3: pause, 4: resume, 5: service responsed.
-    u8_t valid;              // if is set, it has a context, else is free.
-    u8_t perimision_level;   // 0: user, 1: law-based kernel access, 2: most of kernel access.
-    u8_t reserved[3];        // padding.
+    u64_t events_handler;   // for address for 4 handlers (for event betwen 1~3 and 0 is only kernel access).
+    u64_t wait_instruction; // something like descritpion for wait statement.
+    u8_t wait_reason;       // 1: waiting for mini-uart (tx), 2: waiting for mini-uart (rx), 3: waiting for mini-uart to free, 4: waiting for mini-uart to allocate, 5: waiting for timer requests, 6: waiting for true value of address, 7: waiting for false value of address, 8: waiting for mailbox (receive), 9: waiting for event.
+    u8_t flags;             // 0-1: dedicated core, 2: ready flag, 3: core migration enable, 4: accessed before, 5: core dependency.
+    u8_t event_number;      // 0: no event, 1: termination (force), 2: termination (soft), 3: pause, 4: resume, 5: service responsed.
+    u8_t valid;             // if is set, it has a context, else is free.
+    u8_t perimision_level;  // 0: user, 1: law-based kernel access, 2: most of kernel access.
+    u8_t reserved[3];       // padding.
 };
 
 // note: event number of "termination (force)" isnt handleable by user (kernel only).

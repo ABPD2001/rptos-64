@@ -19,7 +19,7 @@ typedef void *(__built_in_free_preipheral_t)(u64_t);
 
 struct task_properties_t
 {
-    u64_t event_handlers[3];
+    u64_t events_handler;
     u8_t priority;
     u8_t dedicated_core;
     u8_t ready_flag;

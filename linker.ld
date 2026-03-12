@@ -237,6 +237,18 @@ SECTIONS {
         . += 8; /* reserve 8 bytes for struct of memory paging settings. */
     }
 
+    /* Pre-builded services. */
+
+    .kernel_service_power ALIGN(8) : {
+        __kernel_service_power_base__ = .;
+        *(.kernel_service_power)
+    }
+
+    .kernel_service_serial ALIGN(8) : {
+        __kernel_service_serial_base__ = .;
+        *(.kernel_service_serial)
+    }
+
     . = 536870912; /* Set user start point at 512 MB. */
     __user_region_start__ = .;
 }
