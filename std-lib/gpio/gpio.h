@@ -1,6 +1,6 @@
 #ifndef STDLIB_GPIO_H
 #define STDLIB_GPIO_H
-#include "../../structure/base.h"
+#include "../base.h"
 
 extern u64_t gpioalloc(u64_t pin);
 extern u64_t gpiofree(u64_t pin);
