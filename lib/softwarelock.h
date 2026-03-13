@@ -1,6 +1,7 @@
 #ifndef LIB_SOFTWARE_LOCK_H
 #define LIB_SOFTWARE_LOCK_H
 #include "../structure/base.h"
+#include "../structure/softwarelock.h"
 
 // -- mutex --
 
