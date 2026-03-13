@@ -60,8 +60,12 @@ u64_t __built_in_task_waiting(volatile struct pcb_t *task)
         if (!task->event_number)
             return false; // if wasnt any event, skip.
 
-        task->pc = task->events_handler; // set program counter of task to handler where task defined itself, reason of not running directly here: because we are in EL1 mode and letting user to run anything here its a security hole.
-        return true;
+        if (task->events_handler)
+        {
+            task->pc = task->events_handler; // set program counter of task to handler where task defined itself, reason of not running directly here: because we are in EL1 mode and letting user to run anything here its a security hole.
+            return true;
+        }
+        return false;
     default:
         return false;
     }

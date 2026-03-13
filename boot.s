@@ -4,11 +4,12 @@
 minit:
     msr daifset,#0xF @ disable irq, fiq, serror and debug.
     mrs x0,HCR_EL2
-
-    ldr x1,=(1<<31) @ Enable 64-bit EL1.
-    orr x0,x0,x1
+    
+    orr x0,x0,#(1<<31) @ Enable 64-bit EL1.
+    @ orr x0,x0,#(11<<41) @ set NV and NV1.
     bic x0,x0,#0x18 @ disable IMO and FMO. (4&5 bits)
     bic x0,x0,#(1<<27) @ disable tge.
+    
     msr HCR_EL2,x0 @ apply changes.
 
     adr x0,cinit

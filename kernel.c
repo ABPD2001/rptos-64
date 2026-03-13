@@ -233,8 +233,11 @@ void kernel()
     volatile struct pcb_t *power_service = create_ktask(props_power);
     volatile struct pcb_t *serial_service = create_ktask(props_serial);
 
-    power_service->perimision_level = 2;  // most kernel access for power service.
-    serial_service->perimision_level = 1; // law-based kernel access for power service.
+    power_service->perimision_level = 2;               // most kernel access for power service.
+    power_service->pc = __kernel_service_power_base__; // set program counter.
+
+    serial_service->perimision_level = 0;                // user access for serial service.
+    serial_service->pc = __kernel_service_serial_base__; // set program counter.
 
     // at last, configure gic-400.
     gic400_interfacectl(true, true); // enable EOIModeNS and Group 1.
@@ -248,3 +251,5 @@ void kernel()
     task_schaduler();  // schadule.
     task_dispatcher(); // dispatch.
 }
+// 6600 of armv8 manual
+// d7 and d8.
