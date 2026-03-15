@@ -254,7 +254,7 @@ psci_cpu_on:
     mrs x2,MPIDR_EL1
     
     and x1,x2,#0xFFFF00 @ mask AFF1, AFF2
-    and x2,x2,#0xF00000000 @ mask AFF3
+    and x2,x2,#0xFF00000000 @ mask AFF3
     orr x1,x1,x2 @ merge.
     and x3,x3,#0xFF @ mask only first byte of parameter.
     orr x1,x1,x3 @ merge.

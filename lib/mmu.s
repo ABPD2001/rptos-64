@@ -106,3 +106,23 @@ invalidate_tlb_va:
 invalidate_tlb_va_allasids:
     tlbi vaae1,x0 @ invalidate by VA (all asids) EL1.
     ret @ return.
+
+translate_address:
+    msr TTBR0_EL1,x3 @ save.
+    msr TTBR1_EL1,x4 @ save.
+    
+    mrs x1,TTBR0_EL1 @ apply.
+    mrs x2,TTBR1_EL1 @ apply.
+    isb sy @ wait until synchronizes...
+
+    ldr x1,[x0] @ use virtual address.
+    mrrs x0,x1,PAR_EL1 @ read physical address register (x0 is lower 64-bits and x1 is upper 64-bits).
+    
+    and x1,x1,0xFFFFFFFFFFF000 @ mask PA bits.
+    and x0,x0,#0xFFF @ mask first 12-bits (offset).
+    orr x0,x0,x1 @ merge OA and offset to create real PA.
+
+    mrs x3,TTBR0_EL1 @ restore.
+    mrs x4,TTBR1_EL1 @ restore.
+    isb sy @ wait until synchronizes...
+    ret @ return.

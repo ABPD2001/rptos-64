@@ -21,4 +21,8 @@ extern void invalidate_tlb();
 extern void invalidate_tlb_asid(u16_t asid);
 extern void invalidate_tlb_va(u64_t virtual_address);
 extern void invalidate_tlb_va_allasids(u64_t virtual_address);
+
+// translation
+
+extern u64_t translate_address(u64_t address, u64_t ttb0r, u64_t ttb1r);
 #endif

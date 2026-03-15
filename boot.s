@@ -6,7 +6,6 @@ minit:
     mrs x0,HCR_EL2
     
     orr x0,x0,#(1<<31) @ Enable 64-bit EL1.
-    @ orr x0,x0,#(11<<41) @ set NV and NV1.
     bic x0,x0,#0x18 @ disable IMO and FMO. (4&5 bits)
     bic x0,x0,#(1<<27) @ disable tge.
     
@@ -125,9 +124,10 @@ core_spinlock:
     
     mrs x0,SPSR_EL1 @ read pstate fields
     mrs x1,ELR_EL1 @ read exception link register
+    mrs x2,TTBR0_EL1 @ read task TTBR0.
     
     stp x30,x0,[sp,#-16]
-    stp x1,x1,[sp,#-16] @ save ELR with padding
+    stp x1,x2,[sp,#-16] @ save ELR and TTBR0.
     dmb ish @ data memory barrier (inner shareable).
 .endm
 
@@ -202,20 +202,12 @@ vector_table:
     ldr x0,[sp],#8
 
     _exception_entry
-    mrs x1,ESR_EL1 @ read ESR_EL1
 
-    and x1,x1,#0xFFFFFF @ mask only class of exception.
-    bl determine_id
-
-
-    ldr x19,=__sync_same_el_table_start__
-    mov x21,#4
-    mul x20,x20,x21 @ calculate callback relative address of table.
-    add x19,x19,x20
-
+    ldr x2,=__sync_same_el_table_start__ @ set base address as param.
+    bl CALCULATE_SYNCHRONOUS_ADDRESS @ calculate absolute address.
     bl x19 # call the callback (c handler)
 
-    b RETURN_TO_TASK
+    b RETURN_TO_TASK @ back to task.
     
     @ IRQ/vIRQ exception (reentrant)
     .balign 128
@@ -254,6 +246,7 @@ vector_table:
     @ <--- LOWER EXECUTION LEVEL with SPx (Aarch64) --->
     @ synchronous exception
     .balign 128
+
     str x0,[sp,#-8]!
     mrs x0,ELR_El1 @ read elr.
     add x0,x0,#4 @ calculate next instruction.
@@ -261,19 +254,12 @@ vector_table:
     ldr x0,[sp],#8
 
     _exception_entry
-    mrs x1,ESR_EL1 @ read ESR_EL1
 
-    and x1,x1,#0xFFFFFF @ mask only class of exception.
-    bl determine_id
-
-    ldr x19,=__sync_same_el_table_start__
-    mov x21,#4
-    mul x20,x20,x21 @ calculate callback relative address of table.
-    add x19,x19,x20
-
+    ldr x2,=__sync_lower_el_table_start__ @ set base address as param.
+    bl CALCULATE_SYNCHRONOUS_ADDRESS @ calculate absolute address.
     bl x19 # call the callback (c handler)
 
-    b RETURN_TO_TASK
+    b RETURN_TO_TASK @ back to task.
 
     @ IRQ/vIRQ exception
     .balign 128
@@ -322,8 +308,10 @@ vector_table:
 RETURN_TO_TASK:
     str w1,[x0,#GICC_DIR] @ interrupt deactivation. 
 
-    ldp x0,x0,[sp,#16] @ read ELR_EL1
+    ldp x0,x1,[sp,#16] @ read ELR_EL1 and TTBR0_EL1
     mrs x0,ELR_EL1 @ apply ELR_EL1.
+    mrs x1,TTBR0_EL1 @ apply TTBR0_EL1.
+
     ldp x30,x0,[sp],#16 @ read x30 and SPSR_EL1    
     msr SPSR_EL1,x0 @ apply spsr.
     ldp x28,x29,[sp],#16    
@@ -384,9 +372,13 @@ irq_routine_router:
     ldp x30,x30,[sp],#16 @ restore link register.
     ret @ return.
 
-determine_id:
+CALCULATE_SYNCHRONOUS_ADDRESS:
     stp x29,x30,[sp,#-16]! @ store FP and LR.
     mov x29,sp @ set frame pointer.
+
+
+    mrs x1,ESR_EL1 @ read ESR_EL1
+    and x1,x1,#0xFFFFFF @ mask only class of exception.
 
     cmp x1,#0x00 @Unkown
     csinc x0,#1,x0,EQ
@@ -420,6 +412,10 @@ determine_id:
     csinc x0,#15,x0,EQ
     cmp x1,#0x3D @Step (debug)
     csinc x0,#16,x0,EQ
+
+    mov x1,#4 
+    mul x2,x2,x1 @ calculate callback relative address of table.
+    add x0,x0,x1 @ calculate absolute address.
 
     mov sp,x29 @ reset sp to frame pointer.
     ldp x29,x30,[sp],#16 @ restore FP and LR.

@@ -251,5 +251,4 @@ void kernel()
     task_schaduler();  // schadule.
     task_dispatcher(); // dispatch.
 }
-// 6600 of armv8 manual
-// d7 and d8.
+// TCR2_EL1

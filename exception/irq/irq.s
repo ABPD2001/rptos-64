@@ -31,12 +31,9 @@ core_generic_timer: @ generic timer of core gonna used for task schaduling...
 
     add sp,sp,#16 @ skip ELR_EL1 + padding, becuase there is no return to task.
     
-    ldp x0,x0,[sp],#16 @ read ELR_EL1.
-    str x0,[x1,#344] @ store task pc.
+    ldp x0,x2,[sp],#16 @ read ELR_EL1.
+    stp x0,x2,[x1,#336] @ store on task program counter (pc) and tranlation table base register (ttbr).
     
-    mrs x0,TTBR0_EL1 @ read ttbr0.
-    str x0,[x1,#348] @ store ttbr of task.
-
     ldp x30,x0,[sp],#16
 
     stp x0,x30,[x1],#16 @ save SPSR_EL1 and x30 into pcb.
@@ -72,7 +69,8 @@ core_generic_timer: @ generic timer of core gonna used for task schaduling...
     
     ldp x2,x3,[sp],#16 @ load x0 and x1 into temp registers.
     stp x2,x3,[x1],#16 @ store it on pcb (this line completes the whole context save).
-    
+    ldp x2,x3,[sp],#16 @ load ELR and 
+
     mrs x0,SP_EL0 @ read stack pointer of task.
     str x0,[x1],#8 @ store sp on pcb.
     
