@@ -31,6 +31,7 @@ release_mutex:
     ldaxr x1,[x0] @ read acquire exclusive.
     cmp x1,#0 @ compare if mutex is gain.
     adr x30. @ set link register.
+    add x30,x30,#8 @ skip two instructions (add & branch).
     b.eq clear_mutex @ try to release mutex.
     cset x2,EQ @ set if mutex gain.
     and x1,x1,x2 @ bitwise and (mutex gain/exclusive write stats) & mutex gain.

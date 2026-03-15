@@ -137,10 +137,12 @@ aux_main_routine:
 
     cmp x2,#0x4 @ check if it is rx id.
     adr x30,. @ set link register.
+    add x30,x30,#8 @ skip two instructions (add & branch).
     b.eq muart_valid_byte @ call routine.
 
     cmp x2,#0x2 @ check if is tx id.
     adr x30,. @ set link register.
+    add x30,x30,#8 @ skip two instructions (add & branch).
     b.eq muart_tx_empty @ call routine.
 
     ldr x1,[x0,#AUX_IIR_REG] @ read interrupt status.
@@ -175,6 +177,7 @@ sgi_main_routine:
     stp x30,x30,[sp,#-16]! @ store link register to main handler.
     
     adr x30,. @ set link register.
+    add x30,x30,#8 @ skip five instructions (add & cmp & branch & cmp & branch).
     cmp x0,#7
     b.eq wakeup_service @ wake-up service.
 

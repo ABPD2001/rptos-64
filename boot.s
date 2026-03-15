@@ -204,10 +204,9 @@ vector_table:
     _exception_entry
     mrs x1,ESR_EL1 @ read ESR_EL1
 
-    bfc x1,xzr,#0,#26 @ seperate class of sync
-    lsr x1,#26 
-
+    and x1,x1,#0xFFFFFF @ mask only class of exception.
     bl determine_id
+
 
     ldr x19,=__sync_same_el_table_start__
     mov x21,#4
@@ -264,9 +263,7 @@ vector_table:
     _exception_entry
     mrs x1,ESR_EL1 @ read ESR_EL1
 
-    bfc x1,xzr,#0,#26 @ seperate class of sync
-    lsr x1,#26 
-
+    and x1,x1,#0xFFFFFF @ mask only class of exception.
     bl determine_id
 
     ldr x19,=__sync_same_el_table_start__
