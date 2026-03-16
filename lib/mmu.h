@@ -14,6 +14,7 @@ extern void set_ttbr1(u64_t base_address); // set TTBR1_EL1.
 extern void mmu_settings(struct mmu_settings_t *mmu_settings); // settings of TCR_EL1.
 
 extern void mmu_configuration(u64_t base_address0, u64_t base_address1, u8_t enable); // Basic configuration of mmu.
+extern void mmu_initialize();
 
 // TLB (MMU)
 

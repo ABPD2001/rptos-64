@@ -225,6 +225,11 @@ extern unsigned long __cccb_bank_base__;
 extern unsigned long __kernel_service_power_base__;
 extern unsigned long __kernel_service_serial_base__;
 
+extern unsigned long __core0_stack_pages__;
+extern unsigned long __core1_stack_pages__;
+extern unsigned long __core2_stack_pages__;
+extern unsigned long __core3_stack_pages__;
+
 typedef unsigned long u64_t;
 typedef signed long s64_t;
 

@@ -90,6 +90,9 @@ mmu_settings:
 
     ret @ return.
 
+mmu_initialize:
+    ret
+
 invalidate_tlb:
     tlbi alle1 @ invalidate all EL1.
     tlbi alle0 @ invalidate all EL0.

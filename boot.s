@@ -46,7 +46,7 @@ cinit:
     mov x3,#8
     mul x2,x0,x3 @ calculate relative address of core stack table.
     add x1,x1,x2
-    ldr sp,[x1] @ load core stack pointer.
+    ldr sp,[x1] @ load core stack pointer. @ this is disabled if mmu is gonna be enabled.
 
     mrs x0,CPACR_EL1
     ldr x1,=(1<<20)
@@ -231,9 +231,9 @@ vector_table:
     _exception_entry
 
     ldr x0,=GICC_BASE
-    ldr x0,[x0,#GICC_AIR] @ ackhowledge interrupt.
-    str x0,[x0,#GICC_EOIR] @ end of interrupt.
-    str x0,[x0,#GICC_DIR] @ deactivation.
+    ldr x1,[x0,#GICC_AIR] @ ackhowledge interrupt.
+    str x1,[x0,#GICC_EOIR] @ end of interrupt.
+    str x1,[x0,#GICC_DIR] @ deactivation.
 
     _exception_fiq_enable
 

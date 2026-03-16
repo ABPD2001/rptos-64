@@ -25,6 +25,20 @@ SECTIONS {
         64-71: cores signal (each byte is for a core).
         */
     }
+    .cores_translation_tables (NOLOAD) : {
+        . = ALIGN(8);
+        __core0_stack_pages__ = .;
+        . += 48; /* reserve a l0 table (with 1 entry) and l1 table (with 1 entry) and l2 table (with 1 entry) and l3 table (with 2 entries). */
+        
+        __core1_stack_pages__ = .;
+        . += 48; /* reserve a l0 table (with 1 entry) and l1 table (with 1 entry) and l2 table (with 1 entry) and l3 table (with 2 entries). */
+        
+        __core2_stack_pages__ = .;
+        . += 48; /* reserve a l0 table (with 1 entry) and l1 table (with 1 entry) and l2 table (with 1 entry) and l3 table (with 2 entries). */
+        
+        __core3_stack_pages__ = .;
+        . += 48; /* reserve a l0 table (with 1 entry) and l1 table (with 1 entry) and l2 table (with 1 entry) and l3 table (with 2 entries). */
+    }
 
     /* TABLES */
     .vectors ALIGN(32) : {

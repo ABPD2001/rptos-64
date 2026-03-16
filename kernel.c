@@ -1,4 +1,5 @@
 #include "./lib/core.h"
+#include "./lib/mmu.h"
 #include "./lib/math.h"
 #include "./lib/schaduler.h"
 
@@ -75,7 +76,26 @@ void wakeup_service();
 
 void kernel()
 {
-    const u8_t cid = core_id();
+    register const u8_t cid = core_id(); // its required to not stored on stack.
+
+    // // set mmu pages for current core and turn on mmu.
+    // register volatile u64_t *l0_table = __core0_stack_pages__;
+    // register volatile u64_t *l1_table = ((char *)__core0_stack_pages__) + 8;
+    // register volatile u64_t *l2_table = ((char *)__core0_stack_pages__) + 16;
+    // register volatile u64_t *l3_table = ((char *)__core0_stack_pages__) + 24;
+
+    // *l0_table = (((u64_t)&l1_table) & 0xFFFFFFFFF) << 11;
+    // *l1_table = (((u64_t)&l2_table) & 0xFFFFFFFFF) << 11;
+    // *l2_table = (((u64_t)&l3_table) & 0xFFFFFFFFF) << 11;
+
+    // l3_table[0] = ((u64_t)((char *)__core_info_table__) + (cid * 8)) & 0xFFFFFFFFF << 11;        // set first 4KB.
+    // l3_table[1] = ((u64_t)((char *)__core_info_table__) + (cid * 8) + 4192) & 0xFFFFFFFFF << 11; // set second 4KB.
+    // mmu_configuration(l0_table, NULL, true);
+
+    // asm volatile("msr SP_EL1,xzr" // set stack as 0 to start mmu.
+    //              :
+    //              :
+    //              :);
 
     // first, we set address of global pointers (.bss variables)
     global_system_ticks = __global_timer_ticks__;
