@@ -117,6 +117,8 @@ restore_context:
     msr ELR_EL1,x1 @ apply pc (into exception link register).
     ldr x1,[x0,#8]!
     msr TTBR0_EL1,x1 @ apply ttbr.
+    ldr x1,=0x300007B @ set mmu and other settings...
+    msr SCTLR_EL0,x1 @ set SCTLR for el0.
 
     ldp x0,x1,[x0,#-16]! @ all context is restored.
 

@@ -28,7 +28,7 @@ struct task_properties_t
     u8_t reserved[3]; // padding.
 };
 
-// Core.
+// Core
 
 u8_t core_id();
 extern void system_panic();
@@ -47,6 +47,7 @@ void terminate_context(volatile struct pcb_t *task);
 void core_terminate();
 
 volatile struct pcb_t *create_ktask(struct task_properties_t properties);
+
 // DAIF
 
 extern void enable_irq();
