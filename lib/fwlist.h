@@ -31,4 +31,12 @@ void tfw_push_back(volatile struct tfwlist_header_t *header, volatile struct tim
 volatile struct timer_request_t *tfw_find(volatile struct tfwlist_header_t *header, u64_t id); // task id.
 u64_t tfw_idx(volatile struct tfwlist_header_t *header, u64_t id);                             // request id.
 u64_t tfw_rm(volatile struct tfwlist_header_t *header, u64_t idx);
+
+// MEMORY
+
+void mh_push_back(struct memframe_t *head, struct memframe_t *tail, volatile struct memframe_t *frame);
+void mh_push_front(struct memframe_t *head, struct memframe_t *tail, volatile struct memframe_t *frame);
+u64_t mh_rm(struct memframe_t *head, struct memframe_t *tail, u64_t idx);
+volatile struct pcb_t *mh_at(struct memframe_t *head, struct memframe_t *tail, u64_t idx);
+u64_t mh_len(struct memframe_t *head, struct memframe_t *tail);
 #endif

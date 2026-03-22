@@ -20,27 +20,121 @@ disable_mmu:
     ret @ return.
 
 set_ttbr0:
-    msr TTBR0_EL1,x0 @ set Translation Table Base Register 0.
-    isb sy @ wait until apply.
+    mrs x3,TTBR0_EL1
+    and x0,x0,#0x1FFFFFFFFFF @ mask base address 0.
+    and x1,x1,#0x3 @ first two bits.
+    
+    cmp x2,#1
+    cset x2,GE @ boolean value of cnp.
+
+    lsr x0,#4 @ shift to left (BADDR).
+    lsr x1,#1 @ shift to left (SKL).
+
+    orr x0,x0,x1 @ merge BADDR and SKL.
+    orr x0,x0,x2 @ merge CNP and others.
+
+    msr TTBR0_EL1,x0 @ apply.
+    isb sy @ wait until everything synchronizes...
     ret @ return.
 
 set_ttbr1:
-    msr TTBR1_EL1,x0 @ set Translation Table Base Register 1.
-    isb sy @ wait until apply.
+    mrs x3,TTBR1_EL1
+    and x0,x0,#0x1FFFFFFFFFF @ mask base address 0.
+    and x1,x1,#0x3 @ first two bits.
+    
+    cmp x2,#1
+    cset x2,GE @ boolean value of cnp.
+
+    lsr x0,#4 @ shift to left (BADDR).
+    lsr x1,#1 @ shift to left (SKL).
+
+    orr x0,x0,x1 @ merge BADDR and SKL.
+    orr x0,x0,x2 @ merge CNP and others.
+
+    msr TTBR1_EL1,x0 @ apply.
+    isb sy @ wait until everything synchronizes...
+    ret @ return.
+
+set_ttbr0_dry:
+    mrs x3,TTBR0_EL1
+    and x0,x0,#0x1FFFFFFFFFF @ mask base address 0.
+    and x1,x1,#0x3 @ first two bits.
+    
+    cmp x2,#1
+    cset x2,GE @ boolean value of cnp.
+
+    lsr x0,#4 @ shift to left (BADDR).
+    lsr x1,#1 @ shift to left (SKL).
+
+    orr x0,x0,x1 @ merge BADDR and SKL.
+    orr x0,x0,x2 @ merge CNP and others.
+
+    msr TTBR0_EL1,x0 @ apply.
+    ret @ return.
+
+set_ttbr1_dry:
+    mrs x3,TTBR1_EL1
+    and x0,x0,#0x1FFFFFFFFFF @ mask base address 0.
+    and x1,x1,#0x3 @ first two bits.
+    
+    cmp x2,#1
+    cset x2,GE @ boolean value of cnp.
+
+    lsr x0,#4 @ shift to left (BADDR).
+    lsr x1,#1 @ shift to left (SKL).
+
+    orr x0,x0,x1 @ merge BADDR and SKL.
+    orr x0,x0,x2 @ merge CNP and others.
+
+    msr TTBR1_EL1,x0 @ apply.
     ret @ return.
 
 mmu_configuration:
-    cmp x2,#0 @ compare.
-    cset x2,EQ @ set bool value.
+    and x6,x0,#0x1FFFFFFFFFF @ mask base address 0.
+    and x7,x1,#0x1FFFFFFFFFF @ mask base address 1.
+    
+    and x8,x4,#0xF @ mask CnP.
+    cmp x8,#1
+    cset x8,GE
 
-    mrs x3,SCTLR_EL1 @ read system control register value.
-    orr x3,x3,x2 @ set mmu enabltion.
+    and x9,x5,#0x3 @ first two bits (SKL0).
+    and x10,x2,#0xFF @ first byte (ASID 0).
 
-    msr TTBR0_EL1,x0 @ set Translation Table Base Register 0.
-    msr TTBR1_EL1,x1 @ set Translation Table Base Register 1.
-    msr SCTLR_EL1,x3 @ apply mmu enablation.
-    isb ish @ wait until inner shareable synchronizes. 
+    lsr x6,#4 @ shift to left (BADDR 0).
+    lsr x9,#1 @ shift to left (SKL0).
+    lsr x10,#47 @ shift to left (ASID 0).
 
+    orr x6,x6,x8 @ merge CnP 0 and BADDR 0.
+    orr x6,x6,x9 @ merge SKL0 and others of 0.
+    orr x6,x6,x10 @ merge ASID 0 and others of 0.
+
+    msr TTBR0_EL1,x6 @ set TTBR0_EL1
+
+    and x8,x4,#0xF0 @ mask CnP 1.
+    cmp x8,#1
+    cset x8,GE
+
+    and x9,x5,#0xC @ second two bits (SKL1).
+    and x10,x2,#0xFF00 @ second byte (ASID 1).
+
+    lsr x7,#4 @ shift to left (BADDR 1).
+    lsr x9,#1 @ shift to left (SKL1).
+    lsr x10,#47 @ shift to left (ASID 1).
+    
+    orr x7,x7,x8 @ merge CnP 1 and BADDR 1.
+    orr x7,x7,x9 @ merge SKL1 and others of 1.
+    orr x7,x7,x10 @ merge ASID 1 and others of 1.
+
+    msr TTBR1_EL1,x7 @ set TTBR1_EL1.
+
+    cmp x3,#1
+    cset x0,GE
+
+    mrs x1,SCTLR_EL1
+    orr x1,x1,x0 @ set mmu enablation.
+    msr SCTLR_EL1,x1 @ apply.
+
+    isb sy @ wait until eveything synchronizes...
     ret @ return.
 
 mmu_settings:

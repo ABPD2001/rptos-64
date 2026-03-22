@@ -25,20 +25,6 @@ SECTIONS {
         64-71: cores signal (each byte is for a core).
         */
     }
-    .cores_translation_tables (NOLOAD) : {
-        . = ALIGN(8);
-        __core0_stack_pages__ = .;
-        . += 48; /* reserve a l0 table (with 1 entry) and l1 table (with 1 entry) and l2 table (with 1 entry) and l3 table (with 2 entries). */
-        
-        __core1_stack_pages__ = .;
-        . += 48; /* reserve a l0 table (with 1 entry) and l1 table (with 1 entry) and l2 table (with 1 entry) and l3 table (with 2 entries). */
-        
-        __core2_stack_pages__ = .;
-        . += 48; /* reserve a l0 table (with 1 entry) and l1 table (with 1 entry) and l2 table (with 1 entry) and l3 table (with 2 entries). */
-        
-        __core3_stack_pages__ = .;
-        . += 48; /* reserve a l0 table (with 1 entry) and l1 table (with 1 entry) and l2 table (with 1 entry) and l3 table (with 2 entries). */
-    }
 
     /* TABLES */
     .vectors ALIGN(32) : {
@@ -125,28 +111,6 @@ SECTIONS {
         __global_muart_metadata__ = .;
         . += 54; /* reserve 54 bytes for global mini uart metadata struct. */  
 
-        __global_uart0_metadata__ = .;
-        . += 54; /* reserve 54 bytes for uart0 metadata. */
-        __global_uart2_metadata__ = .;
-        . += 54; /* reserve 54 bytes for uart2 metadata. */
-        __global_uart3_metadata__ = .;
-        . += 54; /* reserve 54 bytes for uart3 metadata. */
-        __global_uart4_metadata__ = .;
-        . += 54; /* reserve 54 bytes for uart4 metadata. */
-        __global_uart5_metadata__ = .;
-        . += 54; /* reserve 54 bytes for uart5 metadata. */
-
-        __global_uart0_settings__ = .;
-        . += 48; /* reserve 48 bytes for uart0 settings. */
-        __global_uart2_settings__ = .;
-        . += 48; /* reserve 48 bytes for uart2 settings. */
-        __global_uart3_settings__ = .;
-        . += 48; /* reserve 48 bytes for uart3 settings. */
-        __global_uart4_settings__ = .;
-        . += 48; /* reserve 48 bytes for uart4 settings. */
-        __global_uart5_settings__ = .;
-        . += 48; /* reserve 48 bytes for uart5 settings. */
-
         __global_gic400_metadata__ = .;
         . += 16; /* reserve 16 bytes for gic-400 metadata. */
     }
@@ -164,18 +128,7 @@ SECTIONS {
 
         __generic_base_system_exception_statistics__ = .;
         . += 128; /* reserve (32*4) bytes for generic statistics of exceptions. */
-
-        __global_uart0_statistics__ = .;
-        . += 24; /* reserve 24 bytes for uart0 statistics. */
-        __global_uart2_statistics__ = .;
-        . += 24; /* reserve 24 bytes for uart2 statistics. */
-        __global_uart3_statistics__ = .;
-        . += 24; /* reserve 24 bytes for uart3 statistics. */
-        __global_uart4_statistics__ = .;
-        . += 24; /* reserve 24 bytes for uart4 statistics. */
-        __global_uart5_statistics__ = .;
-        . += 24; /* reserve 24 bytes for uart5 statistics. */
-    }
+      }
     
     /* BANKS AND QUEUES */
 
@@ -247,6 +200,7 @@ SECTIONS {
         . = ALIGN(8);
         __system_memory_frame_bank_base__ = .;
         . += 29360128; /* reserve 28 MB for memory frames metadata. */
+        
         __memory_paging_settings_base__ = .;
         . += 8; /* reserve 8 bytes for struct of memory paging settings. */
     }
@@ -261,6 +215,10 @@ SECTIONS {
     .kernel_service_serial ALIGN(8) : {
         __kernel_service_serial_base__ = .;
         *(.kernel_service_serial)
+    }
+    .kernel_services_virtaul_maps ALIGN(8) : {
+        __kernel_sevices_virtual_maps__ = .;
+        . += 64; /* allocate 2 l0 table, 2 l1 table, 2 l2 table and 2 l3 table. */
     }
 
     . = 536870912; /* Set user start point at 512 MB. */

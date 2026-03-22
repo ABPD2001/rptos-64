@@ -46,7 +46,7 @@ cinit:
     mov x3,#8
     mul x2,x0,x3 @ calculate relative address of core stack table.
     add x1,x1,x2
-    ldr sp,[x1] @ load core stack pointer. @ this is disabled if mmu is gonna be enabled.
+    ldr sp,[x1] @ load core stack pointer, this should be comment if mmu is gonna be enabled.
 
     mrs x0,CPACR_EL1
     ldr x1,=(1<<20)
@@ -128,7 +128,7 @@ core_spinlock:
     
     stp x30,x0,[sp,#-16]
     stp x1,x2,[sp,#-16] @ save ELR and TTBR0.
-    dmb ish @ data memory barrier (inner shareable).
+    dsb ish @ data synchronization barrier (inner shareable).
 .endm
 
 .macro _exception_irq_enable
@@ -195,6 +195,7 @@ vector_table:
     @ <--- CURRENT EXECUTION LEVEL with SPx --->
     @ synchronous exception
     .balign 128
+    msr SCTLR_EL1,#59 @ disable mmu, set active only some of settings.
     str x0,[sp,#-8]!
     mrs x0,ELR_El1 @ read elr.
     add x0,x0,#4 @ calculate next instruction.
@@ -211,6 +212,7 @@ vector_table:
     
     @ IRQ/vIRQ exception (reentrant)
     .balign 128
+    msr SCTLR_EL1,#59 @ disable mmu, set active only some of settings.
     _exception_entry
 
     ldr x0,=GICC_BASE
@@ -228,6 +230,7 @@ vector_table:
     
     @ FIQ/vFIQ exception
     .balign 128
+    msr SCTLR_EL1,#59 @ disable mmu, set active only some of settings.
     _exception_entry
 
     ldr x0,=GICC_BASE
@@ -246,6 +249,7 @@ vector_table:
     @ <--- LOWER EXECUTION LEVEL with SPx (Aarch64) --->
     @ synchronous exception
     .balign 128
+    msr SCTLR_EL1,#59 @ disable mmu, set active only some of settings.
 
     str x0,[sp,#-8]!
     mrs x0,ELR_El1 @ read elr.
@@ -263,7 +267,8 @@ vector_table:
 
     @ IRQ/vIRQ exception
     .balign 128
-    _exception_entry    
+    msr SCTLR_EL1,#59 @ disable mmu, set active only some of settings.
+    _exception_entry -   
     ldr x0,=GICC_BASE
     ldr x0,[x0,#GICC_AIR] @ ackhowledge interrupt.
     stp x0,x0,[sp,#-16]! @ store ackhowledge interrupt value. 
@@ -278,6 +283,7 @@ vector_table:
 
     @ FIQ/vFIQ exception
     .balign 128
+    msr SCTLR_EL1,#59 @ disable mmu, set active only some of settings.
     _exception_entry
 
     ldr x0,=GICC_BASE
@@ -291,6 +297,7 @@ vector_table:
 
     @ SError/vSError exception
     .balign
+    msr SCTLR_EL1,#59 @ disable mmu, set active only some of settings.
     _serror_panic
 
     @ <--- LOWER EXECUTION LEVEL with SPx (Aarch32) --->
@@ -311,9 +318,11 @@ RETURN_TO_TASK:
     ldp x0,x1,[sp,#16] @ read ELR_EL1 and TTBR0_EL1
     mrs x0,ELR_EL1 @ apply ELR_EL1.
     mrs x1,TTBR0_EL1 @ apply TTBR0_EL1.
-
     ldp x30,x0,[sp],#16 @ read x30 and SPSR_EL1    
-    msr SPSR_EL1,x0 @ apply spsr.
+    mrs x0,SPSR_EL1 @ apply spsr.
+    mrs SCTLR_EL1,x0 @ apply
+    isb sy @ wait until synchronizes...
+    
     ldp x28,x29,[sp],#16    
     ldp x26,x27,[sp],#16    
     ldp x24,x25,[sp],#16    
@@ -376,6 +385,8 @@ CALCULATE_SYNCHRONOUS_ADDRESS:
     stp x29,x30,[sp,#-16]! @ store FP and LR.
     mov x29,sp @ set frame pointer.
 
+    ldr x0,=0x300007A @ restore last settings of sctlr.
+    isb sy @ synchronize...
 
     mrs x1,ESR_EL1 @ read ESR_EL1
     and x1,x1,#0xFFFFFF @ mask only class of exception.

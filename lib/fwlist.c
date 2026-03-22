@@ -198,3 +198,105 @@ u64_t tfw_idx(volatile struct tfwlist_header_t *header, u64_t id)
         temp_req = temp_req->next; // seek to next request in queue.
     }
 }
+
+void mh_push_back(struct memframe_t *head, struct memframe_t *tail, volatile struct memframe_t *frame)
+{
+    if (head == NULL && tail == NULL)
+    {
+        head = frame;
+        tail = head;
+        return;
+    }
+
+    tail->next_frame = frame; // set pointer of headers tail to new frame.
+    tail = frame;             // set new tail for header.
+}
+void mh_push_front(struct memframe_t *head, struct memframe_t *tail, volatile struct memframe_t *frame)
+{
+    if (head == NULL && tail == NULL)
+    {
+        head = frame;
+        tail = head;
+        return;
+    }
+    frame->next_frame = head; // set pointer of new frame to headers head.
+    head = frame;             // set new head for header.
+}
+u64_t mh_rm(struct memframe_t *head, struct memframe_t *tail, u64_t idx)
+{
+    volatile struct memframe_t *pointed_frame = head;
+    volatile struct memframe_t *prev_frame = NULL;
+
+    idx--;
+    if (pointed_frame == NULL)
+        return 1;
+    for (; idx != -1; idx--)
+    {
+        if (pointed_frame->next_frame == NULL)
+        {
+            if (idx)
+                return 2;
+            break;
+        }
+        prev_frame = pointed_frame;
+        pointed_frame = pointed_frame->next_frame;
+    }
+
+    if (pointed_frame == tail && pointed_frame == head)
+    {
+        head = NULL;
+        tail = NULL;
+
+        return 0;
+    }
+
+    if (pointed_frame == head)
+    {
+
+        head = pointed_frame->next_frame;
+        pointed_frame->next_frame = NULL; // just in case...
+    }
+    else if (pointed_frame == tail)
+    {
+
+        tail = prev_frame;
+        prev_frame->next_frame = NULL; // just in case...
+    }
+
+    return 0;
+}
+volatile struct pcb_t *mh_at(struct memframe_t *head, struct memframe_t *tail, u64_t idx)
+{
+    volatile struct memframe_t *target_frame = head;
+    idx--;
+
+    if (target_frame == NULL)
+        return 1;
+    for (; idx != -1; idx--)
+    {
+        if (target_frame->next_frame == NULL)
+        {
+            if (idx)
+                return 2;
+            break;
+        }
+        target_frame = target_frame->next_frame;
+    }
+
+    return target_frame;
+}
+u64_t mh_len(struct memframe_t *head, struct memframe_t *tail)
+{
+    if (head == NULL && tail == NULL)
+        return 0;
+    volatile struct memframe_t *temp_frame = head;
+    u64_t length = 1; // 1 initial value, because its already pointing on a item...
+
+    while (temp_frame->next_frame == NULL)
+    {
+        length++;
+        temp_frame = temp_frame->next_frame;
+    }
+
+    return length;
+}

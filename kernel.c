@@ -1,5 +1,6 @@
 #include "./lib/core.h"
 #include "./lib/mmu.h"
+#include "./lib/memory.h"
 #include "./lib/math.h"
 #include "./lib/schaduler.h"
 
@@ -76,26 +77,7 @@ void wakeup_service();
 
 void kernel()
 {
-    register const u8_t cid = core_id(); // its required to not stored on stack.
-
-    // // set mmu pages for current core and turn on mmu.
-    // register volatile u64_t *l0_table = __core0_stack_pages__;
-    // register volatile u64_t *l1_table = ((char *)__core0_stack_pages__) + 8;
-    // register volatile u64_t *l2_table = ((char *)__core0_stack_pages__) + 16;
-    // register volatile u64_t *l3_table = ((char *)__core0_stack_pages__) + 24;
-
-    // *l0_table = (((u64_t)&l1_table) & 0xFFFFFFFFF) << 11;
-    // *l1_table = (((u64_t)&l2_table) & 0xFFFFFFFFF) << 11;
-    // *l2_table = (((u64_t)&l3_table) & 0xFFFFFFFFF) << 11;
-
-    // l3_table[0] = ((u64_t)((char *)__core_info_table__) + (cid * 8)) & 0xFFFFFFFFF << 11;        // set first 4KB.
-    // l3_table[1] = ((u64_t)((char *)__core_info_table__) + (cid * 8) + 4192) & 0xFFFFFFFFF << 11; // set second 4KB.
-    // mmu_configuration(l0_table, NULL, true);
-
-    // asm volatile("msr SP_EL1,xzr" // set stack as 0 to start mmu.
-    //              :
-    //              :
-    //              :);
+    const u8_t cid = core_id();
 
     // first, we set address of global pointers (.bss variables)
     global_system_ticks = __global_timer_ticks__;
@@ -176,7 +158,7 @@ void kernel()
             :
             :);
 
-        sctlr = 0x3000079; // set Alignment check, stack alignment check, c15 barrier, Endiannmass of data access in EL0, Exception endiannmass.
+        sctlr = 0x300007A; // set Alignment check, stack alignment check, c15 barrier, Endiannmass of data access in EL0, Exception endiannmass.
 
         // memory paging configuration and initialization.
         if (!cid)
@@ -233,7 +215,7 @@ void kernel()
         // others will be changes at task schaduling or creation.
     }
 
-    // initialize pre-build services.
+    // <--- initialize pre-build services --->
 
     struct task_properties_t props_serial;
     struct task_properties_t props_power;
@@ -259,6 +241,32 @@ void kernel()
     serial_service->perimision_level = 0;                // user access for serial service.
     serial_service->pc = __kernel_service_serial_base__; // set program counter.
 
+    volatile struct memframe_t *power_frame = alloc_page(power_service->id);
+    volatile struct memframe_t *serial_frame = alloc_page(serial_service->id);
+
+    mh_push_back(serial_service->pages.head, serial_service->pages.tail, serial_frame); // allocate only one page.
+    mh_push_back(power_service->pages.head, power_service->pages.tail, power_frame);    // allocate only one page.
+
+    // power virtualization
+    volatile u64_t *power_service_vir = __kernel_sevices_virtual_maps__;
+    *power_service_vir = ((__kernel_sevices_virtual_maps__ + 1) & 0xfffffffff) << 11;       // set l0 table.
+    *(power_service_vir + 1) = ((__kernel_sevices_virtual_maps__ + 2) & 0xfffffffff) << 11; // set l1 table.
+    *(power_service_vir + 2) = ((__kernel_sevices_virtual_maps__ + 3) & 0xfffffffff) << 11; // set l2 table.
+    *(power_service_vir + 3) = (power_frame->start_address & 0xfffffffff) << 11;            // set l3 table.
+    power_service->ttbr = power_service_vir;                                                // set ttbr of power serivce.
+
+    // serial virtualization
+    volatile u64_t *serial_service_vir = __kernel_sevices_virtual_maps__ + 4;
+    *serial_service_vir = ((__kernel_sevices_virtual_maps__ + 5) & 0xfffffffff) << 11;       // set l0 table.
+    *(serial_service_vir + 5) = ((__kernel_sevices_virtual_maps__ + 6) & 0xfffffffff) << 11; // set l1 table.
+    *(serial_service_vir + 6) = ((__kernel_sevices_virtual_maps__ + 7) & 0xfffffffff) << 11; // set l2 table.
+    *(serial_service_vir + 7) = (serial_frame->start_address & 0xfffffffff) << 11;           // set l3 table.
+    serial_service->ttbr = serial_service_vir;                                               // set ttbr of serial serivce.
+
+    // push into queue.
+    fw_push_back(pri3_ready_queue, power_service);  // push into queue.
+    fw_push_back(pri3_ready_queue, serial_service); // push into queue.
+
     // at last, configure gic-400.
     gic400_interfacectl(true, true); // enable EOIModeNS and Group 1.
     gic400_priorityirq(125, 0x80);   // AUX
@@ -271,4 +279,3 @@ void kernel()
     task_schaduler();  // schadule.
     task_dispatcher(); // dispatch.
 }
-// TCR2_EL1

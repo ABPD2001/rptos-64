@@ -183,26 +183,6 @@ extern unsigned long __global_muart_settings__;
 extern unsigned long __global_muart_metadata__;
 extern unsigned long __global_muart_statistics__;
 
-extern unsigned long __global_uart0_statistics__;
-extern unsigned long __global_uart0_settings__;
-extern unsigned long __global_uart0_metadata__;
-
-extern unsigned long __global_uart2_statistics__;
-extern unsigned long __global_uart2_settings__;
-extern unsigned long __global_uart2_metadata__;
-
-extern unsigned long __global_uart3_statistics__;
-extern unsigned long __global_uart3_settings__;
-extern unsigned long __global_uart3_metadata__;
-
-extern unsigned long __global_uart4_statistics__;
-extern unsigned long __global_uart4_settings__;
-extern unsigned long __global_uart4_metadata__;
-
-extern unsigned long __global_uart5_statistics__;
-extern unsigned long __global_uart5_settings__;
-extern unsigned long __global_uart5_metadata__;
-
 extern unsigned long __global_gic400_metadata__;
 
 extern unsigned long __generic_base_irq_statistics__;
@@ -224,11 +204,12 @@ extern unsigned long __cccb_bank_base__;
 
 extern unsigned long __kernel_service_power_base__;
 extern unsigned long __kernel_service_serial_base__;
+extern unsigned long __kernel_sevices_virtual_maps__;
 
-extern unsigned long __core0_stack_pages__;
-extern unsigned long __core1_stack_pages__;
-extern unsigned long __core2_stack_pages__;
-extern unsigned long __core3_stack_pages__;
+extern unsigned long __stack0_top__;
+extern unsigned long __stack1_top__;
+extern unsigned long __stack2_top__;
+extern unsigned long __stack3_top__;
 
 typedef unsigned long u64_t;
 typedef signed long s64_t;
