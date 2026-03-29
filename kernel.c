@@ -227,35 +227,32 @@ void kernel()
 
     for (u64_t i = 0; i < 93; i++)
     {
-        kernel_pages[i].id = i; // set id for page.
-        if (i > 28)             // if was 2KB frame.
+        kernel_pages[i].id = i;                             // set id for page.
+        kernel_frames[i].start_address = kmem_counter_temp; // set start address.
+
+        if (i > 28) // if it was 2KB frame.
         {
             kernel_frames[i].size = KMEM_SIZE_ORG_2KB;
-            kernel_frames[i].start_address = kmem_counter_temp;
             kmem_counter_temp += 2 * KB; // increment to 2 KB.
         }
         else if (i > 13)
-        { // if was 8KB frame.
+        { // if it was 8KB frame.
             kernel_frames[i].size = KMEM_SIZE_ORG_8KB;
-            kernel_frames[i].start_address = kmem_counter_temp;
             kmem_counter_temp += 8 * KB; // increment to 8 KB.
         }
         else if (i > 5)
-        { // if was 32KB frame.
+        { // if it was 32KB frame.
             kernel_frames[i].size = KMEM_SIZE_ORG_32KB;
-            kernel_frames[i].start_address = kmem_counter_temp;
             kmem_counter_temp += 32 * KB; // increment to 32 KB.
         }
         else if (i > 1)
-        { // if was 128KB frame.
+        { // if it was 128KB frame.
             kernel_frames[i].size = KMEM_SIZE_ORG_128KB;
-            kernel_frames[i].start_address = kmem_counter_temp;
             kmem_counter_temp += 128 * KB; // increment to 128 KB.
         }
         else if (!i)
-        { // if was 512KB frame.
+        { // if it was 512KB frame.
             kernel_frames[i].size = KMEM_SIZE_ORG_512KB;
-            kernel_frames[i].start_address = kmem_counter_temp;
             kmem_counter_temp += 512 * KB; // increment to 512 KB.
         }
     }
