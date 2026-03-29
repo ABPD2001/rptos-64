@@ -52,7 +52,11 @@ extern volatile struct memory_paging_settings_t *memory_paging_settings;
 extern volatile u32_t *pri_map;   // 0-7: core 0 current executing priority, 8-15: core 1, 16-23: core 2, 24-31: core 3.
 extern volatile u32_t *sch_ticks; // 0-7: core 0 schaduling ticks, 8-15: core 1, 16-23: core 2, 24-31: core 3.
 
+extern volatile struct kmem_page_t *kernel_pages;
+extern volatile struct kmem_frame_t *kernel_frames;
+
 extern volatile mutex_t *queues_lock;
 extern volatile mutex_t *schaduling_lock;
+extern volatile mutex_t *kmem_lock;
 
 #endif

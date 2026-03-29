@@ -150,6 +150,16 @@
 #define MMU_SH_OUTER_SHARABLE 0b10
 #define MMU_SH_INNER_SHARABLE 0b11
 
+#define KMEM_SIZE_ORG_2KB 0
+#define KMEM_SIZE_ORG_8KB 1
+#define KMEM_SIZE_ORG_32KB 2
+#define KMEM_SIZE_ORG_128KB 3
+#define KMEM_SIZE_ORG_512KB 4
+
+#define KB 1024
+#define MB 1048576
+#define GB 1073741824
+
 #define PSCI_CPU_SUSPEND_CORES_POWER_LEVEL 0b00
 #define PSCI_CPU_SUSPEND_CLUSTERS_POWER_LEVEL 0b01
 #define PSCI_CPU_SUSPEND_SYSTEM_POWER_LEVEL 0b10
@@ -201,6 +211,9 @@ extern unsigned long __system_memory_frame_bank_base__;
 extern unsigned long __memory_paging_settings_base__;
 
 extern unsigned long __cccb_bank_base__;
+extern unsigned long __global_kernel_frames_bank_base__;
+extern unsigned long __global_kernel_pages_bank_base__;
+extern unsigned long __kernel_memory_lock__;
 
 extern unsigned long __kernel_service_power_base__;
 extern unsigned long __kernel_service_serial_base__;

@@ -47,7 +47,19 @@ struct memframes_header_t // 16 Bytes.
     struct memframe_t *tail;
 };
 
-// if using 917,504 frame (4KB frame) as 3.5 GB usage, total size of frames is 28 MB.
-// (512MB - 28MB) = 484 MB on this case is reserved for kernel.
+struct kmem_page_t // 16 Bytes.
+{
+    u64_t start_address;
+    u32_t size;
+    u32_t id;
+};
+
+struct kmem_frame_t // 16 Bytes.
+{
+    u64_t start_address;
+    u8_t allocated;
+    u8_t size;
+    u8_t reserved[6]; // padding (6 Bytes).
+};
 
 #endif

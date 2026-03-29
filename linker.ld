@@ -199,10 +199,19 @@ SECTIONS {
     .mmu (NOLOAD) : {
         . = ALIGN(8);
         __system_memory_frame_bank_base__ = .;
-        . += 29360128; /* reserve 28 MB for memory frames metadata. */
+        . += 33554432; /* reserve 28 MB for memory frames metadata. */
         
         __memory_paging_settings_base__ = .;
         . += 8; /* reserve 8 bytes for struct of memory paging settings. */
+    
+        __global_kernel_page_bank_base__ = .;
+        . += 752; /* Reserve 47 pages for kernel use. */
+
+        __global_kernel_frames_bank_base__ = .;
+        . += 752; /* Reserve 47 frames for kernel use. */
+
+        __kernel_memory_lock__ = .;
+        . += 8; /* Reserve a mutex lock. */
     }
 
     /* Pre-builded services. */
@@ -221,6 +230,5 @@ SECTIONS {
         . += 64; /* allocate 2 l0 table, 2 l1 table, 2 l2 table and 2 l3 table. */
     }
 
-    . = 536870912; /* Set user start point at 512 MB. */
     __user_region_start__ = .;
 }

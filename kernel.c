@@ -65,11 +65,15 @@ volatile struct cccb_t **core_contexts = NULL;
 volatile struct memframe_t *memory_frames = NULL;
 volatile struct memory_paging_settings_t *memory_paging_settings = NULL;
 
+volatile struct kmem_page_t *kernel_pages = NULL;
+volatile struct kmem_frame_t *kernel_frames = NULL;
+
 volatile u32_t *pri_map = NULL;   // 0-7: core 0 current executing priority, 8-15: core 1, 16-23: core 2, 24-31: core 3.
 volatile u32_t *sch_ticks = NULL; // 0-7: core 0 schaduling ticks, 8-15: core 1, 16-23: core 2, 24-31: core 3.
 
 volatile mutex_t *queues_lock = NULL;
 volatile mutex_t *schaduling_lock = NULL;
+volatile mutex_t *kmem_lock = NULL;
 
 void task_dispatcher(); // "dispatching" stage.
 void task_schaduler();  // "schaduling, sorting and grouping" stage.
@@ -96,6 +100,9 @@ void kernel()
     generic_system_exception_statistics_base = __generic_base_system_exception_statistics__;
     generic_system_breakpoints_base = __system_debug_log__;
     core_contexts = __pcb_bank_base__;
+    kernel_pages = __global_kernel_pages_bank_base__;
+    kernel_frames = __global_kernel_frames_bank_base__;
+    kmem_lock = __kernel_memory_lock__;
     core_tasks = __core_info_table__ + 32;
 
     // initialize pcb queues.
@@ -171,7 +178,7 @@ void kernel()
                                                                                                                                      : 65536);
             const u8_t page_size = memory_paging_settings->page_sizing;
 
-            memory_paging_settings->pages_count = (3.5 * (1073741824 /* 1 GB*/)) / pages_numeric_size; // calculate count of pages by page size.
+            memory_paging_settings->pages_count = (4 * GB - __user_region_start__) / pages_numeric_size; // calculate count of pages by page size.
 
             volatile struct memframe_t *frame = memory_frames;
             u64_t raw_address = __user_region_start__;
@@ -267,7 +274,7 @@ void kernel()
     fw_push_back(pri3_ready_queue, power_service);  // push into queue.
     fw_push_back(pri3_ready_queue, serial_service); // push into queue.
 
-    // at last, configure gic-400.
+    // <--- at last, configure gic-400 --->
     gic400_interfacectl(true, true); // enable EOIModeNS and Group 1.
     gic400_priorityirq(125, 0x80);   // AUX
     gic400_priorityirq(89, 0x90);    // UART
@@ -275,7 +282,7 @@ void kernel()
     gic400_priorityirq(97, 0xB0);    // system timer
     enable_daif();                   // enable IRQ, FIQ, SError, Debug
 
-    // run a task.
+    // <--- run a task --->
     task_schaduler();  // schadule.
     task_dispatcher(); // dispatch.
 }
