@@ -205,13 +205,19 @@ SECTIONS {
         . += 8; /* reserve 8 bytes for struct of memory paging settings. */
     
         __global_kernel_page_bank_base__ = .;
-        . += 752; /* Reserve 47 pages for kernel use. */
+        . += 1488; /* Reserve 93 pages for kernel use. */
 
         __global_kernel_frames_bank_base__ = .;
-        . += 752; /* Reserve 47 frames for kernel use. */
+        . += 1488; /* Reserve 93 frames for kernel use. */
 
         __kernel_memory_lock__ = .;
         . += 8; /* Reserve a mutex lock. */
+    }
+
+    .kmemory (NOLOAD) : {
+        . = ALIGN(8);
+        __kernel_memory_reserved__ = .;
+        . += 2097152; /* reserve 2MB for in-kernel memory system. */
     }
 
     /* Pre-builded services. */
@@ -230,5 +236,6 @@ SECTIONS {
         . += 64; /* allocate 2 l0 table, 2 l1 table, 2 l2 table and 2 l3 table. */
     }
 
+    /* USER */
     __user_region_start__ = .;
 }

@@ -14,7 +14,7 @@ volatile struct kmem_page_t *alloc_organized_frame(u8_t size)
         spinwait_mutex(kmem_lock);
     }
 
-    for (u64_t i = 0; i < 47; i++)
+    for (u64_t i = 0; i < 93; i++)
     {
 
         if (!kernel_pages[i].id & (0xF << 28))
@@ -28,7 +28,7 @@ volatile struct kmem_page_t *alloc_organized_frame(u8_t size)
         output = 0; // set as full.
     }
 
-    for (u64_t i = 0; i < 47; i++)
+    for (u64_t i = 0; i < 93; i++)
     {
         if (!kernel_frames[i].allocated && kernel_frames[i].size == size) // if same size and doesnt allocated
         {
@@ -37,7 +37,7 @@ volatile struct kmem_page_t *alloc_organized_frame(u8_t size)
         }
     }
     if (!output->start_address) // if wasnt found any same size.
-        for (u64_t i = 0; i < 47; i++)
+        for (u64_t i = 0; i < 93; i++)
         {
             if (!kernel_frames[i].allocated && kernel_frames[i].size >= size) // if same size and doesnt allocated
             {
@@ -64,7 +64,7 @@ u64_t available_organized_frame(u8_t size)
         spinwait_mutex(kmem_lock);
     }
 
-    for (u64_t i = 0; i < 47; i++)
+    for (u64_t i = 0; i < 93; i++)
     {
         if (!kernel_frames[i].allocated && kernel_frames[i].size == size) // if same size and doesnt allocated
         {
@@ -84,7 +84,7 @@ u64_t free_organized_frame(u32_t id)
         spinwait_mutex(kmem_lock);
     }
 
-    for (u64_t i = 0; i < 47; i++)
+    for (u64_t i = 0; i < 93; i++)
     {
         if (kernel_pages[i].id == id)
         {
@@ -119,7 +119,7 @@ volatile struct kmem_page_t *alloc_frame(u32_t size)
         spinwait_mutex(kmem_lock);
     }
 
-    for (u64_t i = 0; i < 47; i++)
+    for (u64_t i = 0; i < 93; i++)
     {
 
         if (!kernel_pages[i].id & (0xF << 28))
@@ -133,7 +133,7 @@ volatile struct kmem_page_t *alloc_frame(u32_t size)
         output = 0; // set as full.
     }
 
-    for (u64_t i = 0; i < 47; i++)
+    for (u64_t i = 0; i < 93; i++)
     {
         if (!kernel_frames[i].allocated && kernel_frames[i].size == size) // if same size and doesnt allocated
         {
@@ -149,7 +149,7 @@ volatile struct kmem_page_t *alloc_frame(u32_t size)
             break;
         case KMEM_SIZE_ORG_8KB:
             u64_t compatible_frames = 0;
-            for (u64_t i = 0; i < 47; i++)
+            for (u64_t i = 0; i < 93; i++)
             {
                 if (compatible_frames == 4)
                 {
@@ -165,7 +165,7 @@ volatile struct kmem_page_t *alloc_frame(u32_t size)
             break;
         case KMEM_SIZE_ORG_32KB:
             u64_t compatible_frames = 0;
-            for (u64_t i = 0; i < 47; i++)
+            for (u64_t i = 0; i < 93; i++)
             {
                 if (compatible_frames == 4)
                 {
@@ -180,7 +180,7 @@ volatile struct kmem_page_t *alloc_frame(u32_t size)
             break;
         case KMEM_SIZE_ORG_128KB:
             u64_t compatible_frames = 0;
-            for (u64_t i = 0; i < 47; i++)
+            for (u64_t i = 0; i < 93; i++)
             {
                 if (compatible_frames == 4)
                 {
@@ -195,7 +195,7 @@ volatile struct kmem_page_t *alloc_frame(u32_t size)
             break;
         case KMEM_SIZE_ORG_512KB:
             u64_t compatible_frames = 0;
-            for (u64_t i = 0; i < 47; i++)
+            for (u64_t i = 0; i < 93; i++)
             {
                 if (compatible_frames == 4)
                 {
@@ -211,7 +211,7 @@ volatile struct kmem_page_t *alloc_frame(u32_t size)
         }
         if (!output->start_address)
 
-            for (u64_t i = 0; i < 47; i++)
+            for (u64_t i = 0; i < 93; i++)
             {
                 if (!kernel_frames[i].allocated && kernel_frames[i].size >= size) // if same size and doesnt allocated
                 {
@@ -227,7 +227,7 @@ volatile struct kmem_page_t *alloc_frame(u32_t size)
 
 u64_t free_frame(u32_t id)
 {
-    for (u64_t i = 0; i < 47; i++)
+    for (u64_t i = 0; i < 93; i++)
     {
         if (kernel_pages[i].id == id)
         {
