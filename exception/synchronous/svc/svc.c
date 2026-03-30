@@ -553,3 +553,60 @@ u64_t svc_wait(u64_t instruction, u8_t type)
     task_schaduler();
     task_dispatcher();
 }
+
+u64_t svc_spawn_task(u64_t instruction_space, u8_t core_dependent, u8_t core_migration)
+{
+    volatile struct pcb_t *allocated_task = NULL;
+    const u8_t cid = core_id();
+    const u64_t tid = core_tasks[cid];
+
+    for (u64_t i = 0; i < 128; i++)
+    {
+        if (!global_pcb_bank[i].valid)
+        {
+            allocated_task = global_pcb_bank + i; // set pointer.
+            break;
+        }
+        if (i == 127)
+            return 128; // out of bank space (maximum task id+1).
+    }
+    for (u64_t i = 0; i < 128; i++)
+    {
+        if (global_pcb_bank[i].id == tid)
+            allocated_task->parent = global_pcb_bank + i; // set parent.
+    }
+
+    allocated_task->priority = 3;           // set middle at first priority.
+    allocated_task->pc = instruction_space; // set pc.
+    allocated_task->flags = 0b001;          // set ready flag.
+    if (core_dependent)
+        allocated_task->flags |= 1 << 5;
+    if (core_migration)
+        allocated_task->flags |= 1 << 3;
+
+    // create a default memory & virtualization settings and space.
+
+    volatile struct kmem_page_t *virtual_pages = alloc_kframe(2 * KB);       // allocate 8 KB at first.
+    volatile u64_t *dword = virtual_pages->start_address;                    // create a pointer for virtualization space.
+    volatile struct memframe_t *init_frame = alloc_page(allocated_task->id); // allocate initial first 4KB memory page.
+
+    if (!virtual_pages)
+        return 129; // failed to reserve virtualization space. (maximum task id+2)
+    if (!init_frame)
+        return 130; // failed to reserve memory space. (maximum task id+3)
+
+    // define level descriptors.
+    dword[0] = ((u64_t)(dword + 1) & 0xfffffffff) << 11;  // set l0 table descriptor.
+    dword[1] = ((u64_t)(dword + 2) & 0xfffffffff) << 11;  // set l1 table descriptor.
+    dword[2] = ((u64_t)(dword + 3) & 0xfffffffff) << 11;  // set l2 table descriptor.
+    dword[3] = ((u64_t)(init_frame) & 0xfffffffff) << 11; // set l3 page descriptor.
+
+    // set pages and virtualization for allocated task.
+    allocated_task->pages.head = init_frame;
+    allocated_task->pages.tail = init_frame;
+    allocated_task->ttbr = dword; // set Transaltion Table Base Register for allocated task.
+
+    allocated_task->valid = 1; // set valid flag for allocated task.
+
+    return allocated_task->id; // done.
+}

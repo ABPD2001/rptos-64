@@ -97,7 +97,7 @@ u64_t free_organized_frame(u32_t id)
     return 1;                 // 1 as not found.
 }
 
-volatile struct kmem_page_t *alloc_frame(u32_t size)
+volatile struct kmem_page_t *alloc_kframe(u32_t size)
 {
     volatile struct kmem_page_t *output = NULL;
 
@@ -271,4 +271,15 @@ void clear_frame(u64_t start_address, u8_t size)
         *_byte_ = 0; // clear byte.
         _byte_++;    // increment pointer.
     }
+}
+
+s64_t determine_frame_id(u64_t address)
+{
+    for (u64_t i = 0; i < 93; i++)
+    {
+        if (address >= kernel_pages[i].start_address && address <= kernel_pages[i].start_address + kernel_pages[i].size) // if it was in range of current page.
+            return kernel_pages[i].id;
+    }
+
+    return -1; // -1 as not found.
 }

@@ -9,7 +9,7 @@ volatile struct kmem_page_t *alloc_organized_frame(u8_t size); // allocates 2KB,
 u64_t available_organized_frame(u8_t size);
 u64_t free_organized_frame(u32_t id); // free by id.
 
-volatile struct kmem_page_t *alloc_frame(u32_t size);
+volatile struct kmem_page_t *alloc_kframe(u32_t size);
 u64_t free_frame(u32_t id); // free by id.
 
 void clear_mem_incr(u64_t start_address, u64_t size);
@@ -17,4 +17,5 @@ void clear_mem_decr(u64_t start_address, u64_t size);
 
 void clear_frame(u64_t start_address, u8_t size);
 
+s64_t determine_frame_id(u64_t address);
 #endif

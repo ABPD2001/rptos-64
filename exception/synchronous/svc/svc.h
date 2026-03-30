@@ -4,6 +4,7 @@
 #include "../../../structure/extern.h"
 #include "../../../structure/gpio.h"
 #include "../../../structure/ipcmailbox.h"
+#include "../../../structure/mmu.h"
 #include "../../../structure/muart.h"
 #include "../../../structure/timer.h"
 
@@ -15,6 +16,8 @@
 #include "../../../lib/core.h"
 #include "../../../lib/ipcmailbox.h"
 #include "../../../lib/fwlist.h"
+#include "../../../lib/memory.h"
+#include "../../../lib/kmem.h"
 #include "../../../lib/schaduler.h"
 #include "../../../lib/softwarelock.h"
 
@@ -34,6 +37,7 @@ u64_t svc_get_task_id();
 u64_t svc_termination_request(u64_t fault_code, u64_t fault_dump);
 u64_t svc_tsleep_ms(u32_t us);
 u64_t svc_wait(u64_t instruction, u8_t type);
+u64_t svc_spawn_task(u64_t instruction_space, u8_t core_dependent, u8_t core_migration);
 
 // GPIO
 

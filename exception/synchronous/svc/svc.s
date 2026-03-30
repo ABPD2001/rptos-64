@@ -28,7 +28,8 @@
 .org 0x68, b svc_system_reboot
 .org 0x6C, b svc_wait
 .org 0x70, b svc_gpfunction
-.org 0x74, b svc_edit_ipcmailbox // no. 29
+.org 0x74, b svc_edit_ipcmailbox
+.org 0x78, b svc_spawn_task // no. 30
 .ltorg
 
 .section .svc_handlers
