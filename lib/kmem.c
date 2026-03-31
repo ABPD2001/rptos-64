@@ -283,3 +283,14 @@ s64_t determine_frame_id(u64_t address)
 
     return -1; // -1 as not found.
 }
+
+volatile struct kmem_page_t *determine_frame(u64_t address)
+{
+    for (u64_t i = 0; i < 93; i++)
+    {
+        if (address >= kernel_pages[i].start_address && address <= kernel_pages[i].start_address + kernel_pages[i].size) // if it was in range of current page.
+            return (kernel_pages + i);                                                                                   // return pointer of frame.
+    }
+
+    return 0; // 0 as not found.
+}

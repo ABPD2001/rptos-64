@@ -7,8 +7,8 @@
 .org 0x14, b system_panic  @ panic.
 .org 0x18, b system_panic @ panic.
 .org 0x20, b system_panic @ panic.
-.org 0x24, b system_panic @ panic.
-.org 0x28, b system_panic @ panic
+.org 0x24, b system_panic @ panic (data abort from lower level).
+.org 0x28, b same_el_d_abort_same_handler @ data abort in kernel level.
 .org 0x2C, b same_el_sp_alignment_handler @ round stack pointer to nearest aligned address.
 .org 0x30, b same_el_fp_error_handler @ check float pointing unit is powered, if wasnt, power up, else panic.
 .org 0x34, b same_el_breakpoint_handler @ fill up a log.

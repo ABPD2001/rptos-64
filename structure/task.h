@@ -43,7 +43,7 @@ struct pcb_t // 368 Bytes
     u64_t status;                             // 0: created, 1:ready, 2:running, 3:terminated, 4:waiting.
     u64_t priority;                           // 0~7: 0 is most and 7 is least.
     volatile struct memframes_header_t pages; // pointer to memory pages.
-    u64_t fault_code;                         // 0: pc alignment fault, 1: stack alignment fault, 3: simd/fp fault, 4: security breach (wfi/wfe), 5: instruction abort, 6: data abort, 7: i-abort, 8: d-abort, 9: unkown instruction, 10: forbidden access to mini-uart (via waiting), 11: invalid ipc mailbox id (via waiting), 12: invalid access to ipc mailbox (via waiting).
+    u64_t fault_code;                         // 0: pc alignment fault, 1: stack alignment fault, 3: simd/fp fault, 4: security breach (wfi/wfe), 5: instruction abort, 6: data abort, 7: i-abort, 8: d-abort, 9: unkown instruction, 10: forbidden access to mini-uart (via waiting), 11: invalid ipc mailbox id (via waiting), 12: invalid access to ipc mailbox (via waiting), 13: failed to reserve memory page, 14: memory pages virtualization fault, 15: segmentation fault, 16: virtual alignment fault.
     u64_t fault_dump;
     u64_t preipherals; // using this to free all allocated preipherals by this task when this task is terminating. --> each 4 bits is a preipheral id. (0000 --> mini uart, 0001 --> uart-0, 0010 --> uart-2, 0011 --> uart-3, 0100 --> uart-4, 0101 --> uart-5, 0110 --> timer request, 0111 --> gpio ownership, 1000 --> software lock gained, 1001 --> ipc mailbox owned)
     u64_t preipherals_count;

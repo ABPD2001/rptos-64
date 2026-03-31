@@ -56,7 +56,6 @@ set_ttbr1:
     ret @ return.
 
 set_ttbr0_dry:
-    mrs x3,TTBR0_EL1
     and x0,x0,#0x1FFFFFFFFFF @ mask base address 0.
     and x1,x1,#0x3 @ first two bits.
     
@@ -65,9 +64,11 @@ set_ttbr0_dry:
 
     lsr x0,#4 @ shift to left (BADDR).
     lsr x1,#1 @ shift to left (SKL).
+    lsl x3,#47 @ shift to left (ASID).
 
     orr x0,x0,x1 @ merge BADDR and SKL.
     orr x0,x0,x2 @ merge CNP and others.
+    orr x0,x0,x3 @ merge ASID and others.
 
     msr TTBR0_EL1,x0 @ apply.
     ret @ return.

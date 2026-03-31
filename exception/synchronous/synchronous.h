@@ -2,8 +2,11 @@
 #define SYNCHRONOUS_H
 #include "../../structure/base.h"
 #include "../../structure/task.h"
+#include "../../structure/mmu.h"
 #include "../../structure/exceptions.h"
 #include "../../lib/core.h"
+#include "../../lib/memory.h"
+#include "../../lib/kmem.h"
 
 extern void task_dispatcher();
 extern void task_schaduler();
@@ -24,6 +27,7 @@ void lower_el_d_abort_lower_handler();
 void same_el_step_handler();
 void same_el_breakpoint_handler();
 void same_el_fp_error_handler();
+void same_el_d_abort_same_handler();
 void same_el_sp_alignment_handler();
 void same_el_simd_fp_err_handler();
 void same_el_wfi_wfe_handler();

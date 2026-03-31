@@ -220,6 +220,8 @@ extern unsigned long __kernel_service_serial_base__;
 extern unsigned long __kernel_sevices_virtual_maps__;
 
 extern unsigned long __kernel_memory_reserved__;
+extern unsigned long __cores_asid_bank_base__;
+extern unsigned long __cores_asid_bank_locks_base__;
 
 extern unsigned long __stack0_top__;
 extern unsigned long __stack1_top__;

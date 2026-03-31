@@ -56,6 +56,8 @@ volatile struct fwlist_header_t *pri7_ready_queue = NULL;
 volatile struct fwlist_header_t *waiting_queue = NULL;
 volatile struct fwlist_header_t *terminated_queue = NULL;
 
+volatile struct mmu_asid_t **mmu_asids = NULL;
+
 volatile struct tfwlist_header_t *global_timer_requests_queue = NULL;
 
 volatile u64_t **core_tasks = NULL;
@@ -74,6 +76,7 @@ volatile u32_t *sch_ticks = NULL; // 0-7: core 0 schaduling ticks, 8-15: core 1,
 volatile mutex_t *queues_lock = NULL;
 volatile mutex_t *schaduling_lock = NULL;
 volatile mutex_t *kmem_lock = NULL;
+volatile mutex_t **asid_banks_lock = NULL;
 
 void task_dispatcher(); // "dispatching" stage.
 void task_schaduler();  // "schaduling, sorting and grouping" stage.
@@ -103,6 +106,8 @@ void kernel()
     kernel_pages = __global_kernel_pages_bank_base__;
     kernel_frames = __global_kernel_frames_bank_base__;
     kmem_lock = __kernel_memory_lock__;
+    mmu_asids = __cores_asid_bank_base__;
+    asid_banks_lock = __cores_asid_bank_locks_base__;
     core_tasks = __core_info_table__ + 32;
 
     // initialize pcb queues.
@@ -291,19 +296,33 @@ void kernel()
 
     // power virtualization
     volatile u64_t *power_service_vir = __kernel_sevices_virtual_maps__;
+    volatile struct mmu_asid_t *power_service_asid = allocate_asid(power_service->id);
+    u64_t ttbr;
+
     *power_service_vir = ((__kernel_sevices_virtual_maps__ + 1) & 0xfffffffff) << 11;       // set l0 table.
     *(power_service_vir + 1) = ((__kernel_sevices_virtual_maps__ + 2) & 0xfffffffff) << 11; // set l1 table.
     *(power_service_vir + 2) = ((__kernel_sevices_virtual_maps__ + 3) & 0xfffffffff) << 11; // set l2 table.
     *(power_service_vir + 3) = (power_frame->start_address & 0xfffffffff) << 11;            // set l3 table.
-    power_service->ttbr = power_service_vir;                                                // set ttbr of power serivce.
+    set_ttbr0(power_service, power_service_asid->asid, 0, false);                           // set ttbr of power serivce.
+    asm volatile("mrs %0,TTBR0_EL1"
+                 : "=r"(ttbr)
+                 :
+                 :);
+    power_service->ttbr = ttbr;
 
     // serial virtualization
     volatile u64_t *serial_service_vir = __kernel_sevices_virtual_maps__ + 4;
+    volatile struct mmu_asid_t *serial_service_asid = allocate_asid(serial_service->id);
     *serial_service_vir = ((__kernel_sevices_virtual_maps__ + 5) & 0xfffffffff) << 11;       // set l0 table.
     *(serial_service_vir + 5) = ((__kernel_sevices_virtual_maps__ + 6) & 0xfffffffff) << 11; // set l1 table.
     *(serial_service_vir + 6) = ((__kernel_sevices_virtual_maps__ + 7) & 0xfffffffff) << 11; // set l2 table.
     *(serial_service_vir + 7) = (serial_frame->start_address & 0xfffffffff) << 11;           // set l3 table.
-    serial_service->ttbr = serial_service_vir;                                               // set ttbr of serial serivce.
+    set_ttbr0(serial_service, serial_service_asid->asid, 0, false);                          // set ttbr of power serivce.
+    asm volatile("mrs %0,TTBR0_EL1"
+                 : "=r"(ttbr)
+                 :
+                 :);
+    serial_service->ttbr = ttbr;
 
     // push into queue.
     fw_push_back(pri3_ready_queue, power_service);  // push into queue.

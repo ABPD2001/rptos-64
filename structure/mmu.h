@@ -62,4 +62,11 @@ struct kmem_frame_t // 16 Bytes.
     u8_t reserved[6]; // padding (6 Bytes).
 };
 
+struct mmu_asid_t
+{ // 16 Bytes.
+    u64_t owner_task;
+    u16_t asid;
+    u8_t reserved[6]; // padding (6 Bytes).
+};
+
 #endif

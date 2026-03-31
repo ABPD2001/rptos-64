@@ -157,6 +157,11 @@ SECTIONS {
     
         __global_tasks_dump_bank_base__ = .;
         . += 1792; /* Reserve 32 struct of task dump. (32*56) */
+   
+        __cores_asid_bank_base__ = .;
+        . += 8192; /* Reserve 4 banks for 4 cores and each bank is 128 length and each struct is 16 Bytes. */
+        __cores_asid_bank_locks_base__ = .;
+        . += 32; /* Reserve 4 locks. */
     }
     
     .queues (NOLOAD) : {

@@ -40,6 +40,8 @@ extern volatile struct fwlist_header_t *pri7_ready_queue;
 extern volatile struct fwlist_header_t *waiting_queue;
 extern volatile struct fwlist_header_t *terminated_queue;
 
+extern volatile struct mmu_asid_t **mmu_asids;
+
 extern volatile struct tfwlist_header_t *global_timer_requests_queue;
 
 extern volatile u64_t **core_tasks;
@@ -58,5 +60,5 @@ extern volatile struct kmem_frame_t *kernel_frames;
 extern volatile mutex_t *queues_lock;
 extern volatile mutex_t *schaduling_lock;
 extern volatile mutex_t *kmem_lock;
-
+extern volatile mutex_t **asid_banks_lock;
 #endif

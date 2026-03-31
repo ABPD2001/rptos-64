@@ -271,3 +271,33 @@ u64_t create_ktask(struct task_properties_t properties)
         return 0; // return 0 as error if wasnt any pcb free.
     }
 }
+
+void free_asid(volatile struct mmu_asid_t *asid)
+{
+    asid->owner_task = 0; // clear asid owner.
+}
+
+volatile struct mmu_asid_t *allocate_asid(u64_t task_id)
+{
+    const u8_t cid = core_id();
+    volatile struct mmu_asid_t *asid_bank = asid_bank + (128 * cid); // each bank has 128 struct.
+    volatile struct mmu_asid_t *output = NULL;
+
+    // gain lock.
+    while (!gain_mutex(asid_banks_lock + cid))
+    {
+        spinwait_mutex(asid_banks_lock + cid);
+    }
+
+    for (u64_t i = 0; i < 128; i++)
+    {
+        if (!asid_bank[i].owner_task)
+        {
+            asid_bank[i].owner_task = task_id;
+            output = asid_bank + i; // set output to pointer of asid block.
+        }
+    }
+
+    release_mutex(asid_banks_lock + cid); // release lock.
+    return output;
+}

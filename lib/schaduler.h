@@ -5,6 +5,7 @@
 #include "../lib/fwlist.h"
 #include "../lib/ipcmailbox.h"
 #include "../lib/math.h"
+#include "../lib/mmu.h"
 
 #include "../structure/base.h"
 #include "../structure/extern.h"

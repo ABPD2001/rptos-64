@@ -18,4 +18,5 @@ void clear_mem_decr(u64_t start_address, u64_t size);
 void clear_frame(u64_t start_address, u8_t size);
 
 s64_t determine_frame_id(u64_t address);
+volatile struct kmem_page_t *determine_frame(u64_t address);
 #endif

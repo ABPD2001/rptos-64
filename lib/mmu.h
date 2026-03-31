@@ -8,8 +8,8 @@
 extern void enable_mmu();  // enable mmu.
 extern void disable_mmu(); // disable mmu.
 
-extern void set_ttbr0(u64_t base_address, u8_t skl, u8_t cnp); // set TTBR0_EL1.
-extern void set_ttbr1(u64_t base_address, u8_t skl, u8_t cnp); // set TTBR1_EL1.
+extern void set_ttbr0(u64_t base_address, u16_t asid, u8_t skl, u8_t cnp); // set TTBR0_EL1.
+extern void set_ttbr1(u64_t base_address, u16_t asid, u8_t skl, u8_t cnp); // set TTBR1_EL1.
 
 extern void set_ttbr0_dry(u64_t base_address, u8_t skl, u8_t cnp); // set TTBR0_EL1 (without synchronization).
 extern void set_ttbr1_dry(u64_t base_address, u8_t skl, u8_t cnp); // set TTBR1_EL1 (without synchronization).

@@ -39,6 +39,8 @@ extern void restore_core_context(volatile struct cccb_t *core_context);
 extern void save_core_context();
 
 void core_event_number(u8_t number);
+void free_asid(volatile struct mmu_asid_t *asid);
+volatile struct mmu_asid_t *allocate_asid(u64_t task_id);
 
 // Context.
 

@@ -194,6 +194,12 @@ void task_dispatcher()
         spinwait_mutex(queues_lock);
     }
 
+    // TLB invalidation
+    asm volatile("tlbi alle0is\t\ntlbi alle1is\t\nisb ish" // invalidate whole TLB for user and kernel layer (inner-shareable) and wait to synchronizes.
+                 :
+                 :
+                 :);
+
     for (u64_t i = 0; i < 128 && tmptask->next != NULL; i++)
     {
         u64_t next = tmptask->next;
@@ -201,7 +207,7 @@ void task_dispatcher()
         if (tmptask->flags & (1 << 4))
         {
             u64_t next = tmptask->next;
-            if (tmptask->flags & 0x3 != cid && tmptask->flags & (1 << 3)) // if migration was enabled and task was allocated by this core.
+            if (tmptask->flags & 0x3 != cid && tmptask->flags & (1 << 3)) // if migration was enabled and task wasnt allocated by this core.
             {
                 tmptask->flags &= ~(0x3);      // clear core id.
                 tmptask->flags |= (cid & 0x3); // set core id.
