@@ -182,6 +182,9 @@ sgi_main_routine:
     cmp x0,#8
     b.eq core_terminate @ system termination.
 
+    cmp x0,#9
+    b.eq task_migrated
+
     b.ne sgi_main_routine_end
 
     ldp x30,x30,[sp,#-16]! @ restore link register to main handler.

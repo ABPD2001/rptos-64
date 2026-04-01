@@ -12,4 +12,7 @@ void muart_receiver_overrun();
 void muart_tx_empty();
 void muart_valid_byte();
 
+// SGI
+
+void task_migrated();
 #endif

@@ -194,12 +194,6 @@ void task_dispatcher()
         spinwait_mutex(queues_lock);
     }
 
-    // TLB invalidation
-    asm volatile("tlbi alle0is\t\ntlbi alle1is\t\nisb ish" // invalidate whole TLB for user and kernel layer (inner-shareable) and wait to synchronizes.
-                 :
-                 :
-                 :);
-
     for (u64_t i = 0; i < 128 && tmptask->next != NULL; i++)
     {
         u64_t next = tmptask->next;
@@ -209,13 +203,22 @@ void task_dispatcher()
             u64_t next = tmptask->next;
             if (tmptask->flags & 0x3 != cid && tmptask->flags & (1 << 3)) // if migration was enabled and task wasnt allocated by this core.
             {
+
+                // sgi id 9 means migration routine (for from core).
+                gic400_sgi(9, GIC_SGI_MODE_DIRECT, 1 << (tmptask->flags & 0x3)); // send a sgi only to from core of target task to migrate.
+
+                tmptask->flags &= (0b11 << 5);             // clear previous core.
+                tmptask->flags = (tmptask->flags & (0x3)); // set previous core.
+
                 tmptask->flags &= ~(0x3);      // clear core id.
                 tmptask->flags |= (cid & 0x3); // set core id.
 
                 tmptask->status = 2;       // set status to running.
                 core_tasks[cid] = tmptask; // set pointer for current running task.
 
-                // also invalidate cache lines.
+                u64_t new_asid = allocate_asid(tmptask->id); // allocate new asid from asid poll.
+                tmptask->ttbr &= ~(0xffff << 47);            // clear asid.
+                tmptask->ttbr |= (new_asid << 47);           // set new asid.
 
                 fw_rm(ready_queues[cpri], i); // remove from ready queue.
                 tmptask->next = NULL;         // just in case...

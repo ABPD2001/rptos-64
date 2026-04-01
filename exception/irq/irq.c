@@ -58,3 +58,31 @@ void muart_valid_byte()
         muart_metadata->read_length++; // increment read length.
     }
 }
+
+void task_migrated()
+{
+    const u8_t cid = core_id();
+
+    // gain queues lock.
+    while (!gain_mutex(queues_lock))
+    {
+        spinwait_mutex(queues_lock);
+    }
+
+    for (u64_t i = 0; i < 128; i++)
+    {
+        if (global_pcb_bank[i].flags & (0b11 << 5) == cid)
+        {
+            global_pcb_bank[i].flags &= ~(0b11 << 5);                      // clear previous core.
+            u64_t prvasid = (global_pcb_bank[i].flags & 0xffff << 7) >> 7; // previous asid.
+
+            // TLB invalidation
+            asm volatile("tlbi aside1,%0\t\nisb ish" // invalidate TLB of task for user and kernel layer (inner-shareable) and wait to synchronizes.
+                         : "=r"(prvasid)
+                         :
+                         :);
+        }
+    }
+
+    release_mutex(queues_lock); // release queues lock.
+}
