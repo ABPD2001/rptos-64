@@ -7,6 +7,8 @@
 #include "../lib/math.h"
 #include "../lib/mmu.h"
 
+#include "../drivers/gic400.h"
+
 #include "../structure/base.h"
 #include "../structure/extern.h"
 #include "../structure/muart.h"
