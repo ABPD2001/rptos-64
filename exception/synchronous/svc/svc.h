@@ -54,6 +54,7 @@ u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t whitelist_tasks_pt1_id, u64
 u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t done, u64_t receiver_task_id);
 u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_message_t *message, u64_t receiver_task_id);
 u64_t svc_edit_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_settings_t *settings);
+volatile struct ipcmailbox_t *svc_find_by_id(u64_t mailbox_id); // note: is not dangereous to return physical address of a kernel-owned variable, because only kernel has permision to access it, also there is no translation for these variables in task space and tasks cannot change their translation table by itself, only kernel does this and kernel knows to do what.
 
 // Software locks.
 

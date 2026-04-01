@@ -269,7 +269,7 @@ void kernel()
     props_power.ready_flag = true;
     props_power.events_handler = NULL;
 
-    props_serial.priority = 3; // middle priority at first.
+    props_serial.priority = 4; // middle to high priority at first.
     props_serial.core_dependency = true;
     props_serial.core_migration_enable = false;
     props_serial.ready_flag = true;

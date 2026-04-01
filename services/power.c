@@ -3,17 +3,16 @@ __attribute__((section(".kernel_service_power")));
 
 void kernel_service_power()
 {
-    const u64_t tid = taskid();
     volatile u64_t mailbox = mxcreate(0x3, NULL, NULL, NULL, NULL, 16); // limited request size.
     struct ipcmailbox_message_t message;
 
     if (!mailbox)
-        terminate(13, 1); // software failure with as code 1 (means failed to create ipc mailbox).
+        terminate(18, 1); // software failure with as code 1 (means failed to create ipc mailbox).
 
     while (1)
     {
         wait(mailbox, WAIT_IPC_MAILBOX_RECEIVE); // wait for message.
-        mxread(mailbox, &message, tid);          // read mailbox when awake.
+        mxread(mailbox, &message, 0);            // read mailbox when awake.
 
         if (message.content_pt1 == 1)
         {
@@ -46,5 +45,5 @@ void kernel_service_power()
             mxedit(mailbox, &ipcmailbox_settings);
         }
     }
-    terminate(13, 2); // software failure with dump code of unexcepted termination.
+    terminate(18, 2); // software failure with dump code of unexcepted termination.
 }

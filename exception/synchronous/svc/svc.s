@@ -29,7 +29,8 @@
 .org 0x6C, b svc_wait
 .org 0x70, b svc_gpfunction
 .org 0x74, b svc_edit_ipcmailbox
-.org 0x78, b svc_spawn_task // no. 30
+.org 0x78, b svc_spawn_task
+.org 0x7C, b svc_find_by_id // no. 31
 .ltorg
 
 .section .svc_handlers

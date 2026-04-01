@@ -31,10 +31,13 @@ void free_flag_preiph(u8_t flag)
 u64_t svc_muart_write(u8_t *buffer, u64_t length)
 {
     const u8_t cid = core_id();
-    const u64_t *ctask = core_tasks[cid];
+    volatile struct pcb_t *ctask = core_tasks[cid];
     volatile struct muart_metadata_t *muart = __global_muart_metadata__;
 
-    if (muart->owner_task != *ctask)
+    // translate virtual address (task) to physical address (kernel).
+    buffer = translate_address(buffer, ctask->ttbr, NULL);
+
+    if (muart->owner_task != ctask->id)
         return 1; // not allocated to allowed by task.
     muart->write_buffer = buffer;
     muart->write_length = length;
@@ -45,10 +48,13 @@ u64_t svc_muart_write(u8_t *buffer, u64_t length)
 u64_t svc_muart_read(u8_t *buffer, u64_t maximum_length)
 {
     const u8_t cid = core_id();
-    const volatile u64_t *ctask = core_tasks[cid];
+    volatile struct pcb_t *ctask = core_tasks[cid];
     volatile struct muart_metadata_t *muart = __global_muart_metadata__;
 
-    if (muart->owner_task != *ctask)
+    // translate virtual address (task) to physical address (kernel).
+    buffer = translate_address(buffer, ctask->ttbr, NULL);
+
+    if (muart->owner_task != ctask->id)
         return 1; // not allocated to allowed by task.
 
     muart->read_buffer = buffer;
@@ -75,10 +81,14 @@ u64_t svc_muart_write_char(u8_t ch)
 
 u64_t svc_muart_read_char(u8_t *ch)
 {
+
     const u8_t cid = core_id();
     volatile struct pcb_t *ctask = core_tasks[cid];
     volatile struct muart_metadata_t *muart = __global_muart_metadata__;
     volatile u8_t *mu_io = AUX_MU_IO_REG;
+
+    // translate virtual address (task) to physical address (kernel).
+    ch = translate_address(ch, ctask->ttbr, NULL);
 
     if (muart->owner_task != ctask->id && !ctask->perimision_level) // if wasnt owner and was a user.
         return 1;                                                   // not allocated to allowed by task.
@@ -391,6 +401,8 @@ u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_
 
     if (ctask->perimision_level != 2)
     {
+        if (receiver_task_id > 127)
+            return 1; // forbidden receiver task id.
         if ((mailbox->blacklist_tasks_pt1_id || mailbox->blacklist_tasks_pt2_id) && (mailbox->whitelist_tasks_pt1_id || mailbox->whitelist_tasks_pt2_id))
             return 2; // invalid input.
         if (ctask->id < 63 && mailbox->blacklist_tasks_pt1_id && (mailbox->blacklist_tasks_pt1_id & (1 << ctask->id)))
@@ -415,17 +427,19 @@ u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailb
 
     if (ctask->perimision_level != 2)
     {
+        if (receiver_task_id > 127)
+            return 1; // forbidden recevier task id.
         if ((mailbox->blacklist_tasks_pt1_id || mailbox->blacklist_tasks_pt2_id) && (mailbox->whitelist_tasks_pt1_id || mailbox->whitelist_tasks_pt2_id))
             return 2; // invalid input.
         if (ctask->id < 63 && mailbox->blacklist_tasks_pt1_id && (mailbox->blacklist_tasks_pt1_id & (1 << ctask->id)))
             return 3; // task included in blacklist.
-        else if (ctask->id > 63 && mailbox->blacklist_tasks_pt2_id && (mailbox->blacklist_tasks_pt2_id & (1 << ctask->id - 63)))
+        if (ctask->id > 63 && mailbox->blacklist_tasks_pt2_id && (mailbox->blacklist_tasks_pt2_id & (1 << ctask->id - 63)))
             return 3; // task included in blacklist.
-        else if (ctask->id < 63 && mailbox->whitelist_tasks_pt1_id && !(mailbox->whitelist_tasks_pt1_id & (1 << ctask->id)))
+        if (ctask->id < 63 && mailbox->whitelist_tasks_pt1_id && !(mailbox->whitelist_tasks_pt1_id & (1 << ctask->id)))
             return 4; // task does not included in whitelist.
-        else if (ctask->id > 63 && mailbox->whitelist_tasks_pt2_id && !(mailbox->whitelist_tasks_pt2_id & (1 << ctask->id - 63)))
+        if (ctask->id > 63 && mailbox->whitelist_tasks_pt2_id && !(mailbox->whitelist_tasks_pt2_id & (1 << ctask->id - 63)))
             return 4; // task does not included in whitelist.
-        else if (!(mailbox->accessibility & 0x2))
+        if (!(mailbox->accessibility & 0x2))
             return 5; // invalid access.
     }
 
@@ -444,9 +458,22 @@ u64_t svc_edit_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailb
     return 0;                            // done.
 }
 
+volatile struct ipcmailbox_t *svc_find_by_id(u64_t mailbox_id)
+{
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (global_ipcmailbox_bank[i].id == mailbox_id)
+            return global_ipcmailbox_bank + i; // return pointer of id.
+    }
+    return 0; // return 0 as not found.
+}
+
 u64_t svc_mutex_gain(u64_t *mutex)
 {
     volatile struct pcb_t *ctask = core_tasks[core_id()];
+    // translate virtual address (task) to physical address (kernel).
+    mutex = translate_address(mutex, ctask->ttbr, NULL);
+
     if (ctask->preipherals_count >= 16)
         return 2;
     const u64_t res = gain_mutex(mutex);
@@ -461,11 +488,19 @@ u64_t svc_mutex_gain(u64_t *mutex)
 }
 u64_t svc_mutex_release(u64_t *mutex)
 {
+    volatile struct pcb_t *ctask = core_tasks[core_id()];
+    // translate virtual address (task) to physical address (kernel).
+    mutex = translate_address(mutex, ctask->ttbr, NULL);
+
     return release_mutex(mutex); // release mutex.
 }
 
 u64_t svc_semaphore_gain(u64_t *semaphore)
 {
+    volatile struct pcb_t *ctask = core_tasks[core_id()];
+    // translate virtual address (task) to physical address (kernel).
+    semaphore = translate_address(semaphore, ctask->ttbr, NULL);
+
     const u64_t res = gain_semaphore(semaphore);
     if (!res)
     {
@@ -480,8 +515,13 @@ u64_t svc_semaphore_gain(u64_t *semaphore)
         return res;
     }
 }
+
 u64_t svc_semaphore_release(u64_t *semaphore)
 {
+    volatile struct pcb_t *ctask = core_tasks[core_id()];
+    // translate virtual address (task) to physical address (kernel).
+    semaphore = translate_address(semaphore, ctask->ttbr, NULL);
+
     return release_semaphore(semaphore); // release semaphore.
 }
 

@@ -53,7 +53,7 @@ void free_ipcmailboxsegment(volatile struct ipcmailbox_segment_t *segment)
     segment->mailbox_type = 3;              // set mailbox to raw.
 }
 
-u64_t write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t author_id, u64_t receiver_task_id) // set receiver_task_id to 0 for anyone access.
+u64_t write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t author_id, u64_t receiver_task_id) // set receiver_task_id to 0 for host receiver.
 {
     volatile struct ipcmailbox_segment_t *segment = alloc_ipcmailboxsegment();
     if (!segment)
@@ -79,26 +79,37 @@ u64_t write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1,
     return 0; // done, no problem.
 }
 
-struct ipcmailbox_message_t read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t receiver_task_id) // set receiver_task_id to 0 for checking all readable messages.
+struct ipcmailbox_message_t read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t receiver_task_id) // set receiver_task_id to 0 for checking messages for host, 129 for checking all readable messages.
 {
     volatile struct ipcmailbox_segment_t *nav_segment = global_ipcmailbox_segments_bank + 56 * 511;
     struct ipcmailbox_message_t output_msg;
+
+    if (receiver_task_id == 0)
+        receiver_task_id = mailbox->task_owner;
 
     for (u64_t i = 0; i < 512; i++)
     {
         if (nav_segment->mailbox_id == mailbox->id && nav_segment->status == 2 && nav_segment->access_mutex)
         {
-            if (!(receiver_task_id && nav_segment->context.receiver_task_id == receiver_task_id))
+            if (receiver_task_id != 129 && nav_segment->context.receiver_task_id != receiver_task_id) // if receiver task id wasnt 0 and wasnt 129 and context receiver task id wasnt same with receiver task id.
                 continue;
+
             // copy struct pointer into local struct (for security reasons).
 
             // gain mutex of nav_segment.
+            while (!gain_mutex(nav_segment->access_mutex))
+            {
+                spinwait_mutex(nav_segment->access_mutex);
+            }
+
             nav_segment->status = 3; // set status to 'reading'.
             output_msg.content_pt1 = nav_segment->context.content_pt1;
             output_msg.content_pt2 = nav_segment->context.content_pt2;
             output_msg.author_task_id = nav_segment->context.author_task_id;
             output_msg.done = nav_segment->context.done;
             nav_segment->status = 2; // set status to 'fill'.
+
+            release_mutex(nav_segment->access_mutex); // release nav_segment lock.
 
             return output_msg;
         }

@@ -5,12 +5,12 @@ void kernel_serial_service()
 {
     const u64_t tid = taskid();
     if (allocate_serial()) // allocate serial
-        terminate(13, 1);  // software failure with dump as code 1 (means failed to allocate muart).
+        terminate(18, 1);  // software failure with dump as code 1 (means failed to allocate muart).
 
     volatile u64_t mailbox = mxcreate(0x3, NULL, NULL, NULL, NULL, 64); // no whitelist.
     struct ipcmailbox_message_t message;
     if (!mailbox)         // create mailbox.
-        terminate(13, 2); // with dump of failed to create mailbox (ipc).
+        terminate(18, 2); // with dump of failed to create mailbox (ipc).
 
     while (1)
     {
@@ -31,5 +31,5 @@ void kernel_serial_service()
         else
             mxwrite(mailbox, serial_read((char *)message.content_pt2, message.content_pt1 & (0xFFFFFFFF << 1)), 0, true, message.author_task_id); // respone output code of mini-uart read.
     }
-    terminate(13, 3); // software failure with dump code of unexcepted termination.
+    terminate(18, 3); // software failure with dump code of unexcepted termination.
 }
