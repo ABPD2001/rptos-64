@@ -3,7 +3,7 @@ __attribute__((section(".kernel_service_power")));
 
 void kernel_service_power()
 {
-    volatile u64_t mailbox = mxcreate(0x3, NULL, NULL, NULL, NULL, 16); // limited request size.
+    volatile struct ipcmailbox_t *mailbox = mxcreate(0x3, NULL, NULL, NULL, NULL, 16); // limited request size.
     struct ipcmailbox_message_t message;
 
     if (!mailbox)
@@ -12,21 +12,21 @@ void kernel_service_power()
     while (1)
     {
         wait(mailbox, WAIT_IPC_MAILBOX_RECEIVE); // wait for message.
-        mxread(mailbox, &message, 0);            // read mailbox when awake.
+        mxread(mailbox->id, &message, 0);        // read mailbox when awake.
 
         if (message.content_pt1 == 1)
         {
-            mxwrite(mailbox, 1, NULL, true, message.author_task_id); // send a message pending.
-            const s64_t res = system_shutdown();                     // if resulted, means failed.
+            mxwrite(mailbox->id, 1, NULL, true, message.author_task_id); // send a message pending.
+            const s64_t res = system_shutdown();                         // if resulted, means failed.
             if (res)
-                mxwrite(mailbox, 1, res, true, message.author_task_id); // send a message as failure
+                mxwrite(mailbox->id, 1, res, true, message.author_task_id); // send a message as failure
         }
         else if (message.content_pt1 == 2)
         {
-            mxwrite(mailbox, 1, NULL, true, message.author_task_id); // send a message pending.
-            const s64_t res = system_reboot();                       // if resulted, means failed.
+            mxwrite(mailbox->id, 1, NULL, true, message.author_task_id); // send a message pending.
+            const s64_t res = system_reboot();                           // if resulted, means failed.
             if (res)
-                mxwrite(mailbox, 1, res, true, message.author_task_id); // send a message as failure
+                mxwrite(mailbox->id, 1, res, true, message.author_task_id); // send a message as failure
         }
         else
         {
@@ -42,7 +42,7 @@ void kernel_service_power()
                 blacklist_pt1 |= (1 << message.author_task_id);
 
             struct ipcmailbox_settings_t ipcmailbox_settings = {mailbox_struct->task_owner, blacklist_pt1, blacklist_pt2, mailbox_struct->whitelist_tasks_pt1_id, mailbox_struct->whitelist_tasks_pt2_id, mailbox_struct->accessibility, mailbox_struct->maximum_length, mailbox_struct->metadata};
-            mxedit(mailbox, &ipcmailbox_settings);
+            mxedit(mailbox->id, &ipcmailbox_settings);
         }
     }
     terminate(18, 2); // software failure with dump code of unexcepted termination.
