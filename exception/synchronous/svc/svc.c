@@ -394,10 +394,17 @@ u64_t svc_create_ipcmailbox(u64_t accessblity, u64_t whitelist_tasks_pt1_id, u64
     return mailbox; // done.
 }
 
-u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_pt1, u64_t content_pt2, u64_t done, u64_t receiver_task_id)
+u64_t svc_write_ipcmailbox(u64_t mailbox_id, u64_t content_pt1, u64_t content_pt2, u64_t done, u64_t receiver_task_id)
 {
     const u8_t cid = core_id();
     volatile struct pcb_t *ctask = core_tasks[cid];
+    volatile struct ipcmailbox_t *mailbox = NULL;
+
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (global_ipcmailbox_bank[i].id == mailbox_id)
+            mailbox = global_ipcmailbox_bank + i; // set pointer.
+    }
 
     if (ctask->perimision_level != 2)
     {
@@ -420,10 +427,17 @@ u64_t svc_write_ipcmailbox(volatile struct ipcmailbox_t *mailbox, u64_t content_
     return write_ipcmailbox(mailbox, content_pt1, content_pt2, ctask->id, receiver_task_id);
 }
 
-u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_message_t *message, u64_t receiver_task_id)
+u64_t svc_read_ipcmailbox(u64_t mailbox_id, struct ipcmailbox_message_t *message, u64_t receiver_task_id)
 {
     const u8_t cid = core_id();
     volatile struct pcb_t *ctask = core_tasks[cid];
+    volatile struct ipcmailbox_t *mailbox = NULL;
+
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (global_ipcmailbox_bank[i].id == mailbox_id)
+            mailbox = global_ipcmailbox_bank + i; // set pointer.
+    }
 
     if (ctask->perimision_level != 2)
     {
@@ -447,25 +461,23 @@ u64_t svc_read_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailb
     return 0;
 }
 
-u64_t svc_edit_ipcmailbox(volatile struct ipcmailbox_t *mailbox, struct ipcmailbox_settings_t *settings)
+u64_t svc_edit_ipcmailbox(u64_t mailbox_id, struct ipcmailbox_settings_t *settings)
 {
     const u8_t cid = core_id();
     volatile struct pcb_t *ctask = core_tasks[cid];
+    volatile struct ipcmailbox_t *mailbox = NULL;
+
+    for (u64_t i = 0; i < 64; i++)
+    {
+        if (global_ipcmailbox_bank[i].id == mailbox_id)
+            mailbox = global_ipcmailbox_bank + i; // set pointer.
+    }
 
     if (!(mailbox->accessibility & 0x4 || mailbox->task_owner == ctask->id) && ctask->perimision_level != 2)
         return 1;                        // forbidden.
     edit_ipcmailbox(mailbox, *settings); // edit.
-    return 0;                            // done.
-}
 
-volatile struct ipcmailbox_t *svc_find_by_id(u64_t mailbox_id)
-{
-    for (u64_t i = 0; i < 64; i++)
-    {
-        if (global_ipcmailbox_bank[i].id == mailbox_id)
-            return global_ipcmailbox_bank + i; // return pointer of id.
-    }
-    return 0; // return 0 as not found.
+    return 0; // done.
 }
 
 u64_t svc_mutex_gain(u64_t *mutex)
