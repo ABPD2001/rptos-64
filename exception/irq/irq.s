@@ -76,8 +76,9 @@ core_generic_timer: @ generic timer of core gonna used for task schaduling...
     
     mov x0,x1 @ pass pcb address to first paramter.
 
-    bl task_schaduler   
-    bl task_dispatcher
+    bl memoryvisor @ monitor memory
+    bl task_schaduler @ schadule
+    bl task_dispatcher @ dispatch
 
 system_timer1: @ handler by core 0 only.
     @ handler for incrementing global system timer ticks and schaduling timer services.

@@ -14,7 +14,8 @@
 #include "../structure/muart.h"
 
 u64_t __built_in_task_waiting(volatile struct pcb_t *task);
-void task_schaduler();
-void task_dispatcher();
-void wakeup_service();
+void task_schaduler();  // sorts tasks and groups them to a standard and calculatable way.
+void task_dispatcher(); // dispatces task for its core.
+void wakeup_service();  // services timer requests.
+void memoryvisor();     // monitors if memory eviction threshold must be triggred or not.
 #endif

@@ -296,3 +296,39 @@ void wakeup_service()
         }
     release_mutex(queues_lock); // release queue lock.
 }
+
+void memoryvisor()
+{
+    // gain lock for memory frames.
+    while (!gain_mutex(memory_paging_settings->access_mutex))
+    {
+        spinwait_mutex(memory_paging_settings->access_mutex);
+    }
+
+    u64_t free_frames = 0;
+
+    for (u64_t i = 0; i < memory_paging_settings->pages_count; i++)
+    {
+        if (free_frames * 4 >= memory_paging_settings->eviction_threshold * 128 + 256)
+            break; // if free frames was greater or equal to eviction threshold
+        if (memory_frames[i].owner_task_id = 0)
+            free_frames++; // if it was free.
+    }
+    if (free_frames * 4 < memory_paging_settings->eviction_threshold * 128 + 256)
+    { // if free frames was lower than evication threshold (triggred).
+        volatile struct pcb_t *victim_task = NULL;
+
+        for (u64_t i = 0; i < 128; i++)
+        {
+            if (!victim_task)
+                victim_task = global_pcb_bank + i; // set initial victim.
+            else if (victim_task->priority < global_pcb_bank[i].priority && !victim_task->perimision_level && (victim_task->status == 1 | victim_task->status == 2))
+                victim_task = global_pcb_bank + i; // if lower priority and user permision level and it was ready or running found, set victim pointer.
+        }
+
+        victim_task->status = 3;      // set status to terminated.
+        victim_task->fault_code = 17; // set fault code to eviction.
+    }
+
+    release_mutex(memory_paging_settings->access_mutex); // release memory frames lock.
+}

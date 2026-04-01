@@ -333,6 +333,7 @@ void kernel()
     enable_daif();                   // enable IRQ, FIQ, SError, Debug
 
     // <--- run a task --->
+    memoryvisor();     // monitor memory.
     task_schaduler();  // schadule.
     task_dispatcher(); // dispatch.
 }
