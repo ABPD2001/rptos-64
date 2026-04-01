@@ -91,6 +91,9 @@ system_timer1: @ handler by core 0 only.
     str w1,[x0,#GICD_SGIR] @ store (signal on mmio).
 
     b wakeup_service @ start wakeup service.
+    mov x0,#1000 @ set 1ms parameter.
+    bl set_stimer @ set system timer to 1ms (for next cycle).
+
     ret @ done.
 
 aux_main_routine_end:

@@ -16,4 +16,5 @@
 u64_t __built_in_task_waiting(volatile struct pcb_t *task);
 void task_schaduler();
 void task_dispatcher();
+void wakeup_service();
 #endif

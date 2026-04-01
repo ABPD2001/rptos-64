@@ -78,10 +78,6 @@ volatile mutex_t *schaduling_lock = NULL;
 volatile mutex_t *kmem_lock = NULL;
 volatile mutex_t **asid_banks_lock = NULL;
 
-void task_dispatcher(); // "dispatching" stage.
-void task_schaduler();  // "schaduling, sorting and grouping" stage.
-void wakeup_service();
-
 void kernel()
 {
     const u8_t cid = core_id();
